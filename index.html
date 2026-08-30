@@ -50,6 +50,7 @@
     --mono:"Cascadia Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
     --sans:"Helvetica Neue",Helvetica,Arial,"Noto Sans KR",sans-serif;
     --t1:11px; --t2:12px; --t3:14px; --t4:16px; --t5:22px; --t6:34px;
+    --t7:44px;   /* the headline, and nothing else, so it cannot compete */
     color-scheme:dark;
   }
   @media(prefers-color-scheme:light){
@@ -142,6 +143,15 @@
     .tiny{display:inline-block;padding:3px 0}
   }
 
+  /* One idea, at a size nothing else on the page reaches. The reference
+     site opens at 48px and is legible in a second; this page opened at 14px
+     grey and was not. Two lines, because the second line is the half of the
+     business nobody else offers. */
+  h1.lede{margin:18px 0 0;font-family:var(--sans);font-size:var(--t7);line-height:1.06;
+    letter-spacing:-.025em;font-weight:700;color:var(--ink);
+    text-wrap:balance}   /* the copy sets its own breaks with <br> */
+  h1.lede b{font-weight:700;color:var(--sig)}
+  @media(max-width:640px){h1.lede{font-size:30px;max-width:none}}
   .what{margin:11px 0 0;font-family:var(--sans);font-size:var(--t3);
     color:var(--muted);max-width:74ch;text-wrap:balance}
   .what b{color:var(--ink);font-weight:600}
@@ -181,6 +191,7 @@
     letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   .price b{font-size:var(--t6);line-height:1;letter-spacing:-.02em;
     color:var(--sig);font-weight:600}
+  @media(max-width:640px){.price b{font-size:28px}}
   .price b.flat{color:var(--faint)}
   .price em{font-style:normal;font-family:var(--sans);font-size:var(--t2);
     color:var(--muted)}
@@ -428,9 +439,17 @@
   </span>
 </header>
 
+<h1 class="lede" data-h="m_lede">Buy Arc USDC.<br><b>Or sell it for what it is worth.</b></h1>
+
 <p class="what prose" data-h="m_what">Sellers set their own price. Pay on Base,
   <b>receive on Arc in under a minute</b>. If it does not arrive, you are
   refunded automatically.</p>
+
+<div class="price">
+  <span class="lbl" id="tape-lbl" data-t="m_last">Last</span>
+  <b class="flat" id="tape-price">&#8230;</b>
+  <em id="tape-unit">Base USDC per 1 Arc USDC, last trade</em>
+</div>
 
 <div class="ask">
   <label for="askAmt" data-t="m_askq">How much Arc USDC do you want?</label>
@@ -447,11 +466,7 @@
     <a class="linkish" href="/arc-usdc" data-t="m_asknewb">What Arc USDC costs, and how to get in and out</a></p>
 </div>
 
-<div class="price">
-  <span class="lbl" data-t="m_last">Last</span>
-  <b class="flat" id="tape-price">&#8230;</b>
-  <em id="tape-unit">Base USDC per 1 Arc USDC, last trade</em>
-</div>
+<div class="note" id="keeperNote" style="display:none"></div>
 
 <div class="strip">
   <div><span data-t="m_offers">Offers</span><b id="stOffers">-</b></div>
@@ -461,8 +476,6 @@
   <div><span data-t="m_fee">Fee</span><b id="feeShow">2%</b></div>
   <div><span data-t="m_book">Book</span><b id="bookAge">-</b></div>
 </div>
-
-<div class="note" id="keeperNote" style="display:none"></div>
 
 <div class="bhead">
   <h2><span data-t="m_orderbook">Order book</span><span class="sub" data-t="m_backed">every line is backed by deposited inventory</span></h2>
@@ -657,6 +670,7 @@
 var M_I18N={
  en:{},
  ko:{
+  m_lede:"Arc USDC를 사거나,<br><b>제값 받고 팔거나.</b>",
   m_guide:"Arc USDC란",
   m_asknew:"처음 오셨나요?",
   m_asknewb:"Arc USDC가 얼마이고 어떻게 들어가고 나오는지",
@@ -698,6 +712,7 @@ var M_I18N={
   m_exit:"지금 바로 빼야 합니까? <b>브릿지를 쓰십시오.</b> 수수료 2%."
  },
  zh:{
+  m_lede:"买入 Arc USDC，<br><b>或按它真正的价值卖出。</b>",
   m_guide:"什么是 Arc USDC",
   m_asknew:"第一次来?",
   m_asknewb:"Arc USDC 价格几何，如何进出",
@@ -817,6 +832,9 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Connection cancelled.":"연결을 취소했습니다.",
+  "Connecting":"연결 중",
+  "Cheapest now":"지금 최저가",
   "Reading the order book":"호가창 읽는 중",
   "You pay <b>{0} USDC</b> on Base and receive <b>{1}</b> on Arc, in under a minute.":"Base에서 <b>{0} USDC</b>를 내고 Arc로 <b>{1}</b>를 1분 안에 받습니다.",
   "Buy now":"지금 사기",
@@ -928,6 +946,9 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Connection cancelled.":"已取消连接。",
+  "Connecting":"连接中",
+  "Cheapest now":"当前最低价",
   "Reading the order book":"正在读取订单簿",
   "You pay <b>{0} USDC</b> on Base and receive <b>{1}</b> on Arc, in under a minute.":"在 Base 上支付 <b>{0} USDC</b>，一分钟内在 Arc 上收到 <b>{1}</b>。",
   "Buy now":"立即购买",
@@ -1218,19 +1239,30 @@ async function adoptAccount(a){
   try{ renderBids(); bidQuote(); }catch(e){}
 }
 async function connect(){
+  // The button lives in the masthead and say() writes into the buy panel, which
+  // on the live layout sits about 1,400px lower. Every failure here was
+  // therefore silent to the person who pressed it. Say it in both places: the
+  // toast layer is fixed, so the answer arrives where the click did.
+  const both=(msg)=>{ say(msg); try{ toast(msg); }catch(e){} };
   try{
     const p=await pickProvider();
-    if(!p){say(T("No wallet found. Install MetaMask or OKX."));return}
+    if(!p){both(T("No wallet found. Install MetaMask or OKX."));return}
     PROV=p;
     const acc=await p.request({method:"eth_requestAccounts"});
-    if(!acc||!acc.length){say(T("No account was shared."));return}
+    if(!acc||!acc.length){both(T("No account was shared."));return}
     if(PROV.on&&!PROV._otcWired){
       PROV._otcWired=true;
       PROV.on("accountsChanged",a=>adoptAccount((a&&a[0])||null));
       PROV.on("chainChanged",()=>{ if(ACCT) refreshBalances(); });
     }
     await adoptAccount(acc[0]);
-  }catch(e){ say('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+  }catch(e){
+    // A rejected connection prompt is the common case and reads as an error
+    // it does not need to be.
+    const m=String((e&&e.message)||e);
+    both('<span class="bad">'+esch(/user rejected|denied|4001/i.test(m)
+      ? T("Connection cancelled.") : m)+"</span>");
+  }
 }
 let ARC_BAL=null;   // last known Arc USDC balance, for the MAX button
 async function refreshBalances(){
@@ -1670,6 +1702,7 @@ function renderBook(){
   else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
   quote();
   askQuote();      // the hero verb depends on what the book can fill
+  paintTape();     // and so does the headline price
 }
 async function keeperLiveness(){
   const note=document.getElementById("keeperNote");
@@ -1767,6 +1800,7 @@ window.__setTradingLang=function(l){
   try{ document.getElementById("b-connect").textContent=
          ACCT?short(ACCT):T("Connect wallet"); }catch(e){}
   try{ if(LAST_TRADES) renderTrades(LAST_TRADES,LAST_TIP); }catch(e){}
+  try{ paintTape(); }catch(e){}   // data-t just overwrote the label
   try{ quote(); }catch(e){}
   try{ sellQuote(); }catch(e){}
   try{ renderBids(); }catch(e){}
@@ -1798,10 +1832,53 @@ let LAST_TRADES=null,LAST_TIP=0,LAST_BOOK_AGE="";
    a language switch can restate it without another round trip. */
 function setBookAge(k){ LAST_BOOK_AGE=k;
   document.getElementById("bookAge").textContent=T(k); }
+function ago(b,tip){const m=Math.max(0,Math.round((tip-b)*2/60));   // Base ~2s blocks
+  return m<1?T("just now"):(m<60?T("{0}m ago",m)
+    :(m<2880?T("{0}h ago",Math.floor(m/60)):T("{0}d ago",Math.floor(m/1440))));}
+// The headline price. It depends on BOTH the trade list and the book, so it is
+// its own function called from renderTrades and from renderBook. It used to
+// live inside renderTrades, which runs off cached stats and finishes before
+// loadBook() does, so it read an empty BOOK and printed "no offers" while the
+// strip two lines below already showed one. Nothing repainted it.
+function paintTape(){
+  const tp=document.getElementById("tape-price"),tu=document.getElementById("tape-unit"),
+        tl=document.getElementById("tape-lbl");
+  if(!tp) return;                    // the bridge page has no tape
+  // The label belongs to the figure. Quoting the book under a heading that
+  // says "Last" presents an ask as a settled price.
+  const label=(k)=>{ if(tl) tl.textContent=T(k); };
+  const list=LAST_TRADES||[], t=list[0];
+  // A handful of prints is not a price. Below this many the headline shows what
+  // the book is asking now rather than what somebody once paid, because a thin
+  // tape can be produced by one person trading with themselves and a live offer
+  // cannot.
+  const ENOUGH=5;
+  const clear=()=>{tp.classList.remove("flat");
+    if(tp.parentElement) tp.parentElement.classList.remove("flat");};
+  if(list.length<ENOUGH){
+    const cheapest=BOOK.length?BOOK.reduce((m,o)=>o.premiumBps<m.premiumBps?o:m):null;
+    if(cheapest){
+      tp.textContent=((10000+cheapest.premiumBps)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
+      clear(); label("Cheapest now");
+      if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, cheapest offer on the book");
+    }else if(BOOK_READ){
+      tp.textContent="-";            // the strip uses a plain hyphen for empty
+      label("Cheapest now");
+      if(tu) tu.textContent=T("No offers on the book, so there is no price to quote.");
+    }
+    // Book not read yet: leave the placeholder rather than claim an empty market.
+    return;
+  }
+  tp.textContent=((10000+t.p)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
+  clear(); label("Last");
+  if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, last trade ")+ago(t.b,LAST_TIP);
+}
 function renderTrades(list,tip){
   LAST_TRADES=list; LAST_TIP=tip;
   const box=document.getElementById("trades");
-  if(!list||!list.length){box.style.display="none";return}
+  // The tape is not part of the rows: with no prints at all it still has the
+  // book to quote, and hiding the rows must not skip it.
+  if(!list||!list.length){box.style.display="none";paintTape();return}
   box.style.display="";
   const ago=(b)=>{const m=Math.max(0,Math.round((tip-b)*2/60));   // Base ~2s blocks
     return m<1?T("just now"):(m<60?T("{0}m ago",m)
@@ -1810,39 +1887,9 @@ function renderTrades(list,tip){
     '<div class="tr"><span>'+usd(BigInt(t.a))+' USDC <span class="tiny">@ '
       +(t.p/100).toFixed(2)+'%</span></span><span class="tiny">'+ago(t.b)+'</span></div>'
   ).join("");
-  // The market page leads with the last print, and the same all-in formula the
-  // board's column uses, so the headline and the rows can never quote two
-  // different prices. This page has no tape, hence the guard rather than a
-  // second copy of the script that would then drift from the tested one.
-  const tp=document.getElementById("tape-price"),tu=document.getElementById("tape-unit");
-  if(tp){
-    const t=list[0];    // recent is unshifted, so index 0 is the newest print
-    // A handful of prints is not a price. Below this many, the headline shows
-    // what the book is asking now rather than what somebody once paid, because
-    // a thin tape can be produced by one person trading with themselves and a
-    // live offer cannot.
-    const ENOUGH=5;
-    if(list.length<ENOUGH){
-      const cheapest=BOOK.length?BOOK.reduce((m,o)=>o.premiumBps<m.premiumBps?o:m):null;
-      if(cheapest){
-        tp.textContent=((10000+cheapest.premiumBps)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
-        tp.classList.remove("flat");
-        if(tp.parentElement) tp.parentElement.classList.remove("flat");
-        if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, cheapest offer on the book");
-      }else{
-        tp.textContent="-";          // the strip uses a plain hyphen for empty
-        if(tu) tu.textContent=T("No offers on the book, so there is no price to quote.");
-      }
-      return;
-    }
-    tp.textContent=((10000+t.p)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
-    // "flat" greys the price out until a print exists. Which element carries
-    // it is a markup decision, so clear it on both rather than pinning the
-    // script to one shape of the page.
-    tp.classList.remove("flat");
-    if(tp.parentElement) tp.parentElement.classList.remove("flat");
-    if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, last trade ")+ago(t.b);
-  }
+  // The headline and these rows must never quote two different prices, so both
+  // come from paintTape and the same all-in formula the board's column uses.
+  paintTape();
 }
 async function computeStats(){
   if(comingSoon()) return;
@@ -2393,7 +2440,14 @@ document.addEventListener("keydown",e=>{
   const box=document.getElementById("wpick");
   if(box.style.display==="flex") document.getElementById("wpick-x").click();
 });
-document.getElementById("b-connect").onclick=connect;
+document.getElementById("b-connect").onclick=async function(){
+  // The wallet prompt can take a second to appear and the button gave no sign
+  // it had been pressed, which reads as a dead control.
+  const b=this;
+  if(b.dataset.busy) return;                 // double click must not open two prompts
+  b.dataset.busy="1"; const was=b.textContent; b.textContent=T("Connecting");
+  try{ await connect(); } finally{ b.dataset.busy=""; if(!ACCT) b.textContent=was; }
+};
 for(const id of ["bidPrem","bidAmt"]){
   const el=document.getElementById(id);
   if(el) el.addEventListener("input",bidQuote);
