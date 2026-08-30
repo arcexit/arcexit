@@ -1308,7 +1308,7 @@ function renderBids(){
     const btn=document.createElement("button");
     btn.className="btn ghost sm";
     btn.textContent=mine?T("Cancel"):T("Sell");
-    btn.onclick=mine?()=>cancelMyBid(b):()=>sellIntoBid(b);
+    btn.onclick=mine?()=>cancelMyBid(b,btn):()=>sellIntoBid(b,btn);
     td.appendChild(btn);
     tr.appendChild(td);
     tb.appendChild(tr);
@@ -1321,9 +1321,11 @@ function renderBids(){
    into a transaction that would revert. */
 /* Callable by the buyer alone, needing nobody's permission and no keeper.
    Everything not already committed to an open take comes straight back. */
-async function cancelMyBid(b){
+async function cancelMyBid(b,btn){
   if(!ACCT){connect();return}
+  if(BUSY) return;
   const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
+  BUSY=true; if(btn) btn.disabled=true;
   try{
     sayb(T("Cancelling your bid…"));
     const h=await sendTx(BIDBOOK,SELB.cancelBid+pad(hexNum(b.id)),BASE_HEX,null);
@@ -1332,11 +1334,15 @@ async function cancelMyBid(b){
     sayb('<span class="ok">'+T("Bid cancelled. Your USDC is back in your wallet.")+"</span>");
     setTimeout(loadBids,4000);
   }catch(e){ sayb('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+  finally{ BUSY=false; if(btn) btn.disabled=false; }
 }
 
-async function sellIntoBid(b){
+async function sellIntoBid(b,btn){
   if(!ACCT){connect();return}
+  if(BUSY) return;
   const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
+  BUSY=true; if(btn) btn.disabled=true;
+  try{
   const ids=await myVaultIds();
   let vid=null, best=0n;
   for(const id of ids){
@@ -1358,6 +1364,8 @@ async function sellIntoBid(b){
     sayb('<span class="ok">'+T("Sold. Delivery lands on Arc within a minute.")+"</span>");
     setTimeout(loadBids,4000);
   }catch(e){ sayb('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+  }
+  finally{ BUSY=false; if(btn) btn.disabled=false; }
 }
 
 function bidQuote(){
@@ -1388,12 +1396,17 @@ function bidQuote(){
 
 async function doBid(){
   if(!ACCT){connect();return}
+  if(BUSY) return;                 // one signature at a time, like doBuy
   const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
   const q=bidQuote(); if(!q) return;
   const recip=document.getElementById("buyRecv").value.trim();
   if(!/^0x[0-9a-fA-F]{40}$/.test(recip)){
     sayb('<span class="bad">'+T("Enter the Arc address to receive.")+"</span>"); return;
   }
+  // Taken here rather than at the top: the two checks above are refusals, and
+  // a refusal must not leave the page locked. Everything past this point signs.
+  const bbtn=document.getElementById("b-bid");
+  BUSY=true; if(bbtn) bbtn.disabled=true;
   try{
     sayb(T("1 of 2: approving"));
     await sendTx(USDC_BASE,SEL.approve+pad(BIDBOOK)+pad(hexNum(q.lock)),BASE_HEX,null);
@@ -1405,13 +1418,15 @@ async function doBid(){
     if(rc.status!=="0x1"){ sayb('<span class="bad">'+T("The bid was rejected. Check the amount and price.")+"</span>"); return; }
     sayb('<span class="ok">'+T("Bid posted. Cancel any time to take it back.")+"</span>");
     setTimeout(loadBids,4000);
-  }catch(e){
+  }
+  catch(e){
     // The chain's own sentence for an empty wallet is "ERC20: transfer amount
     // exceeds balance", which tells a reader nothing they can act on.
     const m=String((e&&e.message)||e);
     sayb('<span class="bad">'+esch(/exceeds balance/i.test(m)
       ? T("Not enough Base USDC in your wallet for that bid.") : m)+"</span>");
   }
+  finally{ BUSY=false; bidQuote(); }   // bidQuote restores the button state
 }
 
 async function decodeOffer(id){
