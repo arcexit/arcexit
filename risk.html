@@ -45,6 +45,17 @@
   *{box-sizing:border-box}
   html{-webkit-tap-highlight-color:var(--tap)}
   button,a{font-family:inherit;touch-action:manipulation}
+  @media(max-width:640px){
+    /* The masthead grew for desktop and stopped fitting a phone: 412px of
+       content in a 351px bar, so the whole page scrolled sideways. */
+    header{gap:10px;padding:14px 0 12px}
+    .brand{font-size:16px;gap:8px}
+    .brand small{display:none}
+    .brand svg{width:22px;height:22px}
+    .hgroup{gap:6px}
+    .tgl{padding:6px 9px;min-width:30px;font-size:14px}
+    footer a{padding:6px 0;display:inline-block}
+  }
   h1,h2{text-wrap:balance}
   p,li{text-wrap:pretty}
   body{margin:0;background:var(--paper);color:var(--ink);

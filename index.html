@@ -109,7 +109,20 @@
     font-size:var(--t2);font-weight:700;cursor:pointer;font-family:var(--mono)}
   .lang button:hover{color:var(--ink)}
   .lang button.on{background:var(--sink);color:var(--ink)}
-  @media(max-width:640px){.lang button{padding:5px 7px}}
+  @media(max-width:640px){.lang button{padding:5px 7px;font-size:var(--t1)}}
+  @media(max-width:640px){
+    /* The masthead grew for desktop and stopped fitting a phone: 412px of
+       content in a 351px bar, so the whole page scrolled sideways. */
+    header{gap:10px;padding:14px 0 12px}
+    .brand{font-size:16px;gap:8px}
+    .brand small{display:none}
+    .brand svg{width:22px;height:22px}
+    .hgroup{gap:6px}
+    header .btn{padding:9px 12px;font-size:var(--t2)}
+    #theme-toggle{padding:6px 9px;min-width:30px;font-size:14px}
+    footer a{padding:6px 0;display:inline-block}
+  }
+
   .what{margin:11px 0 0;font-family:var(--sans);font-size:var(--t3);
     color:var(--muted);max-width:74ch}
   .what b{color:var(--ink);font-weight:600}
