@@ -752,6 +752,8 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Base USDC per 1 Arc USDC, cheapest offer on the book":"Arc USDC 1개당 Base USDC, 호가창 최저가",
+  "No offers on the book, so there is no price to quote.":"호가창에 매물이 없어서 제시할 가격이 없습니다.",
   "bid":"삽니다",
   "waiting for a seller":"판매자를 기다리는 중",
   "Filling {0} of {1}, which is what your vault holds.":"{1} 중 {0}만큼 채웁니다. 금고에 있는 만큼입니다.",
@@ -855,6 +857,8 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Base USDC per 1 Arc USDC, cheapest offer on the book":"每 1 个 Arc USDC 的 Base USDC，盘口最低价",
+  "No offers on the book, so there is no price to quote.":"盘口没有挂单，因此没有可报的价格。",
   "bid":"求购",
   "waiting for a seller":"等待卖家",
   "Filling {0} of {1}, which is what your vault holds.":"在 {1} 中成交 {0}，也就是你金库里的数量。",
@@ -1735,6 +1739,24 @@ function renderTrades(list,tip){
   const tp=document.getElementById("tape-price"),tu=document.getElementById("tape-unit");
   if(tp){
     const t=list[0];    // recent is unshifted, so index 0 is the newest print
+    // A handful of prints is not a price. Below this many, the headline shows
+    // what the book is asking now rather than what somebody once paid, because
+    // a thin tape can be produced by one person trading with themselves and a
+    // live offer cannot.
+    const ENOUGH=5;
+    if(list.length<ENOUGH){
+      const cheapest=BOOK.length?BOOK.reduce((m,o)=>o.premiumBps<m.premiumBps?o:m):null;
+      if(cheapest){
+        tp.textContent=((10000+cheapest.premiumBps)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
+        tp.classList.remove("flat");
+        if(tp.parentElement) tp.parentElement.classList.remove("flat");
+        if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, cheapest offer on the book");
+      }else{
+        tp.textContent="-";          // the strip uses a plain hyphen for empty
+        if(tu) tu.textContent=T("No offers on the book, so there is no price to quote.");
+      }
+      return;
+    }
     tp.textContent=((10000+t.p)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
     // "flat" greys the price out until a print exists. Which element carries
     // it is a markup decision, so clear it on both rather than pinning the
