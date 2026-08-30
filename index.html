@@ -752,6 +752,11 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Bid cancelled. Your USDC is back in your wallet.":"비드를 취소했습니다. USDC가 지갑으로 돌아왔습니다.",
+  "Cancel":"취소",
+  "Cancel did not go through. Refreshing.":"취소가 되지 않았습니다. 새로 읽습니다.",
+  "Cancelling your bid…":"비드를 취소하는 중…",
+  "yours":"내 비드",
   "Not enough Base USDC in your wallet for that bid.":"지갑에 Base USDC가 부족합니다.",
   "1 of 2: approving":"1/2 승인 중",
   "2 of 2: posting the bid":"2/2 삽니다 등록 중",
@@ -846,6 +851,11 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Bid cancelled. Your USDC is back in your wallet.":"求购已取消。USDC 已回到你的钱包。",
+  "Cancel":"取消",
+  "Cancel did not go through. Refreshing.":"取消未成功。正在重新读取。",
+  "Cancelling your bid…":"正在取消求购…",
+  "yours":"我的",
   "Not enough Base USDC in your wallet for that bid.":"你钱包里的 Base USDC 不足以支付该求购。",
   "1 of 2: approving":"1/2 授权中",
   "2 of 2: posting the bid":"2/2 提交求购",
@@ -1286,12 +1296,15 @@ function renderBids(){
       "<td>"+perArc.toFixed(3)+"\u00d7</td>"+
       "<td>"+usd(b.wantArc)+"</td>"+
       "<td><b>"+usd(b.escrowed)+"</b> USDC</td>";
+    // The reader's own bid is theirs to withdraw, not to sell into.
+    const mine=ACCT&&b.buyer.toLowerCase()===ACCT.toLowerCase();
+    if(mine) tr.firstChild.innerHTML+=' <span class="pill">'+T("yours")+'</span>';
     const td=document.createElement("td");
     td.style.textAlign="right";
     const btn=document.createElement("button");
     btn.className="btn ghost sm";
-    btn.textContent=T("Sell");
-    btn.onclick=()=>sellIntoBid(b);
+    btn.textContent=mine?T("Cancel"):T("Sell");
+    btn.onclick=mine?()=>cancelMyBid(b):()=>sellIntoBid(b);
     td.appendChild(btn);
     tr.appendChild(td);
     tb.appendChild(tr);
@@ -1302,6 +1315,21 @@ function renderBids(){
    taken by the vault out of the delivery and a plain transfer would pay it to
    nobody. A seller with nothing deposited is sent to the Sell tab rather than
    into a transaction that would revert. */
+/* Callable by the buyer alone, needing nobody's permission and no keeper.
+   Everything not already committed to an open take comes straight back. */
+async function cancelMyBid(b){
+  if(!ACCT){connect();return}
+  const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
+  try{
+    sayb(T("Cancelling your bid…"));
+    const h=await sendTx(BIDBOOK,SELB.cancelBid+pad(hexNum(b.id)),BASE_HEX,null);
+    const rc=await waitReceipt(h,baseRead);
+    if(rc.status!=="0x1"){ sayb('<span class="bad">'+T("Cancel did not go through. Refreshing.")+"</span>"); loadBids(); return; }
+    sayb('<span class="ok">'+T("Bid cancelled. Your USDC is back in your wallet.")+"</span>");
+    setTimeout(loadBids,4000);
+  }catch(e){ sayb('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+}
+
 async function sellIntoBid(b){
   if(!ACCT){connect();return}
   const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
