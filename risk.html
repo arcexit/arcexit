@@ -127,8 +127,8 @@
 <p>Security vendors sometimes flag new crypto domains. This domain was flagged at launch and delisted after review, and residual warnings can persist in individual wallets until their lists refresh. Verification of what this site serves is always available, because the published source is byte-identical to the live page (<a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>source</a>).</p>
 <h2>8. OTC: the premium you pay</h2>
 <p>On the <a href='/'>OTC market</a> you pay above 1:1 for Arc USDC, at a price the seller set. Premiums move with supply and demand. What you pay today can look expensive tomorrow, and nothing guarantees you can resell at any premium at all. Compare the all-in price against simply <a href='/bridge'>bridging</a> before you buy.</p>
-<h2>9. OTC: what a seller actually receives</h2>
-<p>The 2% fee is collected in Arc USDC out of the delivery, so a deposit lists for slightly less than it holds, and <b>the premium you set applies to the listed amount, not to what you deposited</b>. Your proceeds per Arc USDC deposited are therefore lower than the premium number suggests. The sell form shows your exact proceeds before you sign, and <a href='/terms'>Terms section 4</a> works the arithmetic through with numbers. Read it before you set a price.</p>
+<h2>9. OTC: your listing will read less than you deposited</h2>
+<p>The 2% fee is collected in Arc USDC out of the delivery, so the vault has to hold it back and your offer lists for slightly less than you put in. This surprises people, so to be plain about it: <b>your payout is not reduced</b>. The buyer's payment reaches you in full, and a deposit sold out at your premium pays you that premium on what you deposited. <a href='/terms'>Terms section 4</a> works it through with numbers, and the sell form shows your exact payout before you sign.</p>
 <h2>10. OTC: what the watcher can and cannot do</h2>
 <p>Deliveries and settlements are executed by an automated watcher (the "keeper") that this site operates. The contracts are written so that the keeper <b>cannot redirect a payment</b>: settlement pays the seller and the fee wallet amounts fixed when the fill was created, refunds pay the buyer in full, and neither contract has a sweep or rescue function. What the keeper can do is act, or fail to act, at the wrong moment. We state the consequences here rather than leave them in the source.</p>
 <p><b>If you are selling</b>, your deposited vault balance is exposed to the keeper key. Releasing a delivery is the keeper's decision, and the Arc contract cannot see the Base payment, so it cannot check the keeper's work. <b>A stolen keeper key could release your deposited balance without a payment ever arriving.</b> Your exposure is capped at what you have deposited and not yet withdrawn, the vault can reach nothing else of yours, and withdrawal needs nobody's permission. Do not leave more in the vault than you are willing to have at risk, and withdraw what is not selling.</p>
@@ -165,8 +165,8 @@
 <p>보안 업체들이 새 크립토 도메인을 종종 신고 목록에 올립니다. 이 도메인도 출시 때 올라갔다가 검토 후 해제되었고, 개별 지갑의 목록이 갱신될 때까지 경고가 남아 있을 수 있습니다. 이 사이트가 무엇을 서빙하는지는 언제든 확인할 수 있습니다. 공개된 소스가 라이브 페이지와 바이트 단위로 같기 때문입니다(<a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>소스</a>).</p>
 <h2>8. OTC 위험, 구매자가 내는 프리미엄</h2>
 <p><a href='/'>OTC 마켓</a>에서는 판매자가 정한 값으로 Arc USDC를 1대1보다 비싸게 삽니다. 프리미엄은 수급에 따라 움직입니다. 오늘 낸 값이 내일은 비싸 보일 수 있고, 어떤 프리미엄으로든 되팔 수 있다는 보장은 없습니다. 사기 전에 총액을 그냥 <a href='/bridge'>브릿지</a>하는 쪽과 비교해 보십시오.</p>
-<h2>9. OTC 위험, 판매자가 실제로 받는 금액</h2>
-<p>2% 수수료는 배달분의 Arc USDC에서 걷히므로 예치한 금액보다 등록되는 금액이 조금 적고, <b>설정한 프리미엄은 예치액이 아니라 등록된 금액에 붙습니다</b>. 따라서 예치한 Arc USDC 1개당 실제 수령액은 프리미엄 숫자가 주는 인상보다 낮습니다. 판매 화면이 서명 전에 정확한 수령액을 보여 주고, <a href='/terms'>이용약관 4항</a>에 숫자로 계산이 적혀 있습니다. 가격을 정하기 전에 읽으십시오.</p>
+<h2>9. OTC 위험, 등록 수량이 예치액보다 적게 보임</h2>
+<p>2% 수수료가 배달분의 Arc USDC에서 걷히기 때문에 금고가 그만큼을 남겨 둬야 하고, 그래서 매물이 넣은 것보다 조금 적게 등록됩니다. 이걸 보고 놀라는 분이 많아서 분명히 적습니다. <b>받는 금액이 깎이는 것이 아닙니다.</b> 구매자가 낸 돈은 전액 판매자에게 오고, 예치분이 전량 팔리면 예치한 금액에 설정한 프리미엄을 붙인 값을 받습니다. 숫자로 계산한 것은 <a href='/terms'>이용약관 4항</a>에 있고, 판매 화면이 서명 전에 정확한 수령액을 보여 줍니다.</p>
 <h2>10. OTC 위험, 감시 프로그램이 할 수 있는 일과 없는 일</h2>
 <p>배달과 정산은 이 사이트가 운영하는 자동 감시 프로그램(이하 "키퍼")이 실행합니다. 컨트랙트는 키퍼가 <b>결제금의 행선지를 바꿀 수 없게</b> 짜여 있습니다. 정산은 체결 시점에 고정된 금액을 판매자와 수수료 지갑에 보내고, 환불은 구매자에게 전액을 보내며, 두 컨트랙트 어디에도 일괄인출이나 회수 기능이 없습니다. 키퍼가 할 수 있는 일은 잘못된 시점에 실행하거나 실행하지 않는 것입니다. 그 결과를 소스에 묻어 두지 않고 여기 적습니다.</p>
 <p><b>파는 쪽이라면</b> 금고에 예치한 잔액이 키퍼 키에 노출됩니다. 배달을 푸는 것은 키퍼의 판단이고, Arc 컨트랙트는 Base 결제를 볼 수 없어서 그 판단을 검증할 방법이 없습니다. <b>키퍼 키가 탈취되면 결제가 들어오지 않았는데도 예치 잔액이 나갈 수 있습니다.</b> 노출 한도는 예치했고 아직 빼지 않은 금액까지이며, 금고는 그 밖의 자산에 손댈 수 없고, 출금에는 누구의 허가도 필요 없습니다. 잃어도 되는 금액보다 많이 금고에 두지 말고, 안 팔리는 물량은 빼십시오.</p>
@@ -203,8 +203,8 @@
 <p>安全厂商有时会把新的加密域名列入名单。本域名在上线时被标记，经复核后已移除，个别钱包在其名单刷新前可能仍显示残留警告。本站所服务的内容随时可以核验，因为公开的源码与线上页面逐字节一致（<a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>源码</a>）。</p>
 <h2>8. OTC 风险，买方支付的溢价</h2>
 <p>在 <a href='/'>OTC 市场</a>上，你按卖方设定的价格以高于 1:1 的价格买入 Arc USDC。溢价随供求波动。你今天付的价格，明天可能显得很贵，而且没有任何东西保证你能以任何溢价转手。买入前请把总价与直接<a href='/bridge'>跨链</a>做个比较。</p>
-<h2>9. OTC 风险，卖方实际收到多少</h2>
-<p>2% 的手续费从交付的 Arc USDC 中收取，所以挂出的数量略少于存入的数量，而且<b>你设定的溢价作用于挂出的数量，而不是你存入的数量</b>。因此，按存入的每个 Arc USDC 计算，你的实际收款低于溢价数字给人的印象。卖出表单会在签名前显示确切收款额，<a href='/terms'>条款第 4 节</a>用数字完整演算了一遍。定价之前请先读它。</p>
+<h2>9. OTC 风险，挂出的数量会少于你存入的数量</h2>
+<p>2% 的手续费从交付的 Arc USDC 中收取，金库必须把它留出来，所以你的挂单会比存入量略少。很多人看到会吃惊，所以这里说清楚，<b>你的收款并没有被扣减</b>。买方支付的金额会全额到你手上，存入的部分按你设定的溢价全部售出时，你拿到的就是对存入量的那个溢价。<a href='/terms'>条款第 4 节</a>用数字完整演算了一遍，卖出表单也会在签名前显示确切收款额。</p>
 <h2>10. OTC 风险，监视程序能做什么、不能做什么</h2>
 <p>交付与结算由本站运行的自动监视程序（下称"keeper"）执行。合约的写法使 keeper <b>无法改变款项的去向</b>：结算按成交时固定的金额支付给卖方和手续费钱包，退款全额支付给买方，两个合约都没有清扫或救援功能。keeper 能做的，是在错误的时点执行或不执行。我们把后果写在这里，而不是留在源码里。</p>
 <p><b>如果你在卖出</b>，你存入金库的余额暴露在 keeper 私钥之下。放行交付是 keeper 的判断，而 Arc 合约看不到 Base 上的付款，因此无法核验这个判断。<b>keeper 私钥若被窃取，可能在从未收到付款的情况下放走你存入的余额。</b>你的暴露上限是已存入且尚未取回的金额，金库触及不到你的其他资产，取回也不需要任何人许可。不要在金库里放超过你愿意承担风险的金额，卖不掉的部分请取回。</p>

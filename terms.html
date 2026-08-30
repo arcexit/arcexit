@@ -127,7 +127,7 @@
 <p><b>On the bridge</b> it is included in the quoted amount and collected by the on-chain contract at execution. It is non-refundable once your burn transaction is confirmed. Circle's own network fee, if any, is separate and disclosed on screen.</p>
 <p><b>On the OTC market the buyer pays it</b>, and it is collected in Arc USDC by the vault contract out of the same delivery that goes to the buyer, rather than in Base USDC out of the payment. Two consequences follow for a seller, and the sell form shows both before you deposit.</p>
 <p><b>A deposit lists for less than it holds</b>, because the vault has to keep back the fee that will travel with the delivery. At a 2% fee, a 100 Arc USDC deposit lists <b>98.039215</b> for sale.</p>
-<p><b>The premium you set applies to the listed amount, not to the deposit.</b> At a 20% premium that 98.039215 sells for <b>117.647058</b> Base USDC, which is what you receive. The buyer pays 120.00, and the difference is the fee. So if you want a particular price per Arc USDC <b>deposited</b>, set the premium to match: to clear 1.20 Base USDC per Arc USDC deposited at a 2% fee, you set 22.4%, not 20%. The sell form shows your exact proceeds before you sign, so you never have to do this arithmetic yourself.</p>
+<p><b>What you are paid for what you put in does not change.</b> That same 100 Arc USDC deposit, sold out at a 20% premium, pays you <b>120.00</b> Base USDC, which is exactly the premium you set on what you deposited. The buyer transfers that amount and it reaches you in full; the fee is taken on the Arc side, out of the delivery. So the listed number shrinks and the payout does not, and the sell form shows both before you sign.</p>
 <p>Nothing is collected unless a fill completes. If a fill is refunded instead, the buyer's entire payment including the fee returns to the buyer, and the seller's deposit stays in the vault, withdrawable at any time.</p>
 <h2>5. Non-custodial mechanics</h2>
 <p>Because we never hold your funds outside the disclosed contracts, we cannot freeze, reverse, or refund anything by hand. If a bridge transfer is interrupted after burning, your funds sit in Circle's protocol until collected, and the <a href='/bridge'>Recover</a> screen exists so that you can finish collection yourself at any time.</p>
@@ -172,7 +172,7 @@
 <p><b>브릿지</b>에서는 제시된 금액에 이미 포함되어 있고 실행 시점에 온체인 컨트랙트가 가져갑니다. 소각 트랜잭션이 확정되면 환불되지 않습니다. Circle의 네트워크 수수료가 있다면 별도이며 화면에 표시됩니다.</p>
 <p><b>OTC 마켓에서는 구매자가 냅니다.</b> 결제된 Base USDC에서 떼지 않고, 구매자에게 가는 바로 그 배달분의 Arc USDC에서 금고 컨트랙트가 가져갑니다. 판매자 입장에서 결과가 두 가지 생기며, 예치 전에 판매 화면이 둘 다 보여 줍니다.</p>
 <p><b>예치한 금액보다 등록되는 금액이 적습니다.</b> 배달과 함께 나갈 수수료를 금고가 남겨 둬야 하기 때문입니다. 수수료 2%에서 100 Arc USDC를 예치하면 <b>98.039215</b>가 판매 등록됩니다.</p>
-<p><b>설정한 프리미엄은 예치액이 아니라 등록된 금액에 붙습니다.</b> 프리미엄 20%라면 그 98.039215가 <b>117.647058</b> Base USDC에 팔리고, 그게 판매자가 받는 금액입니다. 구매자는 120.00를 내고 차액이 수수료입니다. 그러므로 <b>예치한</b> Arc USDC 1개당 받고 싶은 금액이 정해져 있다면 프리미엄을 그에 맞춰 올려야 합니다. 수수료 2%에서 예치한 Arc USDC 1개당 1.20 Base USDC를 받으려면 22.4%가 아니라 20%로 설정합니다. 판매 화면이 서명 전에 정확한 수령액을 보여 주므로 이 계산을 직접 할 일은 없습니다.</p>
+<p><b>예치한 만큼에 대해 받는 금액은 달라지지 않습니다.</b> 같은 100 Arc USDC 예치분이 프리미엄 20%로 전량 팔리면 <b>120.00</b> Base USDC를 받습니다. 예치한 금액에 설정한 프리미엄을 그대로 붙인 값입니다. 구매자가 낸 금액이 전액 판매자에게 오고, 수수료는 Arc 쪽 배달분에서 빠집니다. 그래서 줄어드는 것은 등록 수량이지 수령액이 아니며, 판매 화면이 서명 전에 둘 다 보여 줍니다.</p>
 <p>체결되지 않으면 아무것도 걷지 않습니다. 체결 대신 환불되면 구매자가 낸 돈은 수수료까지 전액 구매자에게 돌아가고, 판매자 예치금은 금고에 그대로 남아 언제든 뺄 수 있습니다.</p>
 <h2>5. 비수탁 구조</h2>
 <p>공개된 컨트랙트 밖에서 자금을 보관하지 않기 때문에 저희가 손으로 동결하거나 되돌리거나 환불해 줄 수 없습니다. 브릿지 전송이 소각 후에 끊기면 자금은 수령될 때까지 Circle 프로토콜에 남아 있고, <a href='/bridge'>복구</a> 화면이 있는 이유가 이것입니다. 언제든 본인이 직접 수령을 끝낼 수 있습니다.</p>
@@ -217,7 +217,7 @@
 <p><b>在跨链桥上</b>，它已包含在报价金额中，由链上合约在执行时收取，销毁交易确认后不可退还。Circle 自己的网络费（如有）另计，并显示在屏幕上。</p>
 <p><b>在 OTC 市场上由买方承担。</b>它不从付出的 Base USDC 中扣除，而是由金库合约从发给买方的那一笔 Arc USDC 交付中收取。这对卖方产生两个结果，卖出表单在你存入前都会显示。</p>
 <p><b>挂出的数量少于存入的数量</b>，因为金库必须留出随交付一起发出的手续费。在 2% 费率下，存入 100 Arc USDC，挂出 <b>98.039215</b>。</p>
-<p><b>你设定的溢价作用于挂出的数量，而不是存入的数量。</b>在 20% 溢价下，那 98.039215 会以 <b>117.647058</b> Base USDC 售出，这就是你收到的金额。买方支付 120.00，差额即手续费。因此，如果你对<b>每一个存入的</b> Arc USDC 有目标价格，就要相应提高溢价：在 2% 费率下，想让每个存入的 Arc USDC 拿到 1.20 Base USDC，应设为 22.4% 而不是 20%。卖出表单在签名前会显示你的确切收款额，所以你不必自己算。</p>
+<p><b>你为存入的部分拿到的钱不会变。</b>同样存入 100 Arc USDC，按 20% 溢价全部售出，你会收到 <b>120.00</b> Base USDC，正是你对存入量设定的溢价。买方支付的金额全额到你手上，手续费从 Arc 那一侧的交付中扣除。所以变小的是挂出的数量，不是你的收款额，卖出表单在签名前会把两者都显示出来。</p>
 <p>未成交则不收取任何费用。若成交被退款，买方的全部付款（含手续费）退还买方，卖方的存入留在金库中，随时可以取回。</p>
 <h2>5. 非托管结构</h2>
 <p>由于我们从不在已披露的合约之外保管资金，我们无法人工冻结、撤销或退款。如果跨链转账在销毁之后中断，资金会留在 Circle 协议中直到被领取，<a href='/bridge'>恢复</a>页面正是为此存在，你随时可以自己完成领取。</p>
