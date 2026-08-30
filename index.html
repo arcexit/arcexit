@@ -162,6 +162,17 @@
   .wrap{overflow-x:auto;background:var(--sheet);border:1px solid var(--rule);
     margin:9px 0 0}
   table{width:100%;border-collapse:collapse;font-size:var(--t3)}
+  /* The book and the bids sit one above the other and share their first
+     three columns, so a reader compares straight down the page. Left to
+     themselves the two tables sized their columns off their own content
+     and nothing lined up. */
+  #book,#bids{table-layout:fixed}
+  #book th:nth-child(1),#bids th:nth-child(1){width:22%}
+  #book th:nth-child(2),#bids th:nth-child(2){width:22%}
+  #book th:nth-child(3),#bids th:nth-child(3){width:22%}
+  #book th:nth-child(4){width:34%}
+  #bids th:nth-child(4){width:22%}
+  #bids th:nth-child(5){width:12%}
   th{text-align:left;color:var(--muted);font-weight:600;font-size:var(--t1);
     letter-spacing:.12em;text-transform:uppercase;padding:9px 16px 8px;
     border-bottom:1px solid var(--ink);white-space:nowrap;background:var(--sink)}
@@ -206,9 +217,14 @@
   html[lang="zh-Hans"] .price b{letter-spacing:-.02em}
   html[lang="ko"]{word-break:keep-all}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
-  .grid>div:last-child{display:flex;flex-direction:column;justify-content:flex-end}
+  #v-buy>.grid>div:last-child,#v-sell>.grid>div:last-child{
+    display:flex;flex-direction:column;justify-content:flex-end}
+  .bidbox{border-top:1px solid var(--rule);margin-top:22px;padding-top:18px}
+  .bidbox h3{font-size:var(--t1);font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 7px}
+  .bidbox p{font-family:var(--sans);color:var(--muted);margin:0;max-width:70ch}
   @media(max-width:720px){.grid{grid-template-columns:1fr;gap:20px}.panel{padding:16px}
-    .grid>div:last-child{justify-content:flex-start}}
+    #v-buy>.grid>div:last-child,#v-sell>.grid>div:last-child{justify-content:flex-start}}
   label{display:block;color:var(--muted);font-size:var(--t1);font-weight:600;
     letter-spacing:.12em;text-transform:uppercase;margin:0 0 7px}
   .lrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
@@ -430,23 +446,9 @@
         <input id="buyAmt" name="buy-amount" class="f big" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
       </div>
       <div class="field">
-        <label for="buyRecv" data-t="m_recv">Arc address to receive</label>
+        <div class="lrow"><label for="buyRecv" data-t="m_recv">Arc address to receive</label>
+          <button type="button" class="tiny" id="useWallet" data-t="m_usewallet">use connected wallet</button></div>
         <input id="buyRecv" name="arc-recipient" class="f mono" placeholder="0x&#8230;" autocomplete="off" spellcheck="false">
-      </div>
-      <div class="fee">
-        <h3 data-t="m_orbid">Or name your own price</h3>
-        <p data-h="m_bidwhat">Lock your Base USDC against an amount you want. A
-        seller can fill it from their deposit at any time, and until one does you
-        can cancel and take every cent back.</p>
-        <div class="lrow" style="gap:12px;margin:12px 0 0">
-          <div style="flex:1"><label for="bidPrem" data-t="m_prem">Premium %</label>
-            <input id="bidPrem" name="bid-premium" class="f" inputmode="decimal" placeholder="20" autocomplete="off"></div>
-          <div style="flex:1"><label for="bidAmt" data-t="m_amtwant">Amount wanted</label>
-            <input id="bidAmt" name="bid-amount" class="f" inputmode="decimal" placeholder="0" autocomplete="off"></div>
-        </div>
-        <div class="quote" id="bidQuote" style="display:none;margin-top:12px"></div>
-        <button class="btn wide" id="b-bid" disabled style="margin-top:12px">Connect wallet</button>
-        <div class="msg" id="saybid" role="status" aria-live="polite"></div>
       </div>
       <div class="fee">
         <h3 data-t="m_whatpay">What you pay</h3>
@@ -460,6 +462,28 @@
       <button class="btn wide" id="b-buy" disabled>Connect wallet</button>
       <p class="accept" data-h="m_accept">By continuing you accept the <a href="/terms">Terms</a> and the <a href="/risk">Risk Disclosure</a>.</p>
       <div class="msg" id="say" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="bidbox">
+    <h3 data-t="m_orbid">Or name your own price</h3>
+    <p data-h="m_bidwhat">Lock your Base USDC against an amount you want. A
+    seller can fill it from their deposit at any time, and until one does you
+    can cancel and take every cent back.</p>
+    <div class="grid" style="margin-top:14px">
+      <div>
+        <div class="lrow" style="gap:12px">
+          <div style="flex:1"><label for="bidPrem" data-t="m_prem">Premium %</label>
+            <input id="bidPrem" name="bid-premium" class="f" inputmode="decimal" placeholder="20" autocomplete="off"></div>
+          <div style="flex:1"><label for="bidAmt" data-t="m_amtwant">Amount wanted</label>
+            <input id="bidAmt" name="bid-amount" class="f" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+        </div>
+      </div>
+      <div>
+        <div class="quote" id="bidQuote" style="display:none"></div>
+        <button class="btn wide" id="b-bid" disabled>Connect wallet</button>
+        <div class="msg" id="saybid" role="status" aria-live="polite"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -584,6 +608,7 @@ var M_I18N={
   m_theypay:"1개당 지불", m_wanted:"원하는 수량", m_youget:"받는 금액",
   m_orbid:"직접 가격을 정해 걸기", m_amtwant:"원하는 수량",
   m_bidwhat:"원하는 수량만큼 Base USDC를 걸어 둡니다. 판매자가 예치분에서 언제든 채울 수 있고, 채워지기 전까지는 취소해서 전액 돌려받습니다.",
+  m_usewallet:"연결된 지갑 주소",
   m_thsize:"수량", m_thpaid:"결제액", m_thstatus:"상태",
   m_thprem:"프리미엄", m_thvault:"금고",
   m_accept:"계속하면 <a href='/terms'>이용약관</a>과 <a href='/risk'>위험 고지</a>에 동의하는 것입니다.",
@@ -618,6 +643,7 @@ var M_I18N={
   m_theypay:"每个支付", m_wanted:"求购数量", m_youget:"你可得到",
   m_orbid:"自己出价", m_amtwant:"求购数量",
   m_bidwhat:"按你想要的数量锁定 Base USDC。卖家随时可以用存入的库存来成交，在成交之前你可以取消并全额取回。",
+  m_usewallet:"使用已连接钱包",
   m_thsize:"数量", m_thpaid:"支付", m_thstatus:"状态",
   m_thprem:"溢价", m_thvault:"金库",
   m_accept:"继续即表示你接受<a href='/terms'>使用条款</a>和<a href='/risk'>风险披露</a>。",
@@ -704,6 +730,7 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Not enough Base USDC in your wallet for that bid.":"지갑에 Base USDC가 부족합니다.",
   "1 of 2: approving":"1/2 승인 중",
   "2 of 2: posting the bid":"2/2 삽니다 등록 중",
   "Bid posted. Cancel any time to take it back.":"삽니다가 등록됐습니다. 언제든 취소해서 전액 돌려받습니다.",
@@ -797,6 +824,7 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Not enough Base USDC in your wallet for that bid.":"你钱包里的 Base USDC 不足以支付该求购。",
   "1 of 2: approving":"1/2 授权中",
   "2 of 2: posting the bid":"2/2 提交求购",
   "Bid posted. Cancel any time to take it back.":"求购已发布。你随时可以取消并全额取回。",
@@ -1008,8 +1036,34 @@ function pickProvider(){
     box.onclick=(e)=>{if(e.target===box) shut()};
   });
 }
+/* Code at an address does not make it a contract wallet. EIP-7702 puts a
+   23-byte delegation designator on an ordinary account, and that account is
+   still the same key at the same address on every chain. */
+function isContractWallet(code){
+  if(!code||code==="0x") return false;
+  if(/^0xef0100[0-9a-fA-F]{40}$/.test(code)) return false;   // 7702, an EOA
+  return true;
+}
 let RECV_TOUCHED=false;   // did the user edit the recipient themselves?
 document.getElementById("buyRecv").addEventListener("input",()=>{RECV_TOUCHED=true;});
+(function(){
+  const b=document.getElementById("useWallet");
+  if(!b) return;
+  b.onclick=async()=>{
+    if(!ACCT){ connect(); return; }
+    const r=document.getElementById("buyRecv");
+    // Say it again on demand rather than filling a recipient that may not
+    // exist on Arc; the reader asked, so answer rather than silently refuse.
+    try{
+      const code=await baseRead("eth_getCode",[ACCT,"latest"]);
+      if(isContractWallet(code)){
+        say(T("Your wallet is a smart contract on Base. Enter the Arc address that should receive the USDC (it may differ)."));
+        r.focus(); return;
+      }
+    }catch(e){}
+    r.value=ACCT; RECV_TOUCHED=true; quote();
+  };
+})();
 async function adoptAccount(a){
   ACCT=a||null;
   document.getElementById("b-connect").textContent=ACCT?short(ACCT):T("Connect wallet");
@@ -1019,9 +1073,17 @@ async function adoptAccount(a){
     // A Base smart-contract wallet (e.g. Coinbase Smart Wallet) has no contract
     // at the same address on Arc, so delivering there could strand funds. Warn
     // and clear the autofill rather than pre-filling a risky recipient.
+    //
+    // But having code is not the same as being a contract. A wallet upgraded
+    // under EIP-7702 carries a delegation designator: exactly 23 bytes,
+    // 0xef0100 followed by the address it delegates to. That is still an
+    // externally owned account, still the same private key, and still that
+    // key's address on Arc. Reading it as a contract wallet cleared the
+    // recipient and told a growing share of readers something untrue about
+    // their own wallet.
     try{
       const code=await baseRead("eth_getCode",[ACCT,"latest"]);
-      if(code&&code!=="0x"){ r.value="";
+      if(isContractWallet(code)){ r.value="";
         say(T("Your wallet is a smart contract on Base. Enter the Arc address that should receive the USDC (it may differ).")); }
     }catch(e){}
   }
@@ -1289,7 +1351,13 @@ async function doBid(){
     if(rc.status!=="0x1"){ sayb('<span class="bad">'+T("The bid was rejected. Check the amount and price.")+"</span>"); return; }
     sayb('<span class="ok">'+T("Bid posted. Cancel any time to take it back.")+"</span>");
     setTimeout(loadBids,4000);
-  }catch(e){ sayb('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+  }catch(e){
+    // The chain's own sentence for an empty wallet is "ERC20: transfer amount
+    // exceeds balance", which tells a reader nothing they can act on.
+    const m=String((e&&e.message)||e);
+    sayb('<span class="bad">'+esch(/exceeds balance/i.test(m)
+      ? T("Not enough Base USDC in your wallet for that bid.") : m)+"</span>");
+  }
 }
 
 async function decodeOffer(id){
