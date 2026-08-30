@@ -100,7 +100,7 @@
     padding:20px 0 16px;border-bottom:2px solid var(--ink)}
   .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:19px;
     letter-spacing:.02em;text-decoration:none;text-transform:uppercase;
-    color:var(--ink)}
+    color:var(--ink);word-spacing:-.28em}
   .brand small{font-weight:400;color:var(--muted);text-transform:none;
     letter-spacing:0;font-size:var(--t3)}
   .hgroup{display:flex;align-items:center;gap:8px}
@@ -214,8 +214,8 @@
      CJK language, and Korean gets keep-all so a line never breaks inside a
      word. The display price keeps its own tightening, which is set on Latin
      digits either way. */
-  html[lang="ko"] *, html[lang="zh-CN"] *, html[lang="zh-Hans"] *{
-    letter-spacing:normal !important; text-transform:none !important}
+  html[lang="ko"] *:not(.brand), html[lang="zh-CN"] *:not(.brand),
+  html[lang="zh-Hans"] *:not(.brand){letter-spacing:normal !important}
   html[lang="ko"] .price b, html[lang="zh-CN"] .price b,
   html[lang="zh-Hans"] .price b{letter-spacing:-.02em}
   html[lang="ko"]{word-break:keep-all}

@@ -228,8 +228,8 @@
      nothing to either script. Both are dropped wholesale when the page is in a
      CJK language, and Korean gets keep-all so a line never breaks inside a
      word. */
-  html[lang="ko"] *, html[lang="zh-CN"] *, html[lang="zh-Hans"] *{
-    letter-spacing:normal !important; text-transform:none !important}
+  html[lang="ko"] *:not(.brand), html[lang="zh-CN"] *:not(.brand),
+  html[lang="zh-Hans"] *:not(.brand){letter-spacing:normal !important}
   html[lang="ko"]{word-break:keep-all}
   .accept{font-family:var(--sans);font-size:11px;color:var(--faint);
     margin:9px 0 0;text-align:center}

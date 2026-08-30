@@ -63,8 +63,8 @@
      nothing to either script. Both are dropped wholesale when the page is in a
      CJK language, and Korean gets keep-all so a line never breaks inside a
      word. */
-  html[lang="ko"] *, html[lang="zh-CN"] *, html[lang="zh-Hans"] *{
-    letter-spacing:normal !important; text-transform:none !important}
+  html[lang="ko"] *:not(.brand), html[lang="zh-CN"] *:not(.brand),
+  html[lang="zh-Hans"] *:not(.brand){letter-spacing:normal !important}
   html[lang="ko"]{word-break:keep-all}
   header{display:flex;align-items:center;justify-content:space-between;gap:14px;
     padding:20px 0 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
