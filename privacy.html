@@ -104,6 +104,25 @@
   .lead{border:1px solid var(--rule);border-left:2px solid var(--sig);
     background:var(--sheet);padding:14px 16px;margin:0 0 8px;border-radius:3px}
   .lead p{color:var(--ink);margin:0}
+  .mono{font-family:var(--mono);font-size:.94em;word-break:break-all}
+  /* The headline figure. Same shape as the market page's price line so the
+     two read as one publication. */
+  .qbox{margin:0 0 22px;display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+  .qlbl{width:100%;margin:0 0 3px;font-size:var(--t1);font-weight:600;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .qprice{font-size:34px;line-height:1;letter-spacing:-.02em;color:var(--sig);
+    font-weight:600;font-family:var(--mono)}
+  .qprice.flat{color:var(--faint)}
+  .qunit{font-style:normal;font-size:var(--t2);color:var(--muted)}
+  .wrap{overflow-x:auto;margin:14px 0 0}
+  table.cmp{width:100%;border-collapse:collapse;font-size:var(--t2);
+    font-family:var(--sans);min-width:420px}
+  table.cmp th{text-align:left;font-size:var(--t1);font-weight:600;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    padding:0 12px 7px 0;border-bottom:1px solid var(--rule2)}
+  table.cmp td{padding:9px 12px 9px 0;border-bottom:1px solid var(--rule);
+    color:var(--ink);vertical-align:top}
+  table.cmp tr:last-child td{border-bottom:0}
   footer{border-top:1px solid var(--rule);margin-top:44px;padding:16px 0 40px;
     color:var(--faint);font-size:var(--t2);display:flex;gap:14px;flex-wrap:wrap}
   footer a{color:var(--faint)}
@@ -131,7 +150,7 @@
 
 <div class='doc' data-lang='en'>
 <h1>Privacy</h1>
-<p class='sub'>2026-08-30 no accounts, no KYC, no analytics</p>
+<p class='sub'>2026-08-31 no accounts, no KYC, no analytics</p>
 <div class='lead'><p>No accounts, no KYC, no analytics, no cookies, no server-side database. We do not ask for your name, ID, or email, and we have no way to associate a wallet with a person.</p></div>
 <h2>1. What we collect</h2>
 <p><b>Nothing on our side.</b> The pages are static files with no backend. There is no sign-up, no form and no tracking pixel, and nothing we wrote reports on you. We cannot see who you are, and we do not try.</p>
@@ -152,7 +171,7 @@
 
 <div class='doc' data-lang='ko' hidden>
 <h1>개인정보</h1>
-<p class='sub'>2026-08-30 계정 없음, 신원확인 없음, 분석도구 없음</p>
+<p class='sub'>2026-08-31 계정 없음, 신원확인 없음, 분석도구 없음</p>
 <div class='lead'><p>계정도 신원확인도 분석도구도 쿠키도 서버 데이터베이스도 없습니다. 이름, 신분증, 이메일을 묻지 않으며, 지갑과 사람을 연결할 방법 자체가 없습니다.</p></div>
 <h2>1. 저희가 수집하는 것</h2>
 <p><b>저희 쪽에는 없습니다.</b> 페이지는 백엔드 없는 정적 파일입니다. 가입도 양식도 추적 픽셀도 없고, 저희가 심은 것 중에 이용자를 보고하는 것은 없습니다. 이용자가 누구인지 볼 수 없고, 보려 하지도 않습니다.</p>
@@ -173,7 +192,7 @@
 
 <div class='doc' data-lang='zh' hidden>
 <h1>隐私</h1>
-<p class='sub'>2026-08-30 无账户、无 KYC、无分析工具</p>
+<p class='sub'>2026-08-31 无账户、无 KYC、无分析工具</p>
 <div class='lead'><p>没有账户，没有 KYC，没有分析工具，没有 cookie，没有服务端数据库。我们不索取你的姓名、证件或邮箱，也没有任何办法把一个钱包和一个人对应起来。</p></div>
 <h2>1. 我们收集什么</h2>
 <p><b>我们这边什么都没有。</b>页面是没有后端的静态文件。没有注册，没有表单，没有跟踪像素，我们写的东西里没有任何会汇报你的部分。我们看不到你是谁，也不打算去看。</p>
@@ -192,7 +211,7 @@
 <p class='sub' style='margin-top:26px'>无账户、无 KYC、无分析工具。静态页面。</p>
 </div>
 
-<footer><a href='/'>Market</a><a href='/bridge'>Bridge</a><a href='/terms'>Terms</a><a href='/risk'>Risk</a><a href='/privacy'>Privacy</a><a href='https://x.com/arcexit' target='_blank' rel='noopener'>@arcexit</a><span class="note">2026-08-30</span></footer>
+<footer><a href='/'>Market</a><a href='/bridge'>Bridge</a><a href='/arc-usdc'>Arc USDC</a><a href='/terms'>Terms</a><a href='/risk'>Risk</a><a href='/privacy'>Privacy</a><a href='https://x.com/arcexit' target='_blank' rel='noopener'>@arcexit</a><span class="note">2026-08-31</span></footer>
 </div>
 <script>"use strict";
 (function(){
@@ -240,5 +259,6 @@
   mql.addEventListener("change",paintTheme);
   paintTheme();
 })();</script>
+<script></script>
 </body>
 </html>

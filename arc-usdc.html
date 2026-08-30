@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="index,follow">
+<meta name="description" content="Arc USDC is worth exactly one dollar and does not trade at one dollar. This page explains why, shows what it costs right now, and compares the two ways in and the two ways out. Eve">
+<meta name="theme-color" content="#11161a">
+<meta name="twitter:site" content="@arcexit">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='3' fill='%236fb4dc'/><path d='M4 17h16M4 12h10M4 7h6' stroke='%230b1216' stroke-width='2.4' stroke-linecap='square'/></svg>">
+<link rel="canonical" href="https://arcexit.com/arc-usdc">
+<title>Arc USDC &#183; arcexit</title>
+<style>
+  :root{
+    --paper:#11161a; --sheet:#171e23; --sink:#1f272d;
+    --ink:#e2e8ec; --muted:#98a3aa; --faint:#79848b;
+    --rule:#2b343b; --rule2:#3c4750;
+    --sig:#6fb4dc; --sig-dim:rgba(111,180,220,.14); --sig-ink:#0b1216;
+    --note-fg:#e0c58c; --note-strong:#f4e6c4;
+    --tap:rgba(226,232,236,.14);
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Malgun Gothic",monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,"Noto Sans KR","Noto Sans SC",sans-serif;
+    --t1:11px; --t2:12px; --t3:14px; --t4:16px; --t5:22px;
+    color-scheme:dark;
+  }
+  @media(prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+      --ink:#101312; --muted:#565d59; --faint:#646b66;
+      --rule:#c9cec9; --rule2:#a9b0aa;
+      --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+      --note-fg:#5f4310; --note-strong:#432f08;
+      --tap:rgba(16,19,18,.1);
+      color-scheme:light;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+    --ink:#101312; --muted:#565d59; --faint:#646b66;
+    --rule:#c9cec9; --rule2:#a9b0aa;
+    --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+    --note-fg:#5f4310; --note-strong:#432f08;
+    --tap:rgba(16,19,18,.1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-tap-highlight-color:var(--tap)}
+  button,a{font-family:inherit;touch-action:manipulation}
+  @media(max-width:640px){
+    /* The masthead grew for desktop and stopped fitting a phone: 412px of
+       content in a 351px bar, so the whole page scrolled sideways. */
+    header{gap:10px;padding:14px 0 12px}
+    .brand{font-size:16px;gap:8px}
+    .brand small{display:none}
+    .brand svg{width:22px;height:22px}
+    .hgroup{gap:6px}
+    .tgl{padding:6px 9px;min-width:30px;font-size:14px}
+    footer a{padding:6px 0;display:inline-block}
+  }
+  h1,h2{text-wrap:balance}
+  p,li{text-wrap:pretty}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:var(--t3)/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+  .rail{max-width:760px;margin:0 auto;padding:0 20px}
+  @media(max-width:640px){.rail{padding:0 12px}}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;
+    text-decoration-color:var(--rule2)}
+  a:hover{text-decoration-color:var(--ink)}
+  :focus-visible{outline:2px solid var(--sig);outline-offset:1px}
+
+  /* --- CJK typography ---------------------------------------------------
+     The tracking and uppercase on labels below are a deliberate Latin look.
+     Hangul and Han are already full-width blocks, so the same tracking puts a
+     gap between every syllable and a label reads as broken; uppercase does
+     nothing to either script. Both are dropped wholesale when the page is in a
+     CJK language, and Korean gets keep-all so a line never breaks inside a
+     word. */
+  html[lang="ko"] *:not(.brand), html[lang="zh-CN"] *:not(.brand),
+  html[lang="zh-Hans"] *:not(.brand){letter-spacing:normal !important}
+  html[lang="ko"]{word-break:keep-all}
+  header{display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:20px 0 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:11px;font-size:19px;
+    font-weight:600;text-decoration:none;letter-spacing:-.01em}
+  .brand small{color:var(--muted);font-weight:400;font-size:var(--t2)}
+  .hgroup{display:flex;align-items:center;gap:8px}
+  .lang{display:inline-flex;border:1px solid var(--rule);border-radius:3px;
+    overflow:hidden}
+  .lang button{background:none;border:0;color:var(--muted);cursor:pointer;
+    padding:5px 8px;font-size:var(--t1);border-right:1px solid var(--rule)}
+  .lang button:last-child{border-right:0}
+  .lang button.on{background:var(--sig-dim);color:var(--ink)}
+  .tgl{background:none;border:1px solid var(--rule);border-radius:3px;
+    color:var(--muted);cursor:pointer;padding:4px 8px;font-size:var(--t3);
+    line-height:1.2}
+  .tgl:hover,.lang button:hover{color:var(--ink)}
+
+  h1{margin:34px 0 4px;font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+  .sub{color:var(--faint);font-size:var(--t2);margin:0 0 26px}
+  h2{margin:30px 0 7px;font-size:var(--t3);font-weight:600;letter-spacing:-.01em}
+  .doc{font-family:var(--sans);font-size:15px;line-height:1.62}
+  .doc p{color:var(--muted);margin:0 0 11px}
+  .doc b,.doc strong{color:var(--ink);font-weight:600}
+  .lead{border:1px solid var(--rule);border-left:2px solid var(--sig);
+    background:var(--sheet);padding:14px 16px;margin:0 0 8px;border-radius:3px}
+  .lead p{color:var(--ink);margin:0}
+  .mono{font-family:var(--mono);font-size:.94em;word-break:break-all}
+  /* The headline figure. Same shape as the market page's price line so the
+     two read as one publication. */
+  .qbox{margin:0 0 22px;display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+  .qlbl{width:100%;margin:0 0 3px;font-size:var(--t1);font-weight:600;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .qprice{font-size:34px;line-height:1;letter-spacing:-.02em;color:var(--sig);
+    font-weight:600;font-family:var(--mono)}
+  .qprice.flat{color:var(--faint)}
+  .qunit{font-style:normal;font-size:var(--t2);color:var(--muted)}
+  .wrap{overflow-x:auto;margin:14px 0 0}
+  table.cmp{width:100%;border-collapse:collapse;font-size:var(--t2);
+    font-family:var(--sans);min-width:420px}
+  table.cmp th{text-align:left;font-size:var(--t1);font-weight:600;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    padding:0 12px 7px 0;border-bottom:1px solid var(--rule2)}
+  table.cmp td{padding:9px 12px 9px 0;border-bottom:1px solid var(--rule);
+    color:var(--ink);vertical-align:top}
+  table.cmp tr:last-child td{border-bottom:0}
+  footer{border-top:1px solid var(--rule);margin-top:44px;padding:16px 0 40px;
+    color:var(--faint);font-size:var(--t2);display:flex;gap:14px;flex-wrap:wrap}
+  footer a{color:var(--faint)}
+  .note{margin-left:auto;font-family:var(--sans)}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;
+    transition-duration:.01ms!important}}
+</style>
+<script>(function(){
+  try{
+    var t=localStorage.getItem("arc-theme");
+    if(t==="light"||t==="dark") document.documentElement.dataset.theme=t;
+  }catch(e){}
+})();</script>
+</head>
+<body>
+<div class="rail">
+
+<header>
+  <a class="brand" href="/"><svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="var(--sig)"/><path d="M4 17h16M4 12h10M4 7h6" stroke="var(--sig-ink)" stroke-width="2.4" stroke-linecap="square"/></svg> Arc USDC <small>arcexit.com</small></a>
+  <span class="hgroup">
+    <span class="lang" id="lang"><button data-lang="en" class="on">EN</button><button data-lang="ko">&#54620;&#44397;&#50612;</button><button data-lang="zh">&#20013;&#25991;</button></span>
+    <button class="tgl" id="theme-toggle" aria-label="Switch between dark and light">&#9728;</button>
+  </span>
+</header>
+
+<div class='doc' data-lang='en'>
+<h1>Arc USDC</h1>
+<p class='sub'>2026-08-31 what it costs, and how to get in and out</p>
+<div class='qbox' data-empty="No live offers on the book right now."><span class='qlbl'>Arc USDC right now</span><b class='qprice'>&#8230;</b><em class='qunit'>Base USDC per 1 Arc USDC, fee included, cheapest live offer</em></div>
+<div class='lead'><p>Arc USDC is worth exactly one dollar and does not trade at one dollar. This page explains why, shows what it costs right now, and compares the two ways in and the two ways out. Every number here was read off the chain.</p></div>
+<h2>1. What Arc USDC is</h2>
+<p>Arc is Circle's own layer 1, chain ID 5042. USDC is not a token you happen to hold on it. USDC <b>is</b> the money of the chain: it pays for gas, so there is no second volatile asset you have to acquire before you can move anything.</p>
+<p>That creates the one thing that confuses every wallet and every script on first contact. Your balance has two faces. It is the native coin, carried at 18 decimals like ether, and it is also an ERC20 at <span class='mono'>0x3600000000000000000000000000000000000000</span>, carried at 6 decimals like USDC everywhere else. These are not two balances you can hold different amounts of. They are one balance shown two ways, and the two readings differ by exactly a factor of a trillion.</p>
+<p>Because gas is denominated in a dollar, the cost of using Arc is legible in a way it is not elsewhere. At the current base fee an ordinary transfer costs about <b>0.0004 USDC</b>, which is four hundredths of a cent.</p>
+<h2>2. Why it costs more than a dollar</h2>
+<p>Arc USDC redeems one for one against USDC on Ethereum, Base and every other chain Circle supports, through Circle's own CCTP. Burn a unit on one side, mint a unit on the other. By construction it is worth a dollar and there is no peg here to break.</p>
+<p>It changes hands above a dollar anyway. The reason is not the asset, it is the queue. More people want to be holding USDC on Arc than are willing to carry theirs over and hand it to someone else, and the premium is the price of that willingness. It is a fee for immediacy, paid to whoever already did the slow part.</p>
+<p>One thing the premium is <b>not</b> is a transfer limit. Moving USDC into Arc has never been capped. Moving it out is capped at <b>100,000 USDC per CCTP message</b>, a ceiling almost nobody reaches. This is worth stating plainly because the widely repeated figure is 1 USDC per message, which was true early on and is no longer true; the current value is readable at any time from the batch contract's <span class='mono'>perMessageLimit()</span>.</p>
+<h2>3. Two ways in</h2>
+<p><b>Bridge it yourself.</b> You need USDC on Base or another CCTP chain. You burn on that side, Circle attests, and it mints to your address on Arc. You pay no premium at all, because nobody is selling you anything. What you spend is time and a fee.</p>
+<p><b>Buy it from someone who already has it.</b> Instant, and you pay whatever they ask. On this site the seller sets the price and their inventory is already deposited, so the delivery is not a promise: it is a balance sitting in a contract before you pay anything.</p>
+<p>Which of the two is cheaper depends entirely on the premium, which is the figure at the top of this page. There is no general answer, only today's.</p>
+<h2>4. Two ways out, and where people lose money</h2>
+<p>The same two routes run in reverse, and the choice is worth more here than it is on the way in.</p>
+<p><b>Bridging out returns exactly one for one.</b> That is the whole point of CCTP and it is completely reliable. It is also, whenever the market pays a premium, the more expensive door: one for one means you receive the dollar and hand the premium to nobody. If Arc USDC is trading at 1.20 and you bridge 1,000 out, you have declined roughly 200 dollars that somebody was willing to pay you.</p>
+<p><b>Selling</b> collects that premium instead. You deposit into a contract, name your price, and keep the ability to withdraw anything that has not sold. The trade is that you wait for a buyer, where the bridge waits for nobody.</p>
+<p>The honest summary: bridge out when you need the money now and the premium is thin, sell when the premium is not thin. Check the number above before you decide, because it is the only input that matters.</p>
+<h2>5. What each route costs</h2>
+<div class='wrap'><table class='cmp'><thead><tr><th>Route</th><th>Premium</th><th>Fee</th><th>Waits for</th></tr></thead><tbody><tr><td>Bridge in</td><td>none</td><td>2%</td><td>Circle's attestation</td></tr><tr><td>Buy here</td><td>you pay it</td><td>2%</td><td>nobody, inventory is deposited</td></tr><tr><td>Bridge out</td><td>none, and you forgo it</td><td>2%</td><td>Circle's attestation</td></tr><tr><td>Sell here</td><td>you collect it</td><td>2%</td><td>a buyer</td></tr></tbody></table></div>
+<p>The 2% is this service's fee and it is capped in the contracts at 5%, a constant no key can raise. Circle charges nothing for CCTP itself; the chain charges the gas quoted in section 1.</p>
+<h2>6. Where these numbers come from</h2>
+<p>Everything above is a chain read, not a claim, and the build refuses to publish this page if any of it stops matching.</p>
+<p>The chain ID, the ERC20 address and its decimals come from Arc itself. The per-message ceiling is <span class='mono'>perMessageLimit()</span> on the batch contract at <span class='mono'>0x477cecd9cad406c58a76dd048393b680be29ecfd</span>, which forwards to Circle's own token minter. The fee and its immutable ceiling are <span class='mono'>feeBps()</span> and <span class='mono'>MAX_FEE_BPS()</span> on the escrow at <span class='mono'>0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e</span>. The premium at the top of the page is read live from that escrow's open offers each time the page loads.</p>
+<p>If you want to check any of it yourself rather than take our word, every address above is a public contract and the source is published.</p>
+<p class='sub' style='margin-top:26px'>This page describes a market and a protocol. It is not advice.</p>
+</div>
+
+<div class='doc' data-lang='ko' hidden>
+<h1>Arc USDC</h1>
+<p class='sub'>2026-08-31 얼마인지, 어떻게 들어가고 어떻게 나오는지</p>
+<div class='qbox' data-empty="지금 호가창에 열린 매물이 없습니다."><span class='qlbl'>지금 Arc USDC</span><b class='qprice'>&#8230;</b><em class='qunit'>Arc USDC 1개당 Base USDC, 수수료 포함, 호가창 최저가</em></div>
+<div class='lead'><p>Arc USDC는 정확히 1달러의 가치를 갖지만 1달러에 거래되지 않습니다. 왜 그런지, 지금 얼마인지, 들어가는 두 길과 나오는 두 길이 각각 얼마인지 정리했습니다. 여기 있는 숫자는 전부 체인에서 직접 읽은 값입니다.</p></div>
+<h2>1. Arc USDC란</h2>
+<p>Arc는 Circle이 직접 만든 레이어1이고 체인 ID는 5042입니다. USDC는 이 체인 위에 얹혀 있는 여러 토큰 중 하나가 아닙니다. USDC가 <b>곧</b> 이 체인의 돈입니다. 가스도 USDC로 냅니다. 뭔가를 옮기기 전에 따로 구해야 하는 변동성 자산이 없다는 뜻입니다.</p>
+<p>여기서 지갑과 스크립트가 처음에 반드시 헷갈리는 지점이 생깁니다. 잔액에 얼굴이 두 개입니다. 이더처럼 소수점 18자리로 다뤄지는 네이티브 코인이면서, 동시에 <span class='mono'>0x3600000000000000000000000000000000000000</span>에 있는 소수점 6자리 ERC20이기도 합니다. 서로 다른 금액을 담을 수 있는 잔액 두 개가 아닙니다. 하나의 잔액을 두 방식으로 보여주는 것이고, 두 표시는 정확히 1조 배 차이입니다.</p>
+<p>가스를 달러로 매기기 때문에 Arc를 쓰는 비용은 다른 체인과 달리 바로 읽힙니다. 현재 기준 수수료로 일반 전송 한 번이 약 <b>0.0004 USDC</b>입니다. 1센트의 25분의 1입니다.</p>
+<h2>2. 왜 1달러보다 비싼가</h2>
+<p>Arc USDC는 Circle의 CCTP를 통해 이더리움, Base를 비롯해 Circle이 지원하는 모든 체인의 USDC와 1대1로 교환됩니다. 한쪽에서 태우면 다른 쪽에서 그만큼 발행됩니다. 구조상 1달러이고, 여기서 깨질 페그 자체가 없습니다.</p>
+<p>그런데도 1달러보다 비싸게 손바뀜합니다. 이유는 자산이 아니라 줄입니다. Arc에서 USDC를 들고 있으려는 사람이, 자기 USDC를 옮겨와서 남에게 넘겨줄 의향이 있는 사람보다 많습니다. 프리미엄은 그 의향의 값입니다. 느린 과정을 이미 통과해 둔 사람에게 지불하는 즉시성의 대가입니다.</p>
+<p>프리미엄이 전송 한도 때문이라는 설명은 <b>사실이 아닙니다</b>. Arc로 들어오는 쪽에는 한도가 있었던 적이 없습니다. 나가는 쪽은 <b>CCTP 메시지당 100,000 USDC</b>가 상한이고, 이 천장에 닿는 사람은 거의 없습니다. 굳이 짚는 이유는 널리 퍼진 숫자가 메시지당 1 USDC이기 때문입니다. 초기에는 맞는 값이었고 지금은 아닙니다. 현재 값은 배치 컨트랙트의 <span class='mono'>perMessageLimit()</span>으로 아무 때나 확인할 수 있습니다.</p>
+<h2>3. 들어가는 두 가지 길</h2>
+<p><b>직접 브릿지</b>. Base나 다른 CCTP 체인에 USDC가 있어야 합니다. 그쪽에서 태우면 Circle이 증명하고 Arc의 내 주소로 발행됩니다. 프리미엄은 한 푼도 내지 않습니다. 파는 사람이 없으니까요. 대신 시간과 수수료를 씁니다.</p>
+<p><b>이미 갖고 있는 사람에게서 구매</b>. 즉시 되고, 그 사람이 부르는 값을 냅니다. 이 사이트에서는 판매자가 가격을 직접 정하고 물량은 이미 예치되어 있습니다. 그래서 인도가 약속이 아닙니다. 내가 돈을 내기 전에 이미 컨트랙트 안에 들어와 있는 잔액입니다.</p>
+<p>둘 중 어느 쪽이 싼지는 전적으로 프리미엄에 달렸고, 그 숫자가 이 페이지 맨 위에 있습니다. 일반해는 없고 오늘의 답만 있습니다.</p>
+<h2>4. 나오는 두 가지 길, 그리고 돈이 새는 자리</h2>
+<p>같은 두 길을 거꾸로 가면 됩니다. 다만 이쪽에서는 선택의 값이 들어올 때보다 훨씬 큽니다.</p>
+<p><b>브릿지로 나가면 정확히 1대1로 돌려받습니다.</b> CCTP의 존재 이유이고 완벽하게 신뢰할 수 있습니다. 그리고 시장이 프리미엄을 주고 있을 때는 이쪽이 더 비싼 문입니다. 1대1이라는 말은 달러만 받고 프리미엄은 아무에게도 넘기지 않는다는 뜻입니다. Arc USDC가 1.20에 거래되는데 1,000을 브릿지로 빼면, 누군가 기꺼이 지불하려던 200달러가량을 거절한 셈입니다.</p>
+<p><b>파는 쪽</b>은 그 프리미엄을 챙깁니다. 컨트랙트에 예치하고 가격을 부르고, 안 팔린 물량은 언제든 다시 뺄 수 있습니다. 대신 구매자를 기다려야 합니다. 브릿지는 아무도 기다리지 않습니다.</p>
+<p>정직하게 요약하면 이렇습니다. 지금 당장 돈이 필요하고 프리미엄이 얇으면 브릿지, 프리미엄이 얇지 않으면 판매. 결정 전에 위의 숫자를 보십시오. 유일하게 중요한 입력값입니다.</p>
+<h2>5. 길마다 얼마인가</h2>
+<div class='wrap'><table class='cmp'><thead><tr><th>경로</th><th>프리미엄</th><th>수수료</th><th>기다리는 대상</th></tr></thead><tbody><tr><td>브릿지로 진입</td><td>없음</td><td>2%</td><td>Circle의 증명</td></tr><tr><td>여기서 구매</td><td>내가 지불</td><td>2%</td><td>없음, 물량이 이미 예치됨</td></tr><tr><td>브릿지로 이탈</td><td>없음, 그리고 포기함</td><td>2%</td><td>Circle의 증명</td></tr><tr><td>여기서 판매</td><td>내가 수취</td><td>2%</td><td>구매자</td></tr></tbody></table></div>
+<p>2%는 이 서비스의 수수료이고 컨트랙트 안에서 5%로 상한이 박혀 있습니다. 어떤 키로도 그 위로 올릴 수 없는 상수입니다. CCTP 자체에 대해 Circle이 받는 돈은 없고, 체인은 1번 항목에 적은 가스를 받습니다.</p>
+<h2>6. 이 숫자들의 출처</h2>
+<p>위의 모든 값은 주장이 아니라 체인 조회 결과이고, 하나라도 어긋나면 빌드가 이 페이지를 발행하지 않습니다.</p>
+<p>체인 ID와 ERC20 주소와 소수점 자리수는 Arc에서 직접 읽습니다. 메시지당 상한은 <span class='mono'>0x477cecd9cad406c58a76dd048393b680be29ecfd</span>에 있는 배치 컨트랙트의 <span class='mono'>perMessageLimit()</span>이며, 이 함수는 Circle의 토큰 민터를 그대로 넘겨봅니다. 수수료와 그 불변 상한은 <span class='mono'>0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e</span>에 있는 에스크로의 <span class='mono'>feeBps()</span>와 <span class='mono'>MAX_FEE_BPS()</span>입니다. 페이지 맨 위의 프리미엄은 페이지를 열 때마다 그 에스크로의 열린 매물에서 실시간으로 읽습니다.</p>
+<p>우리 말을 믿는 대신 직접 확인하고 싶다면, 위의 주소는 전부 공개 컨트랙트이고 소스도 공개되어 있습니다.</p>
+<p class='sub' style='margin-top:26px'>이 페이지는 시장과 프로토콜을 설명합니다. 투자 조언이 아닙니다.</p>
+</div>
+
+<div class='doc' data-lang='zh' hidden>
+<h1>Arc USDC</h1>
+<p class='sub'>2026-08-31 价格几何，如何进出</p>
+<div class='qbox' data-empty="当前订单簿上没有挂单。"><span class='qlbl'>当前 Arc USDC</span><b class='qprice'>&#8230;</b><em class='qunit'>每 1 Arc USDC 的 Base USDC，含手续费，挂单最低价</em></div>
+<div class='lead'><p>Arc USDC 的价值恰好是一美元，但它并不按一美元成交。本页解释原因，显示当前价格，并比较进出各两条路径的成本。这里的每一个数字都直接读自链上。</p></div>
+<h2>1. Arc USDC 是什么</h2>
+<p>Arc 是 Circle 自建的一层链，链 ID 为 5042。USDC 不是恰好在其上流通的某个代币，USDC <b>就是</b>这条链的钱：燃料费也用它支付，所以你不需要先获取另一种波动资产才能转账。</p>
+<p>由此产生了每个钱包和脚本初次接触时都会困惑的一点：余额有两副面孔。它既是原生币，像以太一样按 18 位小数计；也是位于 <span class='mono'>0x3600000000000000000000000000000000000000</span> 的 ERC20，像别处的 USDC 一样按 6 位小数计。这不是可以各自持有不同金额的两个余额，而是同一个余额的两种显示，两者恰好相差一万亿倍。</p>
+<p>因为燃料费以美元计价，使用 Arc 的成本比别处更一目了然。按当前基础费率，一次普通转账约为 <b>0.0004 USDC</b>，即四百分之一美分。</p>
+<h2>2. 为什么高于一美元</h2>
+<p>Arc USDC 通过 Circle 自己的 CCTP，与以太坊、Base 以及 Circle 支持的所有链上的 USDC 一比一兑换：一边销毁，另一边铸造。按其构造它就值一美元，这里不存在会脱锚的锚。</p>
+<p>但它仍然以高于一美元的价格易手。原因不在资产，而在排队：想在 Arc 上持有 USDC 的人，多于愿意把自己的 USDC 搬过来并交给别人的人。溢价就是这份意愿的价格，是为即时性支付的费用，付给那些已经走完慢流程的人。</p>
+<p>溢价<b>并非</b>源于转账上限。转入 Arc 从未设过上限。转出的上限是<b>每条 CCTP 消息 100,000 USDC</b>，几乎没人会触到这个天花板。之所以要点明，是因为广为流传的数字是每条消息 1 USDC，那在早期是对的，现在已经不对；当前值随时可以通过批量合约的 <span class='mono'>perMessageLimit()</span> 查询。</p>
+<h2>3. 进入的两条路</h2>
+<p><b>自己走桥。</b>你需要在 Base 或其他 CCTP 链上持有 USDC。你在那边销毁，Circle 出具证明，然后在 Arc 上铸造到你的地址。你完全不付溢价，因为没有人在卖给你东西，你付出的是时间和手续费。</p>
+<p><b>从已经持有的人手里买。</b>即时，价格由对方开。在本站，卖家自行定价，且其库存已经预先存入，因此交付不是一句承诺，而是在你付款之前就已经躺在合约里的余额。</p>
+<p>两者哪个更便宜，完全取决于溢价，也就是本页顶部的那个数字。没有通用答案，只有今天的答案。</p>
+<h2>4. 退出的两条路，以及钱漏掉的地方</h2>
+<p>同样两条路反过来走，但在这个方向上，选择的价值远大于进入时。</p>
+<p><b>走桥退出恰好一比一返还。</b>这正是 CCTP 的意义所在，完全可靠。而只要市场还在给溢价，这就是更贵的那扇门：一比一意味着你只拿回美元，把溢价拱手让给了空气。如果 Arc USDC 正以 1.20 成交，而你把 1,000 走桥转出，你就等于拒绝了别人愿意付给你的约 200 美元。</p>
+<p><b>卖出</b>则把这份溢价收进来。你存入合约，标出价格，没卖掉的部分随时可以取回。代价是你要等买家，而桥不等任何人。</p>
+<p>老实说就是：急着用钱且溢价很薄时走桥，溢价不薄时卖出。做决定前先看上面那个数字，它是唯一重要的输入。</p>
+<h2>5. 每条路的成本</h2>
+<div class='wrap'><table class='cmp'><thead><tr><th>路径</th><th>溢价</th><th>手续费</th><th>等待对象</th></tr></thead><tbody><tr><td>走桥进入</td><td>无</td><td>2%</td><td>Circle 的证明</td></tr><tr><td>在此购买</td><td>由你支付</td><td>2%</td><td>无，库存已预存</td></tr><tr><td>走桥退出</td><td>无，且被你放弃</td><td>2%</td><td>Circle 的证明</td></tr><tr><td>在此卖出</td><td>由你收取</td><td>2%</td><td>买家</td></tr></tbody></table></div>
+<p>2% 是本服务的手续费，并在合约中被硬性限制为不超过 5%，这是任何私钥都无法提高的常量。Circle 对 CCTP 本身不收费；链收取第 1 节所列的燃料费。</p>
+<h2>6. 这些数字从哪里来</h2>
+<p>以上全部是链上读数而非声明，其中任何一项不再吻合，构建都会拒绝发布本页。</p>
+<p>链 ID、ERC20 地址及其小数位直接读自 Arc。每条消息的上限来自 <span class='mono'>0x477cecd9cad406c58a76dd048393b680be29ecfd</span> 处批量合约的 <span class='mono'>perMessageLimit()</span>，该函数直接转询 Circle 自己的代币铸造器。手续费及其不可变上限来自 <span class='mono'>0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e</span> 处托管合约的 <span class='mono'>feeBps()</span> 与 <span class='mono'>MAX_FEE_BPS()</span>。页面顶部的溢价，则在每次加载时从该托管合约的挂单中实时读取。</p>
+<p>如果你想自己核对而不是听我们说，上面每一个地址都是公开合约，源码也已公开。</p>
+<p class='sub' style='margin-top:26px'>本页描述的是一个市场与一套协议，不构成投资建议。</p>
+</div>
+
+<footer><a href='/'>Market</a><a href='/bridge'>Bridge</a><a href='/arc-usdc'>Arc USDC</a><a href='/terms'>Terms</a><a href='/risk'>Risk</a><a href='/privacy'>Privacy</a><a href='https://x.com/arcexit' target='_blank' rel='noopener'>@arcexit</a><span class="note">2026-08-31</span></footer>
+</div>
+<script>"use strict";
+(function(){
+  var root=document.documentElement;
+  var docs=[].slice.call(document.querySelectorAll(".doc"));
+  var btns=[].slice.call(document.querySelectorAll("#lang button"));
+  var lang="en";
+  try{
+    var s=localStorage.getItem("arcExitLang");
+    if(s==="ko"||s==="zh") lang=s;
+  }catch(e){}
+  var HTMLLANG={en:"en",ko:"ko",zh:"zh-Hans"};
+  function paintLang(){
+    docs.forEach(function(d){ d.hidden = d.dataset.lang!==lang; });
+    btns.forEach(function(b){ b.classList.toggle("on", b.dataset.lang===lang); });
+    root.setAttribute("lang", HTMLLANG[lang]||"en");
+    var t=document.querySelector('.doc[data-lang="'+lang+'"] h1');
+    if(t) document.title=t.textContent+" \u00b7 arcexit";
+  }
+  btns.forEach(function(b){
+    b.onclick=function(){
+      lang=b.dataset.lang;
+      try{ localStorage.setItem("arcExitLang",lang); }catch(e){}
+      paintLang();
+    };
+  });
+  paintLang();
+
+  /* The glyph names the mode you would switch TO, so the button reads as an
+     action rather than a status, and needs no translation. */
+  var btn=document.getElementById("theme-toggle");
+  var mql=window.matchMedia("(prefers-color-scheme: dark)");
+  function current(){ return root.dataset.theme || "dark"; }
+  function paintTheme(){
+    var other = current()==="dark" ? "light" : "dark";
+    btn.textContent = other==="dark" ? "\u263e" : "\u2600";
+    btn.setAttribute("aria-label","Switch to "+other+" theme");
+  }
+  btn.onclick=function(){
+    var next = current()==="dark" ? "light" : "dark";
+    root.dataset.theme=next;
+    try{ localStorage.setItem("arc-theme",next); }catch(e){}
+    paintTheme();
+  };
+  mql.addEventListener("change",paintTheme);
+  paintTheme();
+})();</script>
+<script>
+(function(){
+  var ESCROW="0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e";
+  var VAULT="0xe7f4c15b0919e7707360c0d962322cbccc93abce";
+  var BASE=["https://mainnet.base.org","https://base-rpc.publicnode.com"];
+  var ARC=["https://sharc.fun/rpc"];
+  var S={next:"0x5f5d0655",offers:"0x2ebb620c",fee:"0x24a9d853",avail:"0x84bed06e"};
+  function pad(n){var h=Number(n).toString(16);return new Array(65-h.length).join("0")+h;}
+  function big(h){return BigInt("0x"+h);}
+  async function call(urls,to,data){
+    var last=null;
+    for(var i=0;i<urls.length;i++){
+      try{
+        var r=await fetch(urls[i],{method:"POST",headers:{"content-type":"application/json"},
+          body:JSON.stringify({jsonrpc:"2.0",id:1,method:"eth_call",
+            params:[{to:to,data:data},"latest"]})});
+        if(!r.ok) throw new Error("http "+r.status);
+        var j=await r.json();
+        if(j.error) throw new Error(j.error.message||"rpc error");
+        if(!j.result||j.result==="0x") throw new Error("empty");
+        return j.result;
+      }catch(e){ last=e; }
+    }
+    throw last||new Error("no rpc");
+  }
+  function paint(cls,txt,flat){
+    var els=document.querySelectorAll(cls);
+    for(var i=0;i<els.length;i++){
+      els[i].textContent=txt;
+      if(flat!==undefined) els[i].classList.toggle("flat",!!flat);
+    }
+  }
+  function fail(key){
+    paint(".qprice","-",true);
+    var boxes=document.querySelectorAll(".qbox");
+    for(var i=0;i<boxes.length;i++){
+      var u=boxes[i].querySelector(".qunit");
+      if(u) u.textContent=boxes[i].getAttribute(key);
+    }
+  }
+  (async function(){
+    try{
+      var fee=big(( await call(BASE,ESCROW,S.fee) ).slice(2));
+      var n=Number(big(( await call(BASE,ESCROW,S.next) ).slice(2)));
+      var best=null;
+      for(var id=n-1;id>=1&&id>=n-120;id--){
+        var r=await call(BASE,ESCROW,S.offers+pad(id));
+        var w=function(i){return r.slice(2+64*i,2+64*(i+1));};
+        var prem=Number(big(w(2))), rem=big(w(3)), vid=Number(big(w(5)));
+        if(vid<=0||rem<=0n) continue;
+        if(best!==null&&prem>=best) continue;   // cannot beat what we have
+        var av;
+        try{ av=BigInt(await call(ARC,VAULT,S.avail+pad(vid))); }
+        catch(e){ continue; }                    // unknown backing, not zero
+        var eff=rem<av?rem:av;
+        if(eff>0n) best=prem;
+      }
+      if(best===null){ fail("data-empty"); return; }
+      var mult=(10000+best)/10000*(1+Number(fee)/10000);
+      paint(".qprice",mult.toFixed(3)+"\u00d7",false);
+    }catch(e){ fail("data-err"); }
+  })();
+})();
+</script>
+</body>
+</html>

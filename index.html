@@ -443,6 +443,8 @@
   <button class="btn wide" id="b-ask" disabled>Enter an amount</button>
   <p class="askalt"><span data-t="m_askhold">Holding Arc USDC already?</span>
     <button type="button" class="linkish" id="b-asksell" data-t="m_asksell">Sell it here</button></p>
+  <p class="askalt" style="margin-top:5px"><span data-t="m_asknew">First time here?</span>
+    <a class="linkish" href="/arc-usdc" data-t="m_asknewb">What Arc USDC costs, and how to get in and out</a></p>
 </div>
 
 <div class="price">
@@ -631,7 +633,7 @@
 </section>
 
 <footer>
-  <a href="/bridge" data-t="m_bridge">Bridge</a><a href="/terms" data-t="m_terms">Terms</a><a href="/risk" data-t="m_risk">Risk</a>
+  <a href="/arc-usdc" data-t="m_guide">What is Arc USDC</a><a href="/bridge" data-t="m_bridge">Bridge</a><a href="/terms" data-t="m_terms">Terms</a><a href="/risk" data-t="m_risk">Risk</a>
   <a href="/privacy" data-t="m_privacy">Privacy</a>
   <a href="https://basescan.org/address/0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e" target="_blank" rel="noopener">Escrow</a>
   <a href="https://arc.exploreme.pro/address/0xe7f4c15b0919e7707360c0d962322cbccc93abce" target="_blank" rel="noopener">Vault</a>
@@ -655,6 +657,9 @@
 var M_I18N={
  en:{},
  ko:{
+  m_guide:"Arc USDC란",
+  m_asknew:"처음 오셨나요?",
+  m_asknewb:"Arc USDC가 얼마이고 어떻게 들어가고 나오는지",
   m_askq:"Arc USDC 얼마나 필요하세요?",
   m_askhold:"이미 Arc USDC를 갖고 계신가요?",
   m_asksell:"여기서 파세요",
@@ -693,6 +698,9 @@ var M_I18N={
   m_exit:"지금 바로 빼야 합니까? <b>브릿지를 쓰십시오.</b> 수수료 2%."
  },
  zh:{
+  m_guide:"什么是 Arc USDC",
+  m_asknew:"第一次来?",
+  m_asknewb:"Arc USDC 价格几何，如何进出",
   m_askq:"你需要多少 Arc USDC？",
   m_askhold:"已经持有 Arc USDC？",
   m_asksell:"在这里出售",
