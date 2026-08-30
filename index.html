@@ -981,7 +981,7 @@ const SEL={ // escrow (Base)
   acceptingFills:"0xa6c4bbc3",
   // vault (Arc)
   vOpen:"0x35499b4c", vTopUp:"0x91821b21", vWithdraw:"0x254bba5c", voffers:"0xbf36d63f",
-  vAvail:"0x84bed06e",
+  vAvail:"0x84bed06e", nextVaultId:"0x12ac1763",
   // erc20
   approve:"0x095ea7b3", allowance:"0xdd62ed3e", balanceOf:"0x70a08231", transfer:"0xa9059cbb"};
 const TOPIC_FILLED="0xad6d72f4dbd1686c3b48668fc7d6e58b72b8f597a601ce4d78ad4392158f506e";
@@ -1337,7 +1337,7 @@ async function cancelMyBid(b){
 async function sellIntoBid(b){
   if(!ACCT){connect();return}
   const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
-  const ids=myDepositIds();
+  const ids=await myVaultIds();
   let vid=null, best=0n;
   for(const id of ids){
     const a=await vaultAvail(id);
@@ -1858,6 +1858,30 @@ function rememberDeposit(vid){
   let a=[]; try{a=JSON.parse(localStorage.getItem(k)||"[]")}catch(e){}
   if(!a.includes(vid)){a.push(vid); try{localStorage.setItem(k,JSON.stringify(a))}catch(e){}}
 }
+/* Every vault offer this account owns, read from Arc rather than from what
+   this browser happened to record. The local list is merged in first so the
+   usual case paints without waiting, and the scan is bounded because it walks
+   ids backwards from the newest. */
+async function myVaultIds(){
+  const out=new Set(myDepositIds());
+  if(!ACCT) return [...out];
+  try{
+    const n=Number(numHex(await arcRead("eth_call",
+      [{to:VAULT,data:SEL.nextVaultId},"latest"])));
+    const ids=[]; for(let i=n-1;i>=1&&ids.length<300;i--) ids.push(i);
+    for(let i=0;i<ids.length;i+=10){
+      const chunk=await Promise.all(ids.slice(i,i+10).map(async vid=>{
+        try{
+          const r=await arcRead("eth_call",
+            [{to:VAULT,data:SEL.voffers+pad(hexNum(vid))},"latest"]);
+          return ("0x"+r.slice(26,66)).toLowerCase()===ACCT.toLowerCase()?vid:null;
+        }catch(e){ return null; }
+      }));
+      chunk.forEach(v=>{ if(v!==null){ out.add(v); rememberDeposit(v); } });
+    }
+  }catch(e){ /* keep whatever the local list gave us */ }
+  return [...out];
+}
 function myDepositIds(){
   if(!ACCT) return [];
   try{return JSON.parse(localStorage.getItem("otc-deposits-"+ACCT.toLowerCase())||"[]")}catch(e){return[]}
@@ -1972,7 +1996,7 @@ async function renderMine(){
     }
     // Deposits recorded locally that have no escrow offer (listing failed or
     // was never reached): show them so the money is always withdrawable.
-    for(const vid of myDepositIds()){
+    for(const vid of await myVaultIds()){
       if(seenVault.has(vid)) continue;
       let vb=null; try{vb=await vaultBal(vid)}catch(e){}
       if(!(vb&&vb>0n)) continue;
