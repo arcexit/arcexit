@@ -752,6 +752,8 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Filling {0} of {1}, which is what your vault holds.":"{1} 중 {0}만큼 채웁니다. 금고에 있는 만큼입니다.",
+  "You hold {0}, and this bid takes no less than {1} at a time.":"보유 {0}인데 이 비드는 한 번에 {1} 미만은 받지 않습니다.",
   "Bid cancelled. Your USDC is back in your wallet.":"비드를 취소했습니다. USDC가 지갑으로 돌아왔습니다.",
   "Cancel":"취소",
   "Cancel did not go through. Refreshing.":"취소가 되지 않았습니다. 새로 읽습니다.",
@@ -851,6 +853,8 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Filling {0} of {1}, which is what your vault holds.":"在 {1} 中成交 {0}，也就是你金库里的数量。",
+  "You hold {0}, and this bid takes no less than {1} at a time.":"你持有 {0}，而这笔求购一次最少接受 {1}。",
   "Bid cancelled. Your USDC is back in your wallet.":"求购已取消。USDC 已回到你的钱包。",
   "Cancel":"取消",
   "Cancel did not go through. Refreshing.":"取消未成功。正在重新读取。",
@@ -1349,15 +1353,25 @@ async function sellIntoBid(b,btn){
     const a=await vaultAvail(id);
     if(a!==null&&a>best){ best=a; vid=id; }
   }
-  if(vid===null||best<b.wantArc){
+  if(vid===null||best===0n){
     sayb('<span class="bad">'+T("Deposit Arc USDC on the Sell tab first, then this becomes one click.")+"</span>");
     document.getElementById("t-sell").click();
     return;
   }
-  const q=numHex(await baseCall(BIDBOOK,SELB.quote+pad(hexNum(b.id))+pad(hexNum(b.wantArc))));
+  // Take what the vault can actually deliver. The contract allows a partial
+  // fill down to the bid's own minimum, and taking the whole remainder is
+  // always allowed even when it is below that minimum.
+  const size=best<b.wantArc?best:b.wantArc;
+  if(size<b.minTake&&size!==b.wantArc){
+    sayb('<span class="bad">'+T("You hold {0}, and this bid takes no less than {1} at a time.",
+      usd(best),usd(b.minTake))+"</span>");
+    return;
+  }
+  const q=numHex(await baseCall(BIDBOOK,SELB.quote+pad(hexNum(b.id))+pad(hexNum(size))));
   if(q===0n){ sayb('<span class="bad">'+T("That bid is no longer open.")+"</span>"); loadBids(); return; }
+  if(size<b.wantArc) sayb(T("Filling {0} of {1}, which is what your vault holds.",usd(size),usd(b.wantArc)));
   try{
-    const data=SELB.take+pad(hexNum(b.id))+pad(hexNum(b.wantArc))+pad(hexNum(vid))+pad(hexNum(q));
+    const data=SELB.take+pad(hexNum(b.id))+pad(hexNum(size))+pad(hexNum(vid))+pad(hexNum(q));
     const h=await sendTx(BIDBOOK,data,BASE_HEX,null);
     const rc=await waitReceipt(h,baseRead);
     if(rc.status!=="0x1"){ sayb('<span class="bad">'+T("That bid was taken while you signed. Pick another.")+"</span>"); loadBids(); return; }
