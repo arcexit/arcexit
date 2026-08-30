@@ -130,7 +130,7 @@
   }
 
   .what{margin:11px 0 0;font-family:var(--sans);font-size:var(--t3);
-    color:var(--muted);max-width:74ch}
+    color:var(--muted);max-width:74ch;text-wrap:balance}
   .what b{color:var(--ink);font-weight:600}
 
   /* the strip. label over figure, divided by hairlines, flat on the ground.
@@ -1119,7 +1119,11 @@ async function adoptAccount(a){
         say(T("Your wallet is a smart contract on Base. Enter the Arc address that should receive the USDC (it may differ).")); }
     }catch(e){}
   }
+  // The bids table has to be repainted too: it is drawn before a wallet is
+  // connected, and whether a row offers Sell or Cancel depends on who is
+  // connected. Leaving it out meant a buyer never saw their own Cancel.
   refreshBalances(); quote(); sellQuote(); renderMine();
+  try{ renderBids(); bidQuote(); }catch(e){}
 }
 async function connect(){
   try{
