@@ -1047,10 +1047,10 @@ const SOURCES=[
    rpcs:["https://api.avax.network/ext/bc/C/rpc"]},
   {key:"pol", name:"Polygon", chainId:137, hex:"0x89", domain:7, fastFee:0,
    usdc:"0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", proven:false,
-   rpcs:["https://polygon-rpc.com","https://polygon-bor-rpc.publicnode.com"]},
+   rpcs:["https://polygon-bor-rpc.publicnode.com","https://polygon-rpc.com"]},
   {key:"eth", name:"Ethereum", chainId:1, hex:"0x1", domain:0, fastFee:0.25,
    usdc:"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", proven:false,
-   rpcs:["https://eth.llamarpc.com","https://ethereum-rpc.publicnode.com"]},
+   rpcs:["https://ethereum-rpc.publicnode.com","https://eth.llamarpc.com"]},
 ];
 SOURCES.forEach(s=>{ s.gas = (s.key==="eth") ? "high" : "low"; });
 let SRC=SOURCES.find(s=>s.proven)||SOURCES[0];
