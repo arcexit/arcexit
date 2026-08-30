@@ -47,4 +47,4 @@ Canonical: https://arcexit.com/.well-known/security.txt
 #
 # Token approvals are always for the exact amount being bridged; the site
 # never requests an unlimited allowance and never calls setApprovalForAll.
-# Source: https://github.com/bongbongcrypto/arc-bridge-site
+# Source: https://github.com/arcexit/arcexit
