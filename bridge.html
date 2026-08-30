@@ -654,7 +654,7 @@ ko:{
   g_s2_t:"2. 금액과 받는 주소", g_s2_b:"보낼 금액을 넣습니다. 받는 주소는 연결한 지갑이 기본값이고, 다른 곳으로 보내려면 변경을 누릅니다. 주소를 잘못 넣으면 되돌릴 수 없으니 반드시 확인하십시오.",
   g_s3_t:"3. 서명", g_s3_b:"화면에 표시된 횟수만큼 지갑에서 확인을 누릅니다. 승인 한 번, Arc에서 소각 한 번 이상, 받는 체인에서 수령 한 번입니다.",
   g_s4_t:"4. 도착 확인", g_s4_b:"소각과 수령이 끝나면 받는 체인 잔고에 들어옵니다. 화면 위쪽에 진행 중인 건이 카드로 표시됩니다.",
-  g_why_t:"서명이 왜 여러 번 뜨나요", g_why_b:"Arc는 한 건당 1 USDC까지만 옮길 수 있게 제한돼 있습니다. 400 USDC를 빼면 400건이 됩니다. 그래서 컨트랙트가 한 번의 서명으로 여러 건을 묶어 처리합니다. 금액칸 아래에 몇 번 서명하는지 미리 표시되며, 안내에 나온 금액을 누르면 서명이 한 번 줄어듭니다.",
+  g_why_t:"서명이 왜 여러 번 뜨나요", g_why_b:"Arc는 한 건에 실을 수 있는 금액에 한도가 있어서, 한도를 넘는 금액은 넘는 만큼 여러 건이 됩니다. 그래서 컨트랙트가 한 번의 서명으로 여러 건을 묶어 처리합니다. 금액칸 아래에 몇 번 서명하는지 미리 표시되며, 안내에 나온 금액을 누르면 서명이 한 번 줄어듭니다.",
   g_time_t:"얼마나 걸리나요", g_time_b:"보통 10~30분입니다. Circle이 소각을 서명하는 시간이 대부분이고, 그 뒤 수령은 금방 끝납니다.",
   g_stuck_t:"중간에 끊기면", g_stuck_b:"소각이 끝났다면 자금은 Circle 안에 있고 사라지지 않습니다. 승인은 만료되지 않으니 나중에 하단 복구를 열어 전부 한 번에 수령을 누르면 됩니다. 브라우저를 닫아도 소각 해시가 저장돼 있습니다.",
   g_safe_t:"확인하십시오", g_safe_b:"이 사이트는 필요한 금액만 승인을 요청합니다. 무제한 승인이나 전체 권한을 요구하는 화면이 뜨면 취소하십시오. 호출하는 컨트랙트 주소는 원리에서 확인할 수 있습니다.",
@@ -765,7 +765,7 @@ en:{
   g_s2_t:"2. Amount and recipient", g_s2_b:"Enter the amount to send. The recipient defaults to the connected wallet; press Change to send elsewhere. A wrong address cannot be undone, so check it.",
   g_s3_t:"3. Sign", g_s3_b:"Confirm in your wallet as many times as the screen says: one approval, one or more burns on Arc, and one collection on the destination.",
   g_s4_t:"4. Arrival", g_s4_b:"Once burn and collection finish, the funds appear in your destination balance. Anything in flight is shown as a card at the top.",
-  g_why_t:"Why several signatures", g_why_b:"Arc caps a single transfer at 1 USDC, so withdrawing 400 USDC means 400 pieces. A contract folds many of them into one signature. The count is shown under the amount, and pressing the suggested amount saves one signature.",
+  g_why_t:"Why several signatures", g_why_b:"Arc caps how much one CCTP message may carry, so an amount above that cap is split into that many pieces. A contract folds them into one signature. The count is shown under the amount, and pressing the suggested amount saves one signature.",
   g_time_t:"How long", g_time_b:"Usually 10 to 30 minutes. Most of that is Circle signing the burn; collection is quick.",
   g_stuck_t:"If it is interrupted", g_stuck_b:"Once burned, the funds sit inside Circle and cannot vanish. Attestations do not expire, so open Recover at the bottom later and press Claim all at once. The burn hashes are saved even if you close the browser.",
   g_safe_t:"Check this", g_safe_b:"This site only ever requests approval for the exact amount. If any screen asks for an unlimited allowance or blanket permission, cancel it. The contracts it calls are listed under How it works.",
@@ -876,7 +876,7 @@ zh:{
   g_s2_t:"2. 金额与接收地址", g_s2_b:"输入要转出的金额。接收地址默认为已连接的钱包，如需转到别处请点击更改。地址填错无法撤回，请务必核对。",
   g_s3_t:"3. 签名", g_s3_b:"按屏幕提示的次数在钱包中确认：一次授权、一次或多次 Arc 销毁、以及目标链上一次领取。",
   g_s4_t:"4. 确认到账", g_s4_b:"销毁与领取完成后，资金会出现在目标链余额中。进行中的转账会显示在页面上方。",
-  g_why_t:"为什么要签名多次", g_why_b:"Arc 限制每笔最多 1 USDC，因此转出 400 USDC 就是 400 笔。合约会把多笔合并为一次签名。金额下方会预先显示签名次数，点击提示中的金额可少签一次。",
+  g_why_t:"为什么要签名多次", g_why_b:"Arc 限制每笔消息可携带的金额，超过上限的金额会拆分为多笔。合约会把多笔合并为一次签名。金额下方会预先显示签名次数，点击提示中的金额可少签一次。",
   g_time_t:"需要多久", g_time_b:"通常 10 到 30 分钟。大部分时间用于 Circle 对销毁签名，领取很快。",
   g_stuck_t:"中途中断了", g_stuck_b:"只要已销毁，资金就在 Circle 系统内不会消失。签名不会过期，稍后打开底部的恢复并点击一次性全部领取即可。即使关闭浏览器，销毁哈希也已保存。",
   g_safe_t:"请注意", g_safe_b:"本站只会请求所需金额的授权。若出现要求无限授权或全部权限的界面，请取消。可在原理中查看本站调用的合约地址。",
@@ -1025,7 +1025,7 @@ const BASE_RPCS=["https://mainnet.base.org","https://base.llamarpc.com","https:/
    published price for the fast lane into Arc; zero means the fast lane costs
    nothing from that chain. */
 /* Claim contract per destination chain. Collecting is one receiveMessage per
-   message, and Arc caps a message at 1 USDC, so without a contract on the
+   message, and Arc caps what one message may carry, so without a contract on the
    destination a 400 USDC withdrawal is 400 confirmations there - which is not a
    feature, it is a trap. A chain is only offered once its contract exists, so
    this map is the single place that decides which destinations are open. */
@@ -1780,7 +1780,7 @@ async function sendTx(to,data,chainWanted,gasFloor){
   }catch(e){}
   return eth().request({method:"eth_sendTransaction",params:[tx]});
 }
-/* Wallet-side batching (EIP-5792). Arc caps a CCTP message at 1 USDC, so a $10
+/* Wallet-side batching (EIP-5792). Arc caps what a CCTP message may carry, so a large
    exit is ten burns and, on a plain EOA, ten confirmations. The batch contract
    fixes that but has to be deployed and funded first. A wallet that implements
    the Wallet Call API does the same job with no contract at all: the fee, the
