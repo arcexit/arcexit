@@ -221,6 +221,16 @@
   .cta:hover:not(:disabled){background:var(--sig-hover)}
   .cta:disabled{background:var(--box);color:var(--dim2);cursor:not-allowed}
   .cta.danger{background:var(--boxh);color:var(--bad)}
+  /* --- CJK typography ---------------------------------------------------
+     The tracking and uppercase on labels below are a deliberate Latin look.
+     Hangul and Han are already full-width blocks, so the same tracking puts a
+     gap between every syllable and a label reads as broken; uppercase does
+     nothing to either script. Both are dropped wholesale when the page is in a
+     CJK language, and Korean gets keep-all so a line never breaks inside a
+     word. */
+  html[lang="ko"] *, html[lang="zh-CN"] *, html[lang="zh-Hans"] *{
+    letter-spacing:normal !important; text-transform:none !important}
+  html[lang="ko"]{word-break:keep-all}
   .accept{font-family:var(--sans);font-size:11px;color:var(--faint);
     margin:9px 0 0;text-align:center}
   .accept a{color:var(--faint)}

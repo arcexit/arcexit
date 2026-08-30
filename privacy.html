@@ -56,6 +56,16 @@
   a:hover{text-decoration-color:var(--ink)}
   :focus-visible{outline:2px solid var(--sig);outline-offset:1px}
 
+  /* --- CJK typography ---------------------------------------------------
+     The tracking and uppercase on labels below are a deliberate Latin look.
+     Hangul and Han are already full-width blocks, so the same tracking puts a
+     gap between every syllable and a label reads as broken; uppercase does
+     nothing to either script. Both are dropped wholesale when the page is in a
+     CJK language, and Korean gets keep-all so a line never breaks inside a
+     word. */
+  html[lang="ko"] *, html[lang="zh-CN"] *, html[lang="zh-Hans"] *{
+    letter-spacing:normal !important; text-transform:none !important}
+  html[lang="ko"]{word-break:keep-all}
   header{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:18px 0 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:9px;font-size:var(--t4);
