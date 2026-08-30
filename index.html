@@ -111,6 +111,18 @@
   .lang button:hover{color:var(--ink)}
   .lang button.on{background:var(--sink);color:var(--ink)}
   @media(max-width:640px){.lang button{padding:5px 7px;font-size:var(--t1)}}
+  /* A phone cannot hold brand, switcher, theme and connect on one line: at
+     375px that is 372px of content in a 351px bar. The switcher lost the
+     argument silently because it clips rather than overflows, so the Chinese
+     label was cut in half with nothing else looking wrong. Two rows, and
+     every control keeps its whole name. */
+  @media(max-width:470px){
+    header{flex-wrap:wrap;gap:11px 8px}
+    .brand{flex:1 1 100%}
+    .hgroup{flex:1 1 100%;justify-content:space-between}
+    .lang{flex:none}
+    header .btn{white-space:nowrap}
+  }
   @media(max-width:640px){
     /* The masthead grew for desktop and stopped fitting a phone: 412px of
        content in a 351px bar, so the whole page scrolled sideways. */
@@ -133,6 +145,31 @@
   .what{margin:11px 0 0;font-family:var(--sans);font-size:var(--t3);
     color:var(--muted);max-width:74ch;text-wrap:balance}
   .what b{color:var(--ink);font-weight:600}
+
+  /* The one question. Ruled top and bottom and flat on the ground like every
+     other block here; a printed form does not float, and this is the most
+     important line on the sheet, not a promotion of it. */
+  .ask{margin:20px 0 0;padding:15px 0 17px;
+    border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+  .ask label{display:block;font-family:var(--sans);font-size:var(--t3);
+    font-weight:600;color:var(--ink);margin:0 0 10px;text-wrap:balance}
+  .askrow{display:flex;align-items:stretch;max-width:340px}
+  .askrow input.f{flex:1;min-width:0;border-radius:3px 0 0 3px;border-right:none}
+  .askunit{display:flex;align-items:center;padding:0 13px;font-family:var(--mono);
+    font-size:var(--t2);color:var(--muted);background:var(--sheet);
+    border:1px solid var(--rule2);border-left:none;border-radius:0 3px 3px 0}
+  .askout{font-family:var(--sans);font-size:var(--t2);color:var(--muted);
+    margin:11px 0 0;min-height:1.3em;max-width:62ch}
+  .askout b{color:var(--ink);font-weight:600}
+  .ask .btn.wide{margin-top:13px;max-width:340px}
+  .askalt{font-family:var(--sans);font-size:var(--t2);color:var(--muted);margin:12px 0 0}
+  /* Negative margin cancels the padding, so the tap target grows to 26px
+     without shifting the sentence it sits in. */
+  .linkish{background:none;border:0;padding:4px 2px;margin:-4px -2px;
+    font:inherit;color:var(--sig);display:inline-block;
+    text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+  .linkish:hover{color:var(--ink)}
+  @media(max-width:470px){.askrow,.ask .btn.wide{max-width:none}}
 
   /* the strip. label over figure, divided by hairlines, flat on the ground.
      no card, no radius, no shadow: a printed form does not float. */
@@ -395,6 +432,19 @@
   <b>receive on Arc in under a minute</b>. If it does not arrive, you are
   refunded automatically.</p>
 
+<div class="ask">
+  <label for="askAmt" data-t="m_askq">How much Arc USDC do you want?</label>
+  <div class="askrow">
+    <input id="askAmt" name="ask-amount" class="f big" inputmode="decimal"
+      placeholder="100" autocomplete="off" spellcheck="false" aria-describedby="askOut">
+    <span class="askunit">USDC</span>
+  </div>
+  <div class="askout" id="askOut" role="status" aria-live="polite"></div>
+  <button class="btn wide" id="b-ask" disabled>Enter an amount</button>
+  <p class="askalt"><span data-t="m_askhold">Holding Arc USDC already?</span>
+    <button type="button" class="linkish" id="b-asksell" data-t="m_asksell">Sell it here</button></p>
+</div>
+
 <div class="price">
   <span class="lbl" data-t="m_last">Last</span>
   <b class="flat" id="tape-price">&#8230;</b>
@@ -605,6 +655,9 @@
 var M_I18N={
  en:{},
  ko:{
+  m_askq:"Arc USDC 얼마나 필요하세요?",
+  m_askhold:"이미 Arc USDC를 갖고 계신가요?",
+  m_asksell:"여기서 파세요",
   m_otc:"장외거래", m_last:"최근 체결",
   m_offers:"매물", m_available:"판매 가능",
   m_cheapest:"최저가", m_settled:"체결 완료",
@@ -640,6 +693,9 @@ var M_I18N={
   m_exit:"지금 바로 빼야 합니까? <b>브릿지를 쓰십시오.</b> 수수료 2%."
  },
  zh:{
+  m_askq:"你需要多少 Arc USDC？",
+  m_askhold:"已经持有 Arc USDC？",
+  m_asksell:"在这里出售",
   m_otc:"场外交易", m_last:"最新成交",
   m_offers:"挂单", m_available:"可买数量",
   m_cheapest:"最低价", m_settled:"已成交",
@@ -753,6 +809,12 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Reading the order book":"호가창 읽는 중",
+  "You pay <b>{0} USDC</b> on Base and receive <b>{1}</b> on Arc, in under a minute.":"Base에서 <b>{0} USDC</b>를 내고 Arc로 <b>{1}</b>를 1분 안에 받습니다.",
+  "Buy now":"지금 사기",
+  "No single offer is that big right now. Set your price and the first seller who can fill it does.":"그만한 매물이 지금 없습니다. 가격을 걸어두면 채울 수 있는 판매자가 먼저 체결합니다.",
+  "Nobody is selling right now. Set your price and your money waits on chain until a seller takes it.":"지금 파는 사람이 없습니다. 가격을 걸어두면 판매자가 가져갈 때까지 자금이 온체인에서 기다립니다.",
+  "Set my price":"내 가격 걸기",
   "Base USDC per 1 Arc USDC, cheapest offer on the book":"Arc USDC 1개당 Base USDC, 호가창 최저가",
   "No offers on the book, so there is no price to quote.":"호가창에 매물이 없어서 제시할 가격이 없습니다.",
   "bid":"삽니다",
@@ -858,6 +920,12 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Reading the order book":"正在读取订单簿",
+  "You pay <b>{0} USDC</b> on Base and receive <b>{1}</b> on Arc, in under a minute.":"在 Base 上支付 <b>{0} USDC</b>，一分钟内在 Arc 上收到 <b>{1}</b>。",
+  "Buy now":"立即购买",
+  "No single offer is that big right now. Set your price and the first seller who can fill it does.":"目前没有这么大的挂单。设定你的价格，第一个能成交的卖家会来接。",
+  "Nobody is selling right now. Set your price and your money waits on chain until a seller takes it.":"目前没有人在卖。设定你的价格，资金会在链上等到卖家来取。",
+  "Set my price":"设定我的价格",
   "Base USDC per 1 Arc USDC, cheapest offer on the book":"每 1 个 Arc USDC 的 Base USDC，盘口最低价",
   "No offers on the book, so there is no price to quote.":"盘口没有挂单，因此没有可报的价格。",
   "bid":"求购",
@@ -1593,6 +1661,7 @@ function renderBook(){
                : T("Cannot reach the order book right now. This is not an empty market."))+'</td></tr>';
   else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
   quote();
+  askQuote();      // the hero verb depends on what the book can fill
 }
 async function keeperLiveness(){
   const note=document.getElementById("keeperNote");
@@ -2228,16 +2297,89 @@ async function watchSales(){
 }
 setInterval(watchSales,20000);
 
+// ---- the one question ------------------------------------------------------
+// The book is the product to someone who already trades and a wall to everyone
+// else, so the top of the page asks the single thing either can answer and the
+// button below becomes whichever action the book can actually honour. Nothing
+// here re-implements buying or bidding: it fills the existing fields and hands
+// over, so there stays exactly one signing path to audit.
+function askAmt(){ return parseAmt(document.getElementById("askAmt").value); }
+function askRaw(){ return String(document.getElementById("askAmt").value||"").trim(); }
+function askBest(amt){
+  // Cheapest offer that can actually take this size, not merely the cheapest.
+  return BOOK.filter(o=>canFill(o,amt)).sort((a,b)=>a.premiumBps-b.premiumBps)[0]||null;
+}
+function askScroll(el){
+  if(!el) return;
+  try{ el.scrollIntoView({behavior:"smooth",block:"center"}); }
+  catch(e){ try{ el.scrollIntoView(); }catch(e2){} }
+}
+function askQuote(){
+  const out=document.getElementById("askOut"), btn=document.getElementById("b-ask");
+  if(!out||!btn) return;
+  const amt=askAmt();
+  if(!amt){
+    out.textContent=""; btn.disabled=true; btn.onclick=null;
+    btn.textContent=T("Enter an amount"); return;
+  }
+  if(!BOOK_READ){
+    out.textContent=T("Reading the order book"); btn.disabled=true; btn.onclick=null;
+    btn.textContent=T("Enter an amount"); return;
+  }
+  const o=askBest(amt);
+  btn.disabled=false;
+  if(o){
+    const proceeds=amt*(10000n+BigInt(o.premiumBps))/10000n;
+    const paid=proceeds+(proceeds*FEE_BPS+9999n)/10000n;
+    out.innerHTML=T("You pay <b>{0} USDC</b> on Base and receive <b>{1}</b> on Arc, in under a minute.",
+                    usd(paid),usd(amt));
+    btn.textContent=T("Buy now");
+    btn.onclick=()=>askGoBuy(o);
+  }else{
+    // Never a dead end. The same answer becomes a funded bid, which is the one
+    // thing on this page that gives a seller a reason to arrive.
+    out.textContent=BOOK.length
+      ? T("No single offer is that big right now. Set your price and the first seller who can fill it does.")
+      : T("Nobody is selling right now. Set your price and your money waits on chain until a seller takes it.");
+    btn.textContent=T("Set my price");
+    btn.onclick=()=>askGoBid();
+  }
+}
+function askGoBuy(o){
+  const f=document.getElementById("buyAmt");
+  f.value=askRaw();          // the raw typed string, already validated by parseAmt
+  SELECTED=o; PINNED=true;   // renderBook keeps a pinned offer that can still fill
+  showTab("buy");
+  renderBook();              // ends in quote(), which prices the pinned offer
+  askScroll(document.getElementById("v-buy"));
+  f.focus();
+}
+function askGoBid(){
+  const f=document.getElementById("bidAmt");
+  if(!f) return;
+  f.value=askRaw();
+  showTab("buy");            // the bid form lives under the buy panel
+  bidQuote();
+  askScroll(f.closest(".bidbox")||f);
+  document.getElementById("bidPrem").focus();
+}
+document.getElementById("askAmt").addEventListener("input",askQuote);
+document.getElementById("askAmt").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){ const b=document.getElementById("b-ask"); if(!b.disabled) b.click(); }
+});
+document.getElementById("b-asksell").onclick=()=>{
+  showTab("sell"); askScroll(document.getElementById("v-sell"));
+};
+
 // ---- tabs / boot -----------------------------------------------------------
 const tabs={buy:"v-buy",sell:"v-sell",mine:"v-mine"};
-for(const t of ["buy","sell","mine"]){
-  document.getElementById("t-"+t).onclick=()=>{
-    for(const k in tabs){document.getElementById(tabs[k]).style.display=k===t?"":"none";
-      const tb=document.getElementById("t-"+k);
-      tb.classList.toggle("on",k===t); tb.setAttribute("aria-pressed",String(k===t));}
-    if(t==="mine") renderMine();
-  };
+function showTab(t){
+  for(const k in tabs){document.getElementById(tabs[k]).style.display=k===t?"":"none";
+    const tb=document.getElementById("t-"+k);
+    tb.classList.toggle("on",k===t); tb.setAttribute("aria-pressed",String(k===t));}
+  if(t==="mine") renderMine();
 }
+for(const t of ["buy","sell","mine"]) document.getElementById("t-"+t).onclick=()=>showTab(t);
 document.addEventListener("keydown",e=>{
   if(e.key!=="Escape") return;
   const box=document.getElementById("wpick");
@@ -2250,7 +2392,7 @@ for(const id of ["bidPrem","bidAmt"]){
 }
 if(document.getElementById("b-bid")) document.getElementById("b-bid").onclick=doBid;
 document.getElementById("build").textContent="["+OTC_BUILD+"]";
-quote(); sellQuote();          // set initial button states (incl. coming-soon lock)
+quote(); sellQuote(); askQuote();   // set initial button states (incl. coming-soon lock)
 loadBook();
 // Staggered behind the ask book: both read the same public endpoint, and a
 // simultaneous start is what the bid side kept losing.
