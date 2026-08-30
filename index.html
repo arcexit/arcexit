@@ -400,6 +400,21 @@
   <tbody><tr><td colspan="4" class="muted">Loading&#8230;</td></tr></tbody>
 </table></div>
 
+<div class="bhead" style="margin-top:26px">
+  <h2><span data-t="m_bidbook">Bids</span><span class="sub" data-t="m_bidsub">buyers waiting, money already locked</span></h2>
+</div>
+
+<div class="wrap"><table id="bids">
+  <thead><tr>
+    <th data-t="m_prem">Premium</th>
+    <th data-t="m_theypay">They pay per 1</th>
+    <th data-t="m_wanted">Wanted</th>
+    <th data-t="m_youget">You receive</th>
+    <th></th>
+  </tr></thead>
+  <tbody><tr><td colspan="5" class="muted">Loading&#8230;</td></tr></tbody>
+</table></div>
+
 <div class="tabs">
   <button id="t-buy" class="on" aria-pressed="true" data-t="m_buy">Buy</button>
   <button id="t-sell" aria-pressed="false" data-t="m_sell">Sell</button>
@@ -417,6 +432,21 @@
       <div class="field">
         <label for="buyRecv" data-t="m_recv">Arc address to receive</label>
         <input id="buyRecv" name="arc-recipient" class="f mono" placeholder="0x&#8230;" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="fee">
+        <h3 data-t="m_orbid">Or name your own price</h3>
+        <p data-h="m_bidwhat">Lock your Base USDC against an amount you want. A
+        seller can fill it from their deposit at any time, and until one does you
+        can cancel and take every cent back.</p>
+        <div class="lrow" style="gap:12px;margin:12px 0 0">
+          <div style="flex:1"><label for="bidPrem" data-t="m_prem">Premium %</label>
+            <input id="bidPrem" name="bid-premium" class="f" inputmode="decimal" placeholder="20" autocomplete="off"></div>
+          <div style="flex:1"><label for="bidAmt" data-t="m_amtwant">Amount wanted</label>
+            <input id="bidAmt" name="bid-amount" class="f" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+        </div>
+        <div class="quote" id="bidQuote" style="display:none;margin-top:12px"></div>
+        <button class="btn wide" id="b-bid" disabled style="margin-top:12px">Connect wallet</button>
+        <div class="msg" id="saybid" role="status" aria-live="polite"></div>
       </div>
       <div class="fee">
         <h3 data-t="m_whatpay">What you pay</h3>
@@ -550,6 +580,10 @@ var M_I18N={
   m_what:"판매자가 가격을 직접 정합니다. Base에서 결제하면 <b>1분 안에 Arc로 받습니다</b>. 안 오면 자동 환불됩니다.",
   m_paytext:"표에 뜬 값이 Arc USDC 1개당 내는 금액입니다. 프리미엄과 2% 수수료가 이미 들어 있습니다. 배달 실패 시 전액 환불됩니다.",
   m_feetext:"구매자가 냅니다. Arc USDC로 받기 때문에 등록 수량이 예치한 양보다 조금 적게 표시됩니다. 받는 금액은 그대로입니다.",
+  m_bidbook:"삽니다", m_bidsub:"돈을 걸어 둔 구매자",
+  m_theypay:"1개당 지불", m_wanted:"원하는 수량", m_youget:"받는 금액",
+  m_orbid:"직접 가격을 정해 걸기", m_amtwant:"원하는 수량",
+  m_bidwhat:"원하는 수량만큼 Base USDC를 걸어 둡니다. 판매자가 예치분에서 언제든 채울 수 있고, 채워지기 전까지는 취소해서 전액 돌려받습니다.",
   m_thsize:"수량", m_thpaid:"결제액", m_thstatus:"상태",
   m_thprem:"프리미엄", m_thvault:"금고",
   m_accept:"계속하면 <a href='/terms'>이용약관</a>과 <a href='/risk'>위험 고지</a>에 동의하는 것입니다.",
@@ -580,6 +614,10 @@ var M_I18N={
   m_what:"卖家自行定价。在 Base 上付款，<b>一分钟内在 Arc 上收到</b>。没到账会自动退款。",
   m_paytext:"盘口价格就是每个 Arc USDC 你要付的钱，已含溢价和 2% 手续费。交付失败全额退回。",
   m_feetext:"由买家承担。我们用 Arc USDC 收取，所以挂单数量比存入量略少。你拿到的金额不变。",
+  m_bidbook:"求购", m_bidsub:"已锁定资金的买家",
+  m_theypay:"每个支付", m_wanted:"求购数量", m_youget:"你可得到",
+  m_orbid:"自己出价", m_amtwant:"求购数量",
+  m_bidwhat:"按你想要的数量锁定 Base USDC。卖家随时可以用存入的库存来成交，在成交之前你可以取消并全额取回。",
   m_thsize:"数量", m_thpaid:"支付", m_thstatus:"状态",
   m_thprem:"溢价", m_thvault:"金库",
   m_accept:"继续即表示你接受<a href='/terms'>使用条款</a>和<a href='/risk'>风险披露</a>。",
@@ -829,6 +867,11 @@ const T=(k,...a)=>{
 const OTC_BUILD="o8";
 const ESCROW="0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e";
 const VAULT="0xe7f4c15b0919e7707360c0d962322cbccc93abce"; // Arc-side delivery vault
+const BIDBOOK="0x4d70d100ccf24b9e83d12569114a6f34789b3e9a";
+const SELB={postBid:"0x829f26e8", take:"0x9e88c44e", cancelBid:"0x5ef06aa5",
+  nextBidId:"0xdc269049", bids:"0xfcf6e65a", quote:"0xf40e4341",
+  minHit:"0x62565a60", maxPay:"0x175c3ef2"};
+let BIDS=[], BIDS_READ=false, MIN_HIT=1000000n;
 const ESCROW_BLOCK=50643295;      // escrow deploy block; stats scan starts here
 const BASE_ID=8453, BASE_HEX="0x2105";
 const ARC_ID=5042,  ARC_HEX="0x13b2";
@@ -871,12 +914,27 @@ const usd=(v)=>{
   return (neg?"-":"")+whole+(frac?"."+frac:"");
 };
 const short=(a)=>a?a.slice(0,6)+"…"+a.slice(-4):"";
+const RPC_COOLDOWN={};          // url -> timestamp it may be tried again
 async function rpcVia(urls,method,params){
   let last;
-  for(const u of urls){
+  // An endpoint that just refused goes to the back of the queue rather than
+  // being asked again on the very next call. With hundreds of reads in a book
+  // scan, retrying a limited host first every time is what turns one 429 into
+  // hundreds.
+  const now=Date.now();
+  const order=urls.slice().sort((x,y)=>
+    ((RPC_COOLDOWN[x]||0)>now?1:0)-((RPC_COOLDOWN[y]||0)>now?1:0));
+  for(const u of order){
     try{
       const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});
+      if(!r.ok){
+        // 429 and friends. The body is not necessarily JSON, and reading one
+        // as a result would hand the page a value the chain never gave it.
+        if(r.status===429||r.status>=500) RPC_COOLDOWN[u]=Date.now()+60000;
+        last=new Error("HTTP "+r.status);
+        continue;
+      }
       const j=await r.json();
       if(j.error){last=j.error;continue}
       return j.result;
@@ -1038,6 +1096,162 @@ function comingSoon(){
 }
 
 // ---- book ------------------------------------------------------------------
+async function decodeBid(id){
+  const r=await baseCall(BIDBOOK,SELB.bids+pad(hexNum(id)));
+  const f=(i)=>r.slice(2+64*i,2+64*(i+1));
+  return {id, buyer:"0x"+f(0).slice(24), recip:"0x"+f(1).slice(24),
+          wantArc:BigInt("0x"+f(2)), escrowed:BigInt("0x"+f(3)),
+          minTake:BigInt("0x"+f(4)), expiry:Number(BigInt("0x"+f(5))),
+          open:BigInt("0x"+f(6))===1n};
+}
+
+/* A bid's price is a ratio, not a premium: the contract stores what the buyer
+   locked against what they want, and nothing else. The premium shown here is
+   derived back out of that ratio for display only, using the same fee the ask
+   side quotes with, so a bid at 20% and an ask at 20% read the same to a
+   reader comparing the two tables. */
+function bidPremiumBps(b){
+  if(b.wantArc===0n) return 0;
+  const perArc=Number(b.escrowed)/Number(b.wantArc);
+  return Math.round((perArc/(1+Number(FEE_BPS)/10000)-1)*10000);
+}
+
+async function loadBids(){
+  if(comingSoon()) return;
+  // One retry on the two header calls. The public Base endpoint rate-limits
+  // when the ask book is mid-scan, and a single 429 should not turn the bid
+  // side into "unreadable" for thirty seconds.
+  const once=async(sel_)=>{
+    try{ return numHex(await baseCall(BIDBOOK,sel_)); }
+    catch(e){ await new Promise(r=>setTimeout(r,1200));
+              return numHex(await baseCall(BIDBOOK,sel_)); }
+  };
+  try{
+    MIN_HIT=await once(SELB.minHit);
+    const n=Number(await once(SELB.nextBidId));
+    const ids=[]; for(let i=n-1;i>=1&&ids.length<200;i--) ids.push(i);
+    const out=[];
+    for(let i=0;i<ids.length;i+=10){
+      const chunk=await Promise.all(ids.slice(i,i+10).map(decodeBid));
+      out.push(...chunk);
+    }
+    const now=Math.floor(Date.now()/1000);
+    BIDS=out.filter(b=>b.open&&b.wantArc>0n&&(b.expiry===0||b.expiry>now))
+            .sort((a,b)=>bidPremiumBps(b)-bidPremiumBps(a));
+    BIDS_READ=true;
+  }catch(e){ /* leave the last good book; renderBids says so */ }
+  renderBids();
+}
+
+function renderBids(){
+  const host=document.getElementById("bids");
+  const tb=host&&host.querySelector("tbody");
+  if(!tb) return;
+  tb.innerHTML="";
+  if(!BIDS.length){
+    tb.innerHTML='<tr><td colspan="5" class="muted">'+
+      (BIDS_READ?T("Nobody is bidding yet. Post one on the Buy tab and sellers will see it.")
+                :T("Cannot reach the order book right now. This is not an empty market."))+
+      "</td></tr>";
+    return;
+  }
+  for(const b of BIDS){
+    const perArc=Number(b.escrowed)/Number(b.wantArc);
+    const tr=document.createElement("tr");
+    tr.innerHTML='<td><b>'+(bidPremiumBps(b)/100).toFixed(2)+'%</b></td>'+
+      "<td>"+perArc.toFixed(3)+"\u00d7</td>"+
+      "<td>"+usd(b.wantArc)+"</td>"+
+      "<td><b>"+usd(b.escrowed)+"</b> USDC</td>";
+    const td=document.createElement("td");
+    td.style.textAlign="right";
+    const btn=document.createElement("button");
+    btn.className="btn ghost sm";
+    btn.textContent=T("Sell into this");
+    btn.onclick=()=>sellIntoBid(b);
+    td.appendChild(btn);
+    tr.appendChild(td);
+    tb.appendChild(tr);
+  }
+}
+
+/* Filling a bid needs Arc USDC already deposited, because the venue fee is
+   taken by the vault out of the delivery and a plain transfer would pay it to
+   nobody. A seller with nothing deposited is sent to the Sell tab rather than
+   into a transaction that would revert. */
+async function sellIntoBid(b){
+  if(!ACCT){connect();return}
+  const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
+  const ids=myDepositIds();
+  let vid=null, best=0n;
+  for(const id of ids){
+    const a=await vaultAvail(id);
+    if(a!==null&&a>best){ best=a; vid=id; }
+  }
+  if(vid===null||best<b.wantArc){
+    sayb('<span class="bad">'+T("Deposit Arc USDC on the Sell tab first, then this becomes one click.")+"</span>");
+    document.getElementById("t-sell").click();
+    return;
+  }
+  const q=numHex(await baseCall(BIDBOOK,SELB.quote+pad(hexNum(b.id))+pad(hexNum(b.wantArc))));
+  if(q===0n){ sayb('<span class="bad">'+T("That bid is no longer open.")+"</span>"); loadBids(); return; }
+  try{
+    const data=SELB.take+pad(hexNum(b.id))+pad(hexNum(b.wantArc))+pad(hexNum(vid))+pad(hexNum(q));
+    const h=await sendTx(BIDBOOK,data,BASE_HEX,null);
+    const rc=await waitReceipt(h,baseRead);
+    if(rc.status!=="0x1"){ sayb('<span class="bad">'+T("That bid was taken while you signed. Pick another.")+"</span>"); loadBids(); return; }
+    sayb('<span class="ok">'+T("Sold. Delivery lands on Arc within a minute.")+"</span>");
+    setTimeout(loadBids,4000);
+  }catch(e){ sayb('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+}
+
+function bidQuote(){
+  const q=document.getElementById("bidQuote"), btn=document.getElementById("b-bid");
+  if(!q||!btn) return null;
+  const amt=parseAmt(document.getElementById("bidAmt").value);
+  const prem=document.getElementById("bidPrem").value;
+  if(!amt||prem===""){ q.style.display="none"; btn.disabled=true; return null; }
+  const bps=BigInt(Math.round(parseFloat(prem)*100)||0);
+  if(bps<0n){ q.style.display="none"; btn.disabled=true; return null; }
+  if(amt<MIN_HIT){
+    q.style.display=""; q.innerHTML='<span class="bad">'+
+      T("The smallest bid is {0} Arc USDC.",usd(MIN_HIT))+"</span>";
+    btn.disabled=true; return null;
+  }
+  // Priced exactly as the ask side prices a fill, so the two tables are
+  // comparable and neither can be arbitraged against the other.
+  const proceeds=amt*(10000n+bps)/10000n;
+  const lock=proceeds+(proceeds*FEE_BPS+9999n)/10000n;
+  q.style.display="";
+  q.innerHTML=`<div><span>${T("You want")}</span><b>${usd(amt)} Arc USDC</b></div>
+    <div><span>${T("You lock now")}</span><b>${usd(lock)} USDC</b></div>
+    <div><span>${T("Per 1 Arc USDC")}</span><b>${(Number(lock)/Number(amt)).toFixed(3)}\u00d7</b></div>`;
+  btn.disabled=!ACCT;
+  btn.textContent=ACCT?T("Post bid"):T("Connect wallet");
+  return {amt,lock};
+}
+
+async function doBid(){
+  if(!ACCT){connect();return}
+  const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
+  const q=bidQuote(); if(!q) return;
+  const recip=document.getElementById("buyRecv").value.trim();
+  if(!/^0x[0-9a-fA-F]{40}$/.test(recip)){
+    sayb('<span class="bad">'+T("Enter the Arc address to receive.")+"</span>"); return;
+  }
+  try{
+    sayb(T("1 of 2: approving"));
+    await sendTx(USDC_BASE,SEL.approve+pad(BIDBOOK)+pad(hexNum(q.lock)),BASE_HEX,null);
+    sayb(T("2 of 2: posting the bid"));
+    const data=SELB.postBid+pad(recip)+pad(hexNum(q.amt))+pad(hexNum(q.lock))
+      +pad(hexNum(MIN_HIT))+pad(hexNum(0n));
+    const h=await sendTx(BIDBOOK,data,BASE_HEX,null);
+    const rc=await waitReceipt(h,baseRead);
+    if(rc.status!=="0x1"){ sayb('<span class="bad">'+T("The bid was rejected. Check the amount and price.")+"</span>"); return; }
+    sayb('<span class="ok">'+T("Bid posted. Cancel any time to take it back.")+"</span>");
+    setTimeout(loadBids,4000);
+  }catch(e){ sayb('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+}
+
 async function decodeOffer(id){
   const r=await baseCall(ESCROW,SEL.offers+pad(hexNum(id)));
   const f=(i)=>r.slice(2+64*i,2+64*(i+1));
@@ -1269,6 +1483,8 @@ window.__setTradingLang=function(l){
   try{ if(LAST_TRADES) renderTrades(LAST_TRADES,LAST_TIP); }catch(e){}
   try{ quote(); }catch(e){}
   try{ sellQuote(); }catch(e){}
+  try{ renderBids(); }catch(e){}
+  try{ bidQuote(); }catch(e){}
   try{ refreshBalances(); }catch(e){}
   try{ comingSoon(); }catch(e){}
   try{ if(document.getElementById("v-mine").style.display!=="none") renderMine(); }catch(e){}
@@ -1419,6 +1635,8 @@ async function doBuy(){
       ${T("Track it in <b>My orders</b>; if it cannot be delivered, the payment refunds itself.")}`);
     refreshBalances();
     loadBook();
+// Behind the ask book, which walks up to 400 offers on the same endpoint.
+setTimeout(loadBids,1500);
   }catch(e){ say('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
   finally{ BUSY=false; quote(); }   // quote() restores the button's enabled state
 }
@@ -1585,7 +1803,7 @@ async function renderMine(){
             b.disabled=true;
             const h=await sendTx(ESCROW,SEL.reduceOffer+pad(hexNum(o.id))+pad(hexNum(0)),BASE_HEX);
             await waitReceipt(h,baseRead);renderMine();loadBook();
-          }catch(e){b.disabled=false;say3('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
+          }catch(e){b.disabled=false;sayb('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
           cell.appendChild(b);
         }
         offRows.push(tr);
@@ -1639,7 +1857,7 @@ async function renderMine(){
     if(!fillsT.children.length) fillsT.innerHTML='<tr><td colspan="5" class="muted">'+T("None yet.")+'</td></tr>';
     if(!offT.children.length) offT.innerHTML='<tr><td colspan="4" class="muted">'+T("None yet.")+'</td></tr>';
   }catch(e){
-    if(live()) say3('<span class="bad">'+T("Could not load your orders (RPC). ")+esch(e&&e.message||e)+'</span>');
+    if(live()) sayb('<span class="bad">'+T("Could not load your orders (RPC). ")+esch(e&&e.message||e)+'</span>');
   }
 }
 function withdrawBtn(vaultId,vb){
@@ -1651,7 +1869,7 @@ function withdrawBtn(vaultId,vb){
     say3(rc.status==="0x1"?'<span class="ok">'+T("Vault balance withdrawn to your wallet.")+'</span>'
       :'<span class="bad">'+T("Withdraw reverted - the balance may have changed. Refreshing.")+'</span>');
     refreshBalances();renderMine();loadBook();
-  }catch(e){bw.disabled=false;say3('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
+  }catch(e){bw.disabled=false;sayb('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
   return bw;
 }
 
@@ -1739,11 +1957,17 @@ document.addEventListener("keydown",e=>{
   if(box.style.display==="flex") document.getElementById("wpick-x").click();
 });
 document.getElementById("b-connect").onclick=connect;
+for(const id of ["bidPrem","bidAmt"]){
+  const el=document.getElementById(id);
+  if(el) el.addEventListener("input",bidQuote);
+}
+if(document.getElementById("b-bid")) document.getElementById("b-bid").onclick=doBid;
 document.getElementById("build").textContent="["+OTC_BUILD+"]";
 quote(); sellQuote();          // set initial button states (incl. coming-soon lock)
 loadBook();
 computeStats();
 setInterval(loadBook,30000);
+setInterval(loadBids,30000+7000);   // offset so the two scans do not collide
 </script>
 </body>
 </html>
