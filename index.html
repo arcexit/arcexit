@@ -752,6 +752,8 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "bid":"삽니다",
+  "waiting for a seller":"판매자를 기다리는 중",
   "Filling {0} of {1}, which is what your vault holds.":"{1} 중 {0}만큼 채웁니다. 금고에 있는 만큼입니다.",
   "You hold {0}, and this bid takes no less than {1} at a time.":"보유 {0}인데 이 비드는 한 번에 {1} 미만은 받지 않습니다.",
   "Bid cancelled. Your USDC is back in your wallet.":"비드를 취소했습니다. USDC가 지갑으로 돌아왔습니다.",
@@ -853,6 +855,8 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "bid":"求购",
+  "waiting for a seller":"等待卖家",
   "Filling {0} of {1}, which is what your vault holds.":"在 {1} 中成交 {0}，也就是你金库里的数量。",
   "You hold {0}, and this bid takes no less than {1} at a time.":"你持有 {0}，而这笔求购一次最少接受 {1}。",
   "Bid cancelled. Your USDC is back in your wallet.":"求购已取消。USDC 已回到你的钱包。",
@@ -990,6 +994,9 @@ const SEL={ // escrow (Base)
   approve:"0x095ea7b3", allowance:"0xdd62ed3e", balanceOf:"0x70a08231", transfer:"0xa9059cbb"};
 const TOPIC_FILLED="0xad6d72f4dbd1686c3b48668fc7d6e58b72b8f597a601ce4d78ad4392158f506e";
 const TOPIC_SETTLED="0x702d6ba463a9d19f67d6b3ada754d6fffa92a52b279940f1d8b709b29bca6767";
+// TakeSettled(uint64) on the bid book. A trade there is as real as one on
+// the escrow and belongs on the same tape.
+const TOPIC_TAKE_SETTLED="0x88f6641fef5b9924014c9b4afc1c9a9bddf1546cb1046749d9815912d19b55ce";
 const TOPIC_DEPOSITED="0xee6b87136d2ce2885b4a10d9e1882eab0e4167f758605e6be14600aa1c163bde";
 
 // ---- tiny rpc/abi helpers --------------------------------------------------
@@ -1593,7 +1600,13 @@ async function keeperLiveness(){
     const tip=Number(numHex(await baseRead("eth_blockNumber",[])));
     // 24h of Base blocks is far past the 10,000-block getLogs cap, so walk it
     // in chunks; a single wide query throws and the canary never shows.
-    const logs=await getLogsChunked(ESCROW,[TOPIC_SETTLED],Math.max(0,tip-43200),tip);
+    let logs=await getLogsChunked(ESCROW,[TOPIC_SETTLED],Math.max(0,tip-43200),tip);
+    if(!logs.length){
+      // The keeper settles both books. Warning that nothing has settled while
+      // it is settling bids would drive off exactly the sellers we need.
+      try{ logs=await getLogsChunked(BIDBOOK,[TOPIC_TAKE_SETTLED],Math.max(0,tip-43200),tip); }
+      catch(e){}
+    }
     if(!logs.length){
       note.style.display="";
       note.innerHTML=T("No settlement has been observed in the last 24h. Buyers are always protected by the automatic refund; <b>sellers should test with a small deposit first</b>.");
@@ -1770,6 +1783,23 @@ async function computeStats(){
         const prem=f.amountArc>0n?Number(f.proceeds*10000n/f.amountArc-10000n):0;
         st.recent.unshift({a:f.amountArc.toString(),p:prem,b:Number(BigInt(L.blockNumber))});
       }
+      // Same window, the other book. A settled take is a trade at a price and
+      // belongs in the count, the volume and the tape like any other.
+      try{
+        const tl=await baseRead("eth_getLogs",[{address:BIDBOOK,
+          fromBlock:hexNum(b),toBlock:hexNum(e),topics:[TOPIC_TAKE_SETTLED]}]);
+        for(const L of tl){
+          const tid=Number(BigInt(L.topics[1]));
+          const r=await baseCall(BIDBOOK,SELB.takes+pad(hexNum(tid)));
+          const w=(i)=>BigInt("0x"+r.slice(2+64*i,2+64*(i+1)));
+          const amountArc=w(3), payment=w(4);
+          if(amountArc===0n) continue;
+          st.trades+=1; vol+=payment;
+          const prem=Number(payment*10000n/amountArc-10000n);
+          st.recent.unshift({a:amountArc.toString(),p:prem,b:Number(BigInt(L.blockNumber))});
+        }
+      }catch(e){ /* the escrow half still counts */ }
+      st.recent.sort((x,y)=>y.b-x.b);
       // Persist per chunk so an interrupted long catch-up keeps its progress.
       st.recent=st.recent.slice(0,12); st.cursor=e; st.vol=vol.toString();
       try{localStorage.setItem("otc-stats-v1",JSON.stringify(st));}catch(e2){}
@@ -2035,8 +2065,28 @@ async function renderMine(){
       offRows.push(tr);
     }
 
-    // my purchases
+    // my bids: locked money with no fill yet, which Orders never mentioned.
     const fillRows=[];
+    try{
+      const nb=Number(numHex(await baseCall(BIDBOOK,SELB.nextBidId)));
+      const bIds=[]; for(let i=nb-1;i>=1&&bIds.length<200;i--) bIds.push(i);
+      for(let i=0;i<bIds.length;i+=10){
+        const chunk=await Promise.all(bIds.slice(i,i+10).map(decodeBid));
+        if(!live()) return;
+        for(const bd of chunk){
+          if(bd.buyer.toLowerCase()!==me||!bd.open||bd.wantArc===0n) continue;
+          const tr=document.createElement("tr");
+          tr.innerHTML=`<td>${T("bid")} ${bd.id}</td><td>${usd(bd.wantArc)}</td>`+
+            `<td>${usd(bd.escrowed)}</td><td>${T("waiting for a seller")}</td><td></td>`;
+          const cb=document.createElement("button");
+          cb.className="btn small"; cb.textContent=T("Cancel");
+          cb.onclick=()=>cancelMyBid(bd,cb).then(()=>renderMine());
+          tr.lastElementChild.appendChild(cb);
+          fillRows.push(tr);
+        }
+      }
+    }catch(e){ /* the escrow purchases below still render */ }
+
     const n=Number(numHex(await baseCall(ESCROW,SEL.nextFillId)));
     const fIds=[]; for(let i=n-1;i>=1&&fIds.length<200;i--) fIds.push(i);
     for(let i=0;i<fIds.length;i+=10){
