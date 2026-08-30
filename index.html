@@ -147,54 +147,78 @@
      site opens at 48px and is legible in a second; this page opened at 14px
      grey and was not. Two lines, because the second line is the half of the
      business nobody else offers. */
-  h1.lede{margin:18px 0 0;font-family:var(--sans);font-size:var(--t7);line-height:1.06;
+  /* Deliberately smaller than the desk's numerals. The brief was to be
+     understood at a glance, and a glance lands on the instrument. */
+  h1.lede{margin:18px 0 0;font-family:var(--sans);font-size:26px;line-height:1.15;
     letter-spacing:-.025em;font-weight:700;color:var(--ink);
     text-wrap:balance}   /* the copy sets its own breaks with <br> */
   h1.lede b{font-weight:700;color:var(--sig)}
-  @media(max-width:640px){h1.lede{font-size:30px;max-width:none}}
+  @media(max-width:640px){h1.lede{font-size:21px}}
   .what{margin:11px 0 0;font-family:var(--sans);font-size:var(--t3);
     color:var(--muted);max-width:74ch;text-wrap:balance}
   .what b{color:var(--ink);font-weight:600}
 
-  /* The one question. Ruled top and bottom and flat on the ground like every
-     other block here; a printed form does not float, and this is the most
-     important line on the sheet, not a promotion of it. */
-  .ask{margin:20px 0 0;padding:15px 0 17px;
-    border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
-  .ask label{display:block;font-family:var(--sans);font-size:var(--t3);
-    font-weight:600;color:var(--ink);margin:0 0 10px;text-wrap:balance}
-  .askrow{display:flex;align-items:stretch;max-width:340px}
-  .askrow input.f{flex:1;min-width:0;border-radius:3px 0 0 3px;border-right:none}
-  .askunit{display:flex;align-items:center;padding:0 13px;font-family:var(--mono);
-    font-size:var(--t2);color:var(--muted);background:var(--sheet);
-    border:1px solid var(--rule2);border-left:none;border-radius:0 3px 3px 0}
-  .askout{font-family:var(--sans);font-size:var(--t2);color:var(--muted);
-    margin:11px 0 0;min-height:1.3em;max-width:62ch}
-  .askout b{color:var(--ink);font-weight:600}
-  .ask .btn.wide{margin-top:13px;max-width:340px}
+  /* THE DESK. A bureau de change window: two legs, the border ruled between
+     them, and one control on that rule that turns the desk around. The money
+     is set in the book's own monospaced face at a size nothing else on the
+     page reaches, with tabular figures and the chain as a code chip, because
+     a rate board is numerals and codes and almost no prose.
+
+     Deliberately not the reference: no glass, no gradient, no pill, no card,
+     no display grotesque. Their hero is a sentence at 48px over a soft navy
+     surface. Ours is the instrument. */
+  .desk{margin:20px 0 0;position:relative;background:var(--sheet);
+    border:1px solid var(--rule2);border-top:2px solid var(--ink)}
+  .leg{padding:16px 18px 22px}
+  .leg+.leg{border-top:1px solid var(--rule2)}
+  .leg.get{background:var(--sig-dim)}
+  .legtop{display:flex;align-items:center;justify-content:space-between;
+    gap:10px;margin:0 0 8px}
+  .legl{font-size:var(--t1);font-weight:600;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted)}
+  .chip{font-family:var(--mono);font-size:var(--t1);font-weight:700;
+    letter-spacing:.09em;color:var(--ink);background:var(--sink);
+    border:1px solid var(--rule2);padding:3px 8px;border-radius:2px}
+  .legnum{display:flex;align-items:baseline;gap:10px}
+  .legnum .slot{flex:1;min-width:0}
+  .legnum b,.legnum input{display:block;width:100%;font-family:var(--mono);
+    font-size:38px;line-height:1.05;font-weight:600;letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums;color:var(--ink)}
+  .legnum input{background:none;border:0;padding:0;outline:0;border-radius:0}
+  .legnum input::placeholder{color:var(--faint)}
+  .legnum input:focus{box-shadow:none}
+  .legnum b.dim{color:var(--faint)}
+  .legnum .cur{font-family:var(--mono);font-size:var(--t2);color:var(--muted);
+    letter-spacing:.06em}
+  /* On the rule, because crossing it is what the control does. Labelled with
+     the destination rather than an arrow alone: the other direction is the
+     half of this business nobody else offers and it must not be a guess. */
+  .flip{position:absolute;left:18px;top:50%;transform:translateY(-50%);
+    display:flex;align-items:center;gap:7px;padding:6px 11px;
+    background:var(--paper);border:1px solid var(--rule2);border-radius:3px;
+    color:var(--ink);cursor:pointer;z-index:1;font-family:var(--sans);
+    font-size:var(--t1);font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase}
+  .flip:hover{border-color:var(--ink)}
+  .flip svg{width:13px;height:13px;display:block;flex:none}
+  .deskrate{font-family:var(--sans);font-size:var(--t2);color:var(--muted);
+    margin:12px 0 0;min-height:1.3em;max-width:62ch}
+  .deskrate b{color:var(--ink);font-weight:600}
   .askalt{font-family:var(--sans);font-size:var(--t2);color:var(--muted);margin:12px 0 0}
+  @media(max-width:470px){
+    .legnum b,.legnum input{font-size:30px}
+    .leg{padding:14px 14px 20px}
+    .flip{left:14px}
+  }
   /* Negative margin cancels the padding, so the tap target grows to 26px
      without shifting the sentence it sits in. */
   .linkish{background:none;border:0;padding:4px 2px;margin:-4px -2px;
     font:inherit;color:var(--sig);display:inline-block;
     text-decoration:underline;text-underline-offset:2px;cursor:pointer}
   .linkish:hover{color:var(--ink)}
-  @media(max-width:470px){.askrow,.ask .btn.wide{max-width:none}}
 
   /* the strip. label over figure, divided by hairlines, flat on the ground.
      no card, no radius, no shadow: a printed form does not float. */
-  /* The price is a headline, not a cell. It used to span two columns inside
-     the grid, which made its row twice as tall as the rest and left the
-     neighbours' vertical rules running down the side of the wrapped unit line. */
-  .price{margin:18px 0 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-  .price .lbl{width:100%;margin:0 0 4px;font-size:var(--t1);font-weight:600;
-    letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-  .price b{font-size:var(--t6);line-height:1;letter-spacing:-.02em;
-    color:var(--sig);font-weight:600}
-  @media(max-width:640px){.price b{font-size:28px}}
-  .price b.flat{color:var(--faint)}
-  .price em{font-style:normal;font-family:var(--sans);font-size:var(--t2);
-    color:var(--muted)}
   /* Six equal cells. The dividers are drawn by a 1px gap over a ruled ground,
      so they stay correct however the grid wraps instead of depending on which
      cell happens to be last in a row. */
@@ -439,32 +463,36 @@
   </span>
 </header>
 
-<h1 class="lede" data-h="m_lede">Buy Arc USDC.<br><b>Or sell it for what it is worth.</b></h1>
+<h1 class="lede" data-h="m_lede">USDC across the Arc border, <b>both ways</b>.</h1>
 
 <p class="what prose" data-h="m_what">Sellers set their own price. Pay on Base,
   <b>receive on Arc in under a minute</b>. If it does not arrive, you are
   refunded automatically.</p>
 
-<div class="price">
-  <span class="lbl" id="tape-lbl" data-t="m_last">Last</span>
-  <b class="flat" id="tape-price">&#8230;</b>
-  <em id="tape-unit">Base USDC per 1 Arc USDC, last trade</em>
-</div>
-
-<div class="ask">
-  <label for="askAmt" data-t="m_askq">How much Arc USDC do you want?</label>
-  <div class="askrow">
-    <input id="askAmt" name="ask-amount" class="f big" inputmode="decimal"
-      placeholder="100" autocomplete="off" spellcheck="false" aria-describedby="askOut">
-    <span class="askunit">USDC</span>
+<div class="desk">
+  <div class="leg">
+    <div class="legtop"><span class="legl" id="lbl1">You pay</span>
+      <span class="chip" id="chip1">BASE</span></div>
+    <div class="legnum"><span class="slot" id="slot1"><b id="deskOut" class="dim">0.00</b></span>
+      <span class="cur">USDC</span></div>
   </div>
-  <div class="askout" id="askOut" role="status" aria-live="polite"></div>
-  <button class="btn wide" id="b-ask" disabled>Enter an amount</button>
-  <p class="askalt"><span data-t="m_askhold">Holding Arc USDC already?</span>
-    <button type="button" class="linkish" id="b-asksell" data-t="m_asksell">Sell it here</button></p>
-  <p class="askalt" style="margin-top:5px"><span data-t="m_asknew">First time here?</span>
-    <a class="linkish" href="/arc-usdc" data-t="m_asknewb">What Arc USDC costs, and how to get in and out</a></p>
+  <div class="leg get">
+    <div class="legtop"><span class="legl" id="lbl2">You get</span>
+      <span class="chip" id="chip2">ARC</span></div>
+    <div class="legnum"><span class="slot" id="slot2"><input id="askAmt" name="ask-amount"
+      inputmode="decimal" placeholder="100" autocomplete="off" spellcheck="false"
+      aria-describedby="deskRate"></span><span class="cur">USDC</span></div>
+  </div>
+  <button type="button" class="flip" id="b-flip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+      stroke-linecap="square" aria-hidden="true"><path d="M8 4v13M8 17l-4-4M16 20V7M16 7l4 4"/></svg>
+    <span id="flipLbl">Sell instead</span>
+  </button>
 </div>
+<p class="deskrate" id="deskRate" role="status" aria-live="polite"></p>
+<button class="btn wide" id="b-ask" disabled>Enter an amount</button>
+<p class="askalt" style="margin-top:11px"><span data-t="m_asknew">First time here?</span>
+  <a class="linkish" href="/arc-usdc" data-t="m_asknewb">What Arc USDC costs, and how to get in and out</a></p>
 
 <div class="note" id="keeperNote" style="display:none"></div>
 
@@ -670,7 +698,7 @@
 var M_I18N={
  en:{},
  ko:{
-  m_lede:"Arc USDC를 사거나,<br><b>제값 받고 팔거나.</b>",
+  m_lede:"Arc 국경 너머로 USDC를, <b>양방향으로</b>.",
   m_guide:"Arc USDC란",
   m_asknew:"처음 오셨나요?",
   m_asknewb:"Arc USDC가 얼마이고 어떻게 들어가고 나오는지",
@@ -712,7 +740,7 @@ var M_I18N={
   m_exit:"지금 바로 빼야 합니까? <b>브릿지를 쓰십시오.</b> 수수료 2%."
  },
  zh:{
-  m_lede:"买入 Arc USDC，<br><b>或按它真正的价值卖出。</b>",
+  m_lede:"USDC 跨越 Arc 边境，<b>双向通行</b>。",
   m_guide:"什么是 Arc USDC",
   m_asknew:"第一次来?",
   m_asknewb:"Arc USDC 价格几何，如何进出",
@@ -832,6 +860,18 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "You pay":"내는 금액",
+  "You get":"받는 금액",
+  "Sell instead":"팔기로 전환",
+  "You sell":"파는 금액",
+  "You receive":"받는 금액",
+  "Buy instead":"사기로 전환",
+  "Reading the bids":"삽니다 호가 읽는 중",
+  "<b>{0}x</b> all in, fee included. Lands on Arc in under a minute.":"수수료까지 포함해 <b>{0}배</b>입니다. Arc로 1분 안에 들어옵니다.",
+  "No bid that size right now. Name your price and buyers come to you.":"그만한 삽니다 호가가 지금 없습니다. 가격을 걸어두면 구매자가 찾아옵니다.",
+  "Best live bid pays <b>{0}x</b>. Bridging out pays 1.000x.":"지금 가장 높은 삽니다 호가가 <b>{0}배</b>를 줍니다. 브릿지로 나가면 1.000배입니다.",
+  "Sell into this bid":"이 호가에 팔기",
+  "List it for sale":"판매 등록하기",
   "Connection cancelled.":"연결을 취소했습니다.",
   "Connecting":"연결 중",
   "Cheapest now":"지금 최저가",
@@ -946,6 +986,18 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "You pay":"你支付",
+  "You get":"你收到",
+  "Sell instead":"切换为卖出",
+  "You sell":"你卖出",
+  "You receive":"你收到",
+  "Buy instead":"切换为买入",
+  "Reading the bids":"正在读取求购单",
+  "<b>{0}x</b> all in, fee included. Lands on Arc in under a minute.":"含手续费共 <b>{0}倍</b>。一分钟内到达 Arc。",
+  "No bid that size right now. Name your price and buyers come to you.":"目前没有这么大的求购单。标出你的价格，买家会来找你。",
+  "Best live bid pays <b>{0}x</b>. Bridging out pays 1.000x.":"当前最高求购单出价 <b>{0}倍</b>。走桥退出只有 1.000 倍。",
+  "Sell into this bid":"卖给这张求购单",
+  "List it for sale":"挂单出售",
   "Connection cancelled.":"已取消连接。",
   "Connecting":"连接中",
   "Cheapest now":"当前最低价",
@@ -1437,6 +1489,8 @@ function renderBids(){
     tr.appendChild(td);
     tb.appendChild(tr);
   }
+  // The desk's sell leg is quoted off these bids, so it moves when they do.
+  try{ deskSeed(); askQuote(); }catch(e){}
 }
 
 /* Filling a bid needs Arc USDC already deposited, because the venue fee is
@@ -1701,8 +1755,8 @@ function renderBook(){
                : T("Cannot reach the order book right now. This is not an empty market."))+'</td></tr>';
   else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
   quote();
-  askQuote();      // the hero verb depends on what the book can fill
-  paintTape();     // and so does the headline price
+  deskSeed();      // the opening amount depends on what the book can fill
+  askQuote();      // and so does the hero verb
 }
 async function keeperLiveness(){
   const note=document.getElementById("keeperNote");
@@ -1800,7 +1854,7 @@ window.__setTradingLang=function(l){
   try{ document.getElementById("b-connect").textContent=
          ACCT?short(ACCT):T("Connect wallet"); }catch(e){}
   try{ if(LAST_TRADES) renderTrades(LAST_TRADES,LAST_TIP); }catch(e){}
-  try{ paintTape(); }catch(e){}   // data-t just overwrote the label
+  try{ deskPaint(); }catch(e){}   // labels and chips are set from T()
   try{ quote(); }catch(e){}
   try{ sellQuote(); }catch(e){}
   try{ renderBids(); }catch(e){}
@@ -1832,53 +1886,12 @@ let LAST_TRADES=null,LAST_TIP=0,LAST_BOOK_AGE="";
    a language switch can restate it without another round trip. */
 function setBookAge(k){ LAST_BOOK_AGE=k;
   document.getElementById("bookAge").textContent=T(k); }
-function ago(b,tip){const m=Math.max(0,Math.round((tip-b)*2/60));   // Base ~2s blocks
-  return m<1?T("just now"):(m<60?T("{0}m ago",m)
-    :(m<2880?T("{0}h ago",Math.floor(m/60)):T("{0}d ago",Math.floor(m/1440))));}
-// The headline price. It depends on BOTH the trade list and the book, so it is
-// its own function called from renderTrades and from renderBook. It used to
-// live inside renderTrades, which runs off cached stats and finishes before
-// loadBook() does, so it read an empty BOOK and printed "no offers" while the
-// strip two lines below already showed one. Nothing repainted it.
-function paintTape(){
-  const tp=document.getElementById("tape-price"),tu=document.getElementById("tape-unit"),
-        tl=document.getElementById("tape-lbl");
-  if(!tp) return;                    // the bridge page has no tape
-  // The label belongs to the figure. Quoting the book under a heading that
-  // says "Last" presents an ask as a settled price.
-  const label=(k)=>{ if(tl) tl.textContent=T(k); };
-  const list=LAST_TRADES||[], t=list[0];
-  // A handful of prints is not a price. Below this many the headline shows what
-  // the book is asking now rather than what somebody once paid, because a thin
-  // tape can be produced by one person trading with themselves and a live offer
-  // cannot.
-  const ENOUGH=5;
-  const clear=()=>{tp.classList.remove("flat");
-    if(tp.parentElement) tp.parentElement.classList.remove("flat");};
-  if(list.length<ENOUGH){
-    const cheapest=BOOK.length?BOOK.reduce((m,o)=>o.premiumBps<m.premiumBps?o:m):null;
-    if(cheapest){
-      tp.textContent=((10000+cheapest.premiumBps)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
-      clear(); label("Cheapest now");
-      if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, cheapest offer on the book");
-    }else if(BOOK_READ){
-      tp.textContent="-";            // the strip uses a plain hyphen for empty
-      label("Cheapest now");
-      if(tu) tu.textContent=T("No offers on the book, so there is no price to quote.");
-    }
-    // Book not read yet: leave the placeholder rather than claim an empty market.
-    return;
-  }
-  tp.textContent=((10000+t.p)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
-  clear(); label("Last");
-  if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, last trade ")+ago(t.b,LAST_TIP);
-}
 function renderTrades(list,tip){
   LAST_TRADES=list; LAST_TIP=tip;
   const box=document.getElementById("trades");
   // The tape is not part of the rows: with no prints at all it still has the
   // book to quote, and hiding the rows must not skip it.
-  if(!list||!list.length){box.style.display="none";paintTape();return}
+  if(!list||!list.length){box.style.display="none";return}
   box.style.display="";
   const ago=(b)=>{const m=Math.max(0,Math.round((tip-b)*2/60));   // Base ~2s blocks
     return m<1?T("just now"):(m<60?T("{0}m ago",m)
@@ -1887,9 +1900,6 @@ function renderTrades(list,tip){
     '<div class="tr"><span>'+usd(BigInt(t.a))+' USDC <span class="tiny">@ '
       +(t.p/100).toFixed(2)+'%</span></span><span class="tiny">'+ago(t.b)+'</span></div>'
   ).join("");
-  // The headline and these rows must never quote two different prices, so both
-  // come from paintTape and the same all-in formula the board's column uses.
-  paintTape();
 }
 async function computeStats(){
   if(comingSoon()) return;
@@ -2366,39 +2376,137 @@ function askBest(amt){
 }
 function askScroll(el){
   if(!el) return;
-  try{ el.scrollIntoView({behavior:"smooth",block:"center"}); }
-  catch(e){ try{ el.scrollIntoView(); }catch(e2){} }
+  // Deferred, because the caller has just shown one panel and hidden another.
+  // setTimeout rather than requestAnimationFrame: frames are not produced for a
+  // hidden tab, so rAF here left anyone who switched away mid-action at the top
+  // of the page with the panel they asked for somewhere below.
+  setTimeout(()=>{
+    try{ el.scrollIntoView({behavior:"smooth",block:"center"}); }
+    catch(e){ try{ el.scrollIntoView(); }catch(e2){} }
+  },0);
+}
+let DESKMODE="buy";
+// The best bid that can actually take this size. minTake is the bid's own
+// floor; taking the whole thing bypasses it, the same rump rule the offer
+// side uses.
+function askBestBid(amt){
+  return BIDS.filter(b=>amt<=b.wantArc&&(amt>=b.minTake||amt===b.wantArc))
+    .sort((a,b)=>Number(b.escrowed)/Number(b.wantArc)-Number(a.escrowed)/Number(a.wantArc))[0]||null;
+}
+// Paint the desk for the current direction. The editable leg is whichever one
+// is denominated in Arc USDC, because that is the amount both flows are
+// written in, so the input moves rather than being duplicated.
+function deskPaint(){
+  const buy=DESKMODE==="buy";
+  const g=(id)=>document.getElementById(id);
+  if(!g("slot1")) return;
+  // Plain literals inside T, never a ternary. The build gate finds
+  // translatable text by scanning for a quoted literal directly inside a T
+  // call, so a string it would have to evaluate an expression to reach is
+  // invisible to it, and five labels shipped in English on both translations
+  // while the build reported all of them translated.
+  g("lbl1").textContent=buy?T("You pay"):T("You sell");
+  g("lbl2").textContent=buy?T("You get"):T("You receive");
+  g("chip1").textContent=buy?"BASE":"ARC";
+  g("chip2").textContent=buy?"ARC":"BASE";
+  const flipTo=buy?T("Sell instead"):T("Buy instead");
+  g("flipLbl").textContent=flipTo;
+  g("b-flip").setAttribute("aria-label",flipTo);
+  const inp=g("askAmt"), out=g("deskOut"), s1=g("slot1"), s2=g("slot2");
+  const wantIn=buy?s2:s1, wantOut=buy?s1:s2;
+  if(inp.parentNode!==wantIn){ wantIn.appendChild(inp); wantOut.appendChild(out); }
+  inp.setAttribute("placeholder","100");
+  deskSeed();
+  askQuote();
+}
+// Plain decimal for an input box. usd() groups thousands and parseAmt()
+// rejects the commas it inserts, so the two must not share a formatter.
+function plainAmt(v){
+  const a=v<0n?-v:v;
+  const frac=(a%1000000n).toString().padStart(6,"0").replace(/0+$/,"");
+  return (a/1000000n).toString()+(frac?"."+frac:"");
+}
+// Open holding something the book can actually do. A round 100 against a
+// five dollar book made the first impression "we cannot fill that", which is
+// the worst true thing available to lead with.
+function deskSeed(){
+  const inp=document.getElementById("askAmt");
+  if(!inp||inp.dataset.touched) return;
+  let v="100";
+  if(DESKMODE==="buy"&&BOOK_READ&&BOOK.length){
+    const cap=BOOK.reduce((m,o)=>(o.eff&&o.eff>m)?o.eff:m,0n);
+    if(cap>0n&&cap<100000000n&&askBest(cap)) v=plainAmt(cap);
+  }else if(DESKMODE==="sell"&&BIDS_READ&&BIDS.length){
+    const cap=BIDS.reduce((m,b)=>b.wantArc>m?b.wantArc:m,0n);
+    if(cap>0n&&cap<100000000n&&askBestBid(cap)) v=plainAmt(cap);
+  }
+  if(inp.value!==v) inp.value=v;
+}
+function deskFlip(){
+  DESKMODE=DESKMODE==="buy"?"sell":"buy";
+  deskPaint();
+  document.getElementById("askAmt").focus();
 }
 function askQuote(){
-  const out=document.getElementById("askOut"), btn=document.getElementById("b-ask");
-  if(!out||!btn) return;
+  const out=document.getElementById("deskOut"), rate=document.getElementById("deskRate"),
+        btn=document.getElementById("b-ask");
+  if(!out||!btn||!rate) return;
   const amt=askAmt();
-  if(!amt){
-    out.textContent=""; btn.disabled=true; btn.onclick=null;
-    btn.textContent=T("Enter an amount"); return;
-  }
-  if(!BOOK_READ){
-    out.textContent=T("Reading the order book"); btn.disabled=true; btn.onclick=null;
-    btn.textContent=T("Enter an amount"); return;
-  }
-  const o=askBest(amt);
-  btn.disabled=false;
-  if(o){
+  const show=(txt,dim)=>{ out.textContent=txt; out.classList.toggle("dim",!!dim); };
+  const idle=(msg)=>{ show("0.00",true); rate.textContent=msg||"";
+    btn.disabled=true; btn.onclick=null; btn.textContent=T("Enter an amount"); };
+  if(!amt) return idle("");
+  if(DESKMODE==="buy"){
+    if(!BOOK_READ) return idle(T("Reading the order book"));
+    const o=askBest(amt);
+    if(!o){
+      // Never a dead end. The same answer becomes a funded bid, which is the
+      // one thing on this page that gives a seller a reason to arrive.
+      show("0.00",true);
+      rate.textContent=BOOK.length
+        ? T("No single offer is that big right now. Set your price and the first seller who can fill it does.")
+        : T("Nobody is selling right now. Set your price and your money waits on chain until a seller takes it.");
+      btn.disabled=false; btn.textContent=T("Set my price"); btn.onclick=()=>askGoBid();
+      return;
+    }
     const proceeds=amt*(10000n+BigInt(o.premiumBps))/10000n;
     const paid=proceeds+(proceeds*FEE_BPS+9999n)/10000n;
-    out.innerHTML=T("You pay <b>{0} USDC</b> on Base and receive <b>{1}</b> on Arc, in under a minute.",
-                    usd(paid),usd(amt));
-    btn.textContent=T("Buy now");
-    btn.onclick=()=>askGoBuy(o);
-  }else{
-    // Never a dead end. The same answer becomes a funded bid, which is the one
-    // thing on this page that gives a seller a reason to arrive.
-    out.textContent=BOOK.length
-      ? T("No single offer is that big right now. Set your price and the first seller who can fill it does.")
-      : T("Nobody is selling right now. Set your price and your money waits on chain until a seller takes it.");
-    btn.textContent=T("Set my price");
-    btn.onclick=()=>askGoBid();
+    show(usd(paid),false);
+    rate.innerHTML=T("<b>{0}x</b> all in, fee included. Lands on Arc in under a minute.",
+                     (Number(paid)/Number(amt)).toFixed(3));
+    btn.disabled=false; btn.textContent=T("Buy now"); btn.onclick=()=>askGoBuy(o);
+    return;
   }
+  if(!BIDS_READ) return idle(T("Reading the bids"));
+  const bd=askBestBid(amt);
+  if(!bd){
+    show("0.00",true);
+    rate.textContent=T("No bid that size right now. Name your price and buyers come to you.");
+    btn.disabled=false; btn.textContent=T("List it for sale"); btn.onclick=()=>askGoSell(null);
+    return;
+  }
+  const pay=bd.escrowed*amt/bd.wantArc;
+  show(usd(pay),false);
+  // The whole argument of this business, as two numbers rather than an essay:
+  // a bridge returns exactly what you put in, a buyer pays more than that.
+  rate.innerHTML=T("Best live bid pays <b>{0}x</b>. Bridging out pays 1.000x.",
+                   (Number(pay)/Number(amt)).toFixed(3));
+  btn.disabled=false; btn.textContent=T("Sell into this bid"); btn.onclick=()=>askGoSell(bd);
+}
+// Selling means depositing first, so the desk hands over to the sell panel
+// rather than pretending a stranger already has inventory in the vault. When
+// a bid is live its premium is copied across, so the listing that results can
+// be filled the moment it is posted.
+function askGoSell(bd){
+  const a=document.getElementById("sellAmt");
+  if(a) a.value=askRaw();
+  if(bd){
+    const p=document.getElementById("sellPrem");
+    if(p) p.value=(bidPremiumBps(bd)/100).toFixed(2);
+  }
+  showTab("sell");
+  try{ sellQuote(); }catch(e){}
+  askScroll(document.getElementById("v-sell"));
 }
 function askGoBuy(o){
   const f=document.getElementById("buyAmt");
@@ -2418,13 +2526,25 @@ function askGoBid(){
   askScroll(f.closest(".bidbox")||f);
   document.getElementById("bidPrem").focus();
 }
-document.getElementById("askAmt").addEventListener("input",askQuote);
+document.getElementById("askAmt").addEventListener("input",function(){
+  this.dataset.touched="1";   // never re-seed over someone who cleared it
+  askQuote();
+});
 document.getElementById("askAmt").addEventListener("keydown",e=>{
   if(e.key==="Enter"){ const b=document.getElementById("b-ask"); if(!b.disabled) b.click(); }
 });
-document.getElementById("b-asksell").onclick=()=>{
-  showTab("sell"); askScroll(document.getElementById("v-sell"));
-};
+document.getElementById("b-flip").onclick=deskFlip;
+// The number fills its row, so the row is what a thumb aims at, not the 32px
+// input inside it. Clicking anywhere on the editable leg focuses the field.
+for(const id of ["slot1","slot2"]){
+  const el=document.getElementById(id);
+  if(!el||!el.parentElement) continue;
+  el.parentElement.parentElement.addEventListener("click",e=>{
+    if(e.target.closest("button")) return;      // the flip sits on this leg too
+    const inp=document.getElementById("askAmt");
+    if(inp&&el.contains(inp)) inp.focus();
+  });
+}
 
 // ---- tabs / boot -----------------------------------------------------------
 const tabs={buy:"v-buy",sell:"v-sell",mine:"v-mine"};
@@ -2454,7 +2574,7 @@ for(const id of ["bidPrem","bidAmt"]){
 }
 if(document.getElementById("b-bid")) document.getElementById("b-bid").onclick=doBid;
 document.getElementById("build").textContent="["+OTC_BUILD+"]";
-quote(); sellQuote(); askQuote();   // set initial button states (incl. coming-soon lock)
+quote(); sellQuote(); deskPaint();  // set initial button states (incl. coming-soon lock)
 loadBook();
 // Staggered behind the ask book: both read the same public endpoint, and a
 // simultaneous start is what the bid side kept losing.
