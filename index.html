@@ -121,6 +121,12 @@
     header .btn{padding:9px 12px;font-size:var(--t2)}
     #theme-toggle{padding:6px 9px;min-width:30px;font-size:14px}
     footer a{padding:6px 0;display:inline-block}
+    /* Under 24px is not a target a finger can hit. The acceptance line's
+       links were 12px tall and the Arc-tools row 18px. */
+    .accept a,.tools a{display:inline-block;padding:6px 0}
+    .lang button{padding:7px 9px}
+    .btn.sm{padding:6px 10px}
+    .tiny{display:inline-block;padding:3px 0}
   }
 
   .what{margin:11px 0 0;font-family:var(--sans);font-size:var(--t3);
