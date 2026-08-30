@@ -1139,7 +1139,15 @@ async function loadBids(){
     BIDS=out.filter(b=>b.open&&b.wantArc>0n&&(b.expiry===0||b.expiry>now))
             .sort((a,b)=>bidPremiumBps(b)-bidPremiumBps(a));
     BIDS_READ=true;
-  }catch(e){ /* leave the last good book; renderBids says so */ }
+  }catch(e){
+    // Transient: the ask book's scan and this one share one public endpoint.
+    // Try again shortly rather than sitting on "unreadable" until the next
+    // refresh. Never claim the market is empty; renderBids says which it is.
+    if(!BIDS_READ&&!loadBids._retried){
+      loadBids._retried=true;
+      setTimeout(()=>{ loadBids._retried=false; loadBids(); },5000);
+    }
+  }
   renderBids();
 }
 
