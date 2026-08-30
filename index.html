@@ -171,8 +171,11 @@
   #book th:nth-child(2),#bids th:nth-child(2){width:22%}
   #book th:nth-child(3),#bids th:nth-child(3){width:22%}
   #book th:nth-child(4){width:34%}
-  #bids th:nth-child(4){width:22%}
-  #bids th:nth-child(5){width:12%}
+  #bids th:nth-child(4){width:19%}
+  #bids th:nth-child(5){width:15%}
+  /* The label is two words and the row should not grow to hold it. */
+  #bids td:last-child{text-align:right;white-space:nowrap}
+  #bids td:last-child .btn{white-space:nowrap}
   th{text-align:left;color:var(--muted);font-weight:600;font-size:var(--t1);
     letter-spacing:.12em;text-transform:uppercase;padding:9px 16px 8px;
     border-bottom:1px solid var(--ink);white-space:nowrap;background:var(--sink)}
