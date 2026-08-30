@@ -171,8 +171,8 @@
   #book th:nth-child(2),#bids th:nth-child(2){width:22%}
   #book th:nth-child(3),#bids th:nth-child(3){width:22%}
   #book th:nth-child(4){width:34%}
-  #bids th:nth-child(4){width:19%}
-  #bids th:nth-child(5){width:15%}
+  #bids th:nth-child(4){width:22%}
+  #bids th:nth-child(5){width:12%}
   /* The label is two words and the row should not grow to hold it. */
   #bids td:last-child{text-align:right;white-space:nowrap}
   #bids td:last-child .btn{white-space:nowrap}
@@ -742,7 +742,7 @@ const TS={
   "Nobody is bidding yet. Post one on the Buy tab and sellers will see it.":"아직 삽니다가 없습니다. 구매 탭에서 하나 걸면 판매자들이 봅니다.",
   "Per 1 Arc USDC":"Arc USDC 1개당",
   "Post bid":"삽니다 걸기",
-  "Sell into this":"여기에 팔기",
+  "Sell":"팔기",
   "Sold. Delivery lands on Arc within a minute.":"팔렸습니다. 1분 안에 Arc로 배달됩니다.",
   "That bid is no longer open.":"그 삽니다는 이미 닫혔습니다.",
   "That bid was taken while you signed. Pick another.":"서명하는 동안 다른 사람이 가져갔습니다. 다른 것을 고르십시오.",
@@ -836,7 +836,7 @@ const TS={
   "Nobody is bidding yet. Post one on the Buy tab and sellers will see it.":"还没有人求购。到买入页发一个，卖家就能看到。",
   "Per 1 Arc USDC":"每 1 个 Arc USDC",
   "Post bid":"发布求购",
-  "Sell into this":"卖给它",
+  "Sell":"卖出",
   "Sold. Delivery lands on Arc within a minute.":"已售出。一分钟内在 Arc 上交付。",
   "That bid is no longer open.":"该求购已经关闭。",
   "That bid was taken while you signed. Pick another.":"在你签名时已被别人成交。请另选一个。",
@@ -1271,7 +1271,7 @@ function renderBids(){
     td.style.textAlign="right";
     const btn=document.createElement("button");
     btn.className="btn ghost sm";
-    btn.textContent=T("Sell into this");
+    btn.textContent=T("Sell");
     btn.onclick=()=>sellIntoBid(b);
     td.appendChild(btn);
     tr.appendChild(td);
