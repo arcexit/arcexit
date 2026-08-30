@@ -1643,8 +1643,7 @@ async function doBuy(){
       ${T("Track it in <b>My orders</b>; if it cannot be delivered, the payment refunds itself.")}`);
     refreshBalances();
     loadBook();
-// Behind the ask book, which walks up to 400 offers on the same endpoint.
-setTimeout(loadBids,1500);
+    loadBids();
   }catch(e){ say('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
   finally{ BUSY=false; quote(); }   // quote() restores the button's enabled state
 }
@@ -1973,6 +1972,9 @@ if(document.getElementById("b-bid")) document.getElementById("b-bid").onclick=do
 document.getElementById("build").textContent="["+OTC_BUILD+"]";
 quote(); sellQuote();          // set initial button states (incl. coming-soon lock)
 loadBook();
+// Staggered behind the ask book: both read the same public endpoint, and a
+// simultaneous start is what the bid side kept losing.
+setTimeout(loadBids,1500);
 computeStats();
 setInterval(loadBook,30000);
 setInterval(loadBids,30000+7000);   // offset so the two scans do not collide
