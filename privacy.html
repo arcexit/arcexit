@@ -122,7 +122,8 @@
 <p class='sub'>2026-08-30 no accounts, no KYC, no analytics</p>
 <div class='lead'><p>No accounts, no KYC, no analytics, no cookies, no server-side database. We do not ask for your name, ID, or email, and we have no way to associate a wallet with a person.</p></div>
 <h2>1. What we collect</h2>
-<p><b>Nothing on our side.</b> The pages are static files with no backend. There is no sign-up, no form, no tracking pixel, and no analytics script. We cannot see who you are, and we do not try.</p>
+<p><b>Nothing on our side.</b> The pages are static files with no backend. There is no sign-up, no form and no tracking pixel, and nothing we wrote reports on you. We cannot see who you are, and we do not try.</p>
+<p>One correction worth making, because you can see it in a browser console: our host, Cloudflare, injects its own analytics beacon into the page on the way out. The site's security headers block it from loading, so it never runs and never reports anything, and it is absent from what a plain download of the page contains. We did not put it there and we do not read it, but saying flatly that no analytics script exists would not survive anyone checking.</p>
 <h2>2. The watcher</h2>
 <p>The OTC service includes an automated watcher that we run, because someone has to observe payments and execute deliveries. It reads <b>public blockchain data only</b>: offers, payments, and deliveries, the same things a block explorer shows anyone. Nothing reaches it from your browser, it sets no cookie, and it stores no personal data. It can tell no more about who you are than any other observer of a public chain.</p>
 <h2>3. What stays in your browser</h2>
@@ -142,7 +143,8 @@
 <p class='sub'>2026-08-30 계정 없음, 신원확인 없음, 분석도구 없음</p>
 <div class='lead'><p>계정도 신원확인도 분석도구도 쿠키도 서버 데이터베이스도 없습니다. 이름, 신분증, 이메일을 묻지 않으며, 지갑과 사람을 연결할 방법 자체가 없습니다.</p></div>
 <h2>1. 저희가 수집하는 것</h2>
-<p><b>저희 쪽에는 없습니다.</b> 페이지는 백엔드 없는 정적 파일입니다. 가입도 양식도 추적 픽셀도 분석 스크립트도 없습니다. 이용자가 누구인지 볼 수 없고, 보려 하지도 않습니다.</p>
+<p><b>저희 쪽에는 없습니다.</b> 페이지는 백엔드 없는 정적 파일입니다. 가입도 양식도 추적 픽셀도 없고, 저희가 심은 것 중에 이용자를 보고하는 것은 없습니다. 이용자가 누구인지 볼 수 없고, 보려 하지도 않습니다.</p>
+<p>브라우저 콘솔을 열면 보이기 때문에 한 가지 정정합니다. 호스팅 업체인 Cloudflare가 페이지를 내보낼 때 자체 분석 스크립트를 끼워 넣습니다. 사이트 보안 헤더가 그 스크립트의 로딩을 막기 때문에 실행되지 않고 아무것도 보고하지 않으며, 페이지를 그대로 내려받으면 거기에는 없습니다. 저희가 넣은 것이 아니고 읽지도 않지만, 분석 스크립트가 아예 없다고만 적으면 확인해 본 사람에게는 틀린 말이 됩니다.</p>
 <h2>2. 감시 프로그램</h2>
 <p>OTC 서비스에는 저희가 돌리는 자동 감시 프로그램이 있습니다. 결제를 확인하고 배달을 실행할 주체가 필요하기 때문입니다. 이 프로그램은 <b>공개된 블록체인 데이터만</b> 읽습니다. 매물, 결제, 배달이며 블록 탐색기가 누구에게나 보여 주는 것과 같습니다. 브라우저에서 이쪽으로 오는 정보는 없고, 쿠키를 심지 않으며, 개인정보를 저장하지 않습니다. 공개 체인을 보는 다른 누구보다 이용자에 대해 더 알 수 있는 것이 없습니다.</p>
 <h2>3. 브라우저에 남는 것</h2>
@@ -162,7 +164,8 @@
 <p class='sub'>2026-08-30 无账户、无 KYC、无分析工具</p>
 <div class='lead'><p>没有账户，没有 KYC，没有分析工具，没有 cookie，没有服务端数据库。我们不索取你的姓名、证件或邮箱，也没有任何办法把一个钱包和一个人对应起来。</p></div>
 <h2>1. 我们收集什么</h2>
-<p><b>我们这边什么都没有。</b>页面是没有后端的静态文件。没有注册，没有表单，没有跟踪像素，没有分析脚本。我们看不到你是谁，也不打算去看。</p>
+<p><b>我们这边什么都没有。</b>页面是没有后端的静态文件。没有注册，没有表单，没有跟踪像素，我们写的东西里没有任何会汇报你的部分。我们看不到你是谁，也不打算去看。</p>
+<p>有一点需要更正，因为你在浏览器控制台里能看到：我们的托管方 Cloudflare 会在页面发出时注入它自己的分析脚本。站点的安全响应头会阻止它加载，所以它从不运行、也从不上报任何东西，而且直接下载页面时它并不存在。它不是我们放的，我们也不读取它，但如果只写"没有分析脚本"，对于真去检查的人来说就是错的。</p>
 <h2>2. 监视程序</h2>
 <p>OTC 服务包含一个由我们运行的自动监视程序，因为总要有人监视付款并执行交付。它<b>只读取公开的区块链数据</b>：报价、付款和交付，与区块浏览器向任何人展示的内容相同。没有任何信息从你的浏览器传到它那里，它不设置 cookie，也不存储个人数据。关于你是谁，它知道的不会比任何一个观察公链的人更多。</p>
 <h2>3. 留在你浏览器里的东西</h2>

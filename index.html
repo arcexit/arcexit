@@ -675,6 +675,7 @@ const TS={
   "live":"실시간",
   "RPC unreachable":"RPC 응답 없음",
   "No open offers. Be the first to post on the Sell tab.":"올라온 매물이 없습니다. 판매 탭에서 첫 매물을 올려 보십시오.",
+  "Cannot reach the order book right now. This is not an empty market.":"지금 호가창을 읽을 수 없습니다. 매물이 없다는 뜻이 아닙니다.",
   "No offers match the filters.":"필터에 맞는 매물이 없습니다.",
   "The escrow contract is being deployed. The book below goes live the moment it lands.":"에스크로 컨트랙트를 배포하는 중입니다. 배포되는 즉시 아래 호가창이 열립니다.",
   "The book opens when the escrow contract lands.":"에스크로 컨트랙트가 배포되면 호가창이 열립니다.",
@@ -751,6 +752,7 @@ const TS={
   "live":"实时",
   "RPC unreachable":"RPC 无法连接",
   "No open offers. Be the first to post on the Sell tab.":"暂无挂单。到卖出页发布第一笔吧。",
+  "Cannot reach the order book right now. This is not an empty market.":"当前无法读取盘口。这不表示市场上没有挂单。",
   "No offers match the filters.":"没有符合筛选条件的挂单。",
   "The escrow contract is being deployed. The book below goes live the moment it lands.":"托管合约正在部署。部署完成后下方盘口立即开放。",
   "The book opens when the escrow contract lands.":"托管合约部署后盘口开放。",
@@ -1001,6 +1003,11 @@ async function waitReceipt(h,reader){
 
 // ---- state -----------------------------------------------------------------
 let FEE_BPS=200n, BOOK=[], SELECTED=null, PINNED=false, ACCEPTING=true;
+/* Whether the book has EVER been read successfully. An empty BOOK means
+   two completely different things depending on this, and rendering both
+   as "no offers" tells a buyer the market is empty when the truth is that
+   we could not reach it. */
+let BOOK_READ=false;
 let SORT={key:"prem",dir:1};
 const FILTER={size:0n,prem:null,seller:""};
 // One predicate for every place the dashboard filters the book, so the row
@@ -1101,6 +1108,7 @@ async function loadBook(){
       return;
     }
     BOOK=live.filter(o=>o.eff!==null&&o.eff>0n).sort((a,b)=>a.premiumBps-b.premiumBps);
+    BOOK_READ=true;
     renderBook();
     setBookAge("live");
     keeperLiveness();
@@ -1133,7 +1141,7 @@ function renderBook(){
   const cheapest=BOOK.length?BOOK.reduce((m,o)=>o.premiumBps<m.premiumBps?o:m):null;
   document.getElementById("stBest").textContent=cheapest
     ?(((10000+cheapest.premiumBps)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3)+"\u00d7"):"-";
-  document.getElementById("stOffers").textContent=String(BOOK.length);
+  document.getElementById("stOffers").textContent=BOOK_READ?(String(BOOK.length)):"-";
   document.getElementById("stAvail").textContent=
     BOOK.length?usd(BOOK.reduce((t,o)=>t+o.eff,0n)):"0";
   const tb=document.querySelector("#book tbody");
@@ -1162,7 +1170,9 @@ function renderBook(){
     const again=[...tb.children].find(r=>r.__oid===focusedId);
     if(again) again.focus();
   }
-  if(!BOOK.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No open offers. Be the first to post on the Sell tab.")+'</td></tr>';
+  if(!BOOK.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+
+    (BOOK_READ ? T("No open offers. Be the first to post on the Sell tab.")
+               : T("Cannot reach the order book right now. This is not an empty market."))+'</td></tr>';
   else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
   quote();
 }
