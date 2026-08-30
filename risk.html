@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="index,follow">
+<meta name="description" content="Every transaction you sign is final. Blockchains cannot be reversed, and nothing here can be undone by us or by anyone else. Try a small amount first.">
+<meta name="theme-color" content="#11161a">
+<meta name="twitter:site" content="@arcexit">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='3' fill='%236fb4dc'/><path d='M4 17h16M4 12h10M4 7h6' stroke='%230b1216' stroke-width='2.4' stroke-linecap='square'/></svg>">
+<title>Risk Disclosure &#183; arcexit</title>
+<style>
+  :root{
+    --paper:#11161a; --sheet:#171e23; --sink:#1f272d;
+    --ink:#e2e8ec; --muted:#98a3aa; --faint:#79848b;
+    --rule:#2b343b; --rule2:#3c4750;
+    --sig:#6fb4dc; --sig-dim:rgba(111,180,220,.14); --sig-ink:#0b1216;
+    --note-fg:#e0c58c; --note-strong:#f4e6c4;
+    --tap:rgba(226,232,236,.14);
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Malgun Gothic",monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,"Noto Sans KR","Noto Sans SC",sans-serif;
+    --t1:11px; --t2:12px; --t3:14px; --t4:16px; --t5:22px;
+    color-scheme:dark;
+  }
+  @media(prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+      --ink:#101312; --muted:#565d59; --faint:#646b66;
+      --rule:#c9cec9; --rule2:#a9b0aa;
+      --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+      --note-fg:#5f4310; --note-strong:#432f08;
+      --tap:rgba(16,19,18,.1);
+      color-scheme:light;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+    --ink:#101312; --muted:#565d59; --faint:#646b66;
+    --rule:#c9cec9; --rule2:#a9b0aa;
+    --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+    --note-fg:#5f4310; --note-strong:#432f08;
+    --tap:rgba(16,19,18,.1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-tap-highlight-color:var(--tap)}
+  button,a{font-family:inherit;touch-action:manipulation}
+  h1,h2{text-wrap:balance}
+  p,li{text-wrap:pretty}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:var(--t3)/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+  .rail{max-width:760px;margin:0 auto;padding:0 20px}
+  @media(max-width:640px){.rail{padding:0 12px}}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;
+    text-decoration-color:var(--rule2)}
+  a:hover{text-decoration-color:var(--ink)}
+  :focus-visible{outline:2px solid var(--sig);outline-offset:1px}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 0 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:9px;font-size:var(--t4);
+    font-weight:600;text-decoration:none;letter-spacing:-.01em}
+  .brand small{color:var(--muted);font-weight:400;font-size:var(--t2)}
+  .hgroup{display:flex;align-items:center;gap:8px}
+  .lang{display:inline-flex;border:1px solid var(--rule);border-radius:3px;
+    overflow:hidden}
+  .lang button{background:none;border:0;color:var(--muted);cursor:pointer;
+    padding:5px 8px;font-size:var(--t1);border-right:1px solid var(--rule)}
+  .lang button:last-child{border-right:0}
+  .lang button.on{background:var(--sig-dim);color:var(--ink)}
+  .tgl{background:none;border:1px solid var(--rule);border-radius:3px;
+    color:var(--muted);cursor:pointer;padding:4px 8px;font-size:var(--t3);
+    line-height:1.2}
+  .tgl:hover,.lang button:hover{color:var(--ink)}
+
+  h1{margin:34px 0 4px;font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+  .sub{color:var(--faint);font-size:var(--t2);margin:0 0 26px}
+  h2{margin:30px 0 7px;font-size:var(--t3);font-weight:600;letter-spacing:-.01em}
+  .doc{font-family:var(--sans);font-size:15px;line-height:1.62}
+  .doc p{color:var(--muted);margin:0 0 11px}
+  .doc b,.doc strong{color:var(--ink);font-weight:600}
+  .lead{border:1px solid var(--rule);border-left:2px solid var(--sig);
+    background:var(--sheet);padding:14px 16px;margin:0 0 8px;border-radius:3px}
+  .lead p{color:var(--ink);margin:0}
+  footer{border-top:1px solid var(--rule);margin-top:44px;padding:16px 0 40px;
+    color:var(--faint);font-size:var(--t2);display:flex;gap:14px;flex-wrap:wrap}
+  footer a{color:var(--faint)}
+  .note{margin-left:auto;font-family:var(--sans)}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;
+    transition-duration:.01ms!important}}
+</style>
+<script>(function(){
+  try{
+    var t=localStorage.getItem("arc-theme");
+    if(t==="light"||t==="dark") document.documentElement.dataset.theme=t;
+  }catch(e){}
+})();</script>
+</head>
+<body>
+<div class="rail">
+
+<header>
+  <a class="brand" href="/"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="var(--sig)"/><path d="M4 17h16M4 12h10M4 7h6" stroke="var(--sig-ink)" stroke-width="2.4" stroke-linecap="square"/></svg> Arc USDC <small>arcexit.com</small></a>
+  <span class="hgroup">
+    <span class="lang" id="lang"><button data-lang="en" class="on">EN</button><button data-lang="ko">&#54620;&#44397;&#50612;</button><button data-lang="zh">&#20013;&#25991;</button></span>
+    <button class="tgl" id="theme-toggle" aria-label="Switch between dark and light">&#9728;</button>
+  </span>
+</header>
+
+<div class='doc' data-lang='en'>
+<h1>Risk Disclosure</h1>
+<p class='sub'>2026-08-30 read this before bridging or trading</p>
+<div class='lead'><p>Every transaction you sign is final. Blockchains cannot be reversed, and nothing here can be undone by us or by anyone else. <b>Try a small amount first.</b></p></div>
+<h2>1. Irreversible mistakes</h2>
+<p>A wrong recipient address, a mistyped amount, or a transaction signed in a hurry can cause irreversible loss. The interface shows every value before you sign, but what you sign is what executes.</p>
+<h2>2. Arc is pre-launch infrastructure</h2>
+<p>Arc mainnet is operating before its public launch. Circle can change limits, pause attestation, or alter behaviour without notice. The interface checks, right before each withdrawal, whether Circle has recently signed real burns, and blocks the flow when it cannot confirm this. That check reduces the risk but does not remove it. The timing of attestation and delivery is entirely Circle's.</p>
+<h2>3. Smart contract risk</h2>
+<p>The helper contracts are small, open source, covered by an automated test suite, and disclosed, but they are <b>not audited by a third party</b>. Bugs, exploits, or unexpected interactions in any layer, whether ours, Circle's, your wallet, or an RPC endpoint, could result in loss of funds.</p>
+<h2>4. Interrupted bridge transfers</h2>
+<p>If your session ends after burning but before collecting, funds are not lost. They remain in Circle's protocol addressed to your recipient, and the <a href='/bridge'>Recover</a> screen can finish collection at any time. Burn transaction hashes are stored in your browser, so keep a copy if you clear browser data.</p>
+<h2>5. Single RPC dependence</h2>
+<p>Arc has effectively one public RPC endpoint. When it is down the interface may be unable to read chain state, and it will say so rather than guess. This can delay, but does not by itself endanger, funds.</p>
+<h2>6. Gas is your cost</h2>
+<p>On Arc, USDC is also the gas token, so bridging your entire balance leaves nothing to pay gas with. Keep a small remainder. Collection on the destination chain also costs that chain's gas.</p>
+<h2>7. Wallet warnings</h2>
+<p>Security vendors sometimes flag new crypto domains. This domain was flagged at launch and delisted after review, and residual warnings can persist in individual wallets until their lists refresh. Verification of what this site serves is always available, because the published source is byte-identical to the live page (<a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>source</a>).</p>
+<h2>8. OTC: the premium you pay</h2>
+<p>On the <a href='/'>OTC market</a> you pay above 1:1 for Arc USDC, at a price the seller set. Premiums move with supply and demand. What you pay today can look expensive tomorrow, and nothing guarantees you can resell at any premium at all. Compare the all-in price against simply <a href='/bridge'>bridging</a> before you buy.</p>
+<h2>9. OTC: what a seller actually receives</h2>
+<p>The 2% fee is collected in Arc USDC out of the delivery, so a deposit lists for slightly less than it holds, and <b>the premium you set applies to the listed amount, not to what you deposited</b>. Your proceeds per Arc USDC deposited are therefore lower than the premium number suggests. The sell form shows your exact proceeds before you sign, and <a href='/terms'>Terms section 4</a> works the arithmetic through with numbers. Read it before you set a price.</p>
+<h2>10. OTC: what the watcher can and cannot do</h2>
+<p>Deliveries and settlements are executed by an automated watcher (the "keeper") that this site operates. The contracts are written so that the keeper <b>cannot redirect a payment</b>: settlement pays the seller and the fee wallet amounts fixed when the fill was created, refunds pay the buyer in full, and neither contract has a sweep or rescue function. What the keeper can do is act, or fail to act, at the wrong moment. We state the consequences here rather than leave them in the source.</p>
+<p><b>If you are selling</b>, your deposited vault balance is exposed to the keeper key. Releasing a delivery is the keeper's decision, and the Arc contract cannot see the Base payment, so it cannot check the keeper's work. <b>A stolen keeper key could release your deposited balance without a payment ever arriving.</b> Your exposure is capped at what you have deposited and not yet withdrawn, the vault can reach nothing else of yours, and withdrawal needs nobody's permission. Do not leave more in the vault than you are willing to have at risk, and withdraw what is not selling.</p>
+<p><b>If you are buying</b>, your payment sits in escrow until delivery is confirmed, and you can reclaim it yourself after 45 minutes if nothing arrives. The residual case is a stolen keeper key combined with an offer the attacker posted themselves, which could settle open fills without delivering. Exposure is bounded by the 45-minute window and by the total sitting in open fills at that moment.</p>
+<p>If the watcher is simply offline, nothing is lost. No new deliveries happen, purchases are not delivered, vault deposits do not sell, and refunds and withdrawals keep working without us.</p>
+<h2>11. OTC: nothing guarantees a buyer</h2>
+<p>Listing is not selling. An offer can sit unfilled for as long as no buyer wants it at your price, and there is no market maker behind this book. If you need your Arc USDC out on a schedule, withdraw it from the vault and use the <a href='/bridge'>bridge</a> instead of waiting.</p>
+<h2>12. OTC: the fee can change</h2>
+<p>The escrow and vault each have an owner address that can change the fee rate and the keeper address, and nothing else. The rate is bounded by an immutable <b>5%</b> ceiling written into each contract at deployment, which no one including us can exceed. A change cannot take anything you hold, but it can strand a live offer: if the rate is raised while your offer is listed, the vault no longer covers the listed amount plus the new fee, and deliveries against it fail until you relist. A buyer caught by that is refunded after 45 minutes, and your deposit stays withdrawable throughout.</p>
+<h2>13. Notifications are best-effort</h2>
+<p>Sale alerts run only while the page is open. Missing an alert never loses funds, it only delays your knowing.</p>
+<h2>14. No advice, your laws</h2>
+<p>Nothing here is financial, investment, legal, or tax advice. You are responsible for complying with the laws that apply to you and for any taxes you owe.</p>
+<p class='sub' style='margin-top:26px'>If in doubt, move a small amount first and confirm it arrives.</p>
+</div>
+
+<div class='doc' data-lang='ko' hidden>
+<h1>위험 고지</h1>
+<p class='sub'>2026-08-30 브릿지나 거래 전에 읽으십시오</p>
+<div class='lead'><p>서명한 트랜잭션은 전부 되돌릴 수 없습니다. 블록체인은 되돌려지지 않고, 저희도 다른 누구도 여기서 일어난 일을 취소할 수 없습니다. <b>먼저 소액으로 해 보십시오.</b></p></div>
+<h2>1. 되돌릴 수 없는 실수</h2>
+<p>받는 주소를 잘못 넣거나 금액을 잘못 치거나 급하게 서명하면 되돌릴 수 없는 손실이 납니다. 인터페이스가 서명 전에 모든 값을 보여 주지만, 실행되는 것은 이용자가 서명한 내용입니다.</p>
+<h2>2. Arc는 정식 출시 전 인프라</h2>
+<p>Arc 메인넷은 공개 출시 전에 돌고 있습니다. Circle은 한도를 바꾸거나 증명을 멈추거나 동작을 예고 없이 바꿀 수 있습니다. 인터페이스는 출금 직전마다 Circle이 최근 실제 소각에 서명했는지 확인하고, 확인되지 않으면 진행을 막습니다. 이 확인은 위험을 줄이지만 없애지는 않습니다. 증명과 배달의 시점은 전적으로 Circle에 달려 있습니다.</p>
+<h2>3. 스마트 컨트랙트 위험</h2>
+<p>보조 컨트랙트는 작고 오픈소스이며 자동 테스트로 덮여 있고 전부 공개되어 있지만 <b>제3자 감사를 받지 않았습니다</b>. 저희 쪽이든 Circle 쪽이든 지갑이든 RPC든 어느 층에서 버그나 취약점이나 예상 못 한 상호작용이 나오면 자금 손실로 이어질 수 있습니다.</p>
+<h2>4. 중단된 브릿지 전송</h2>
+<p>소각한 뒤 수령 전에 세션이 끊겨도 자금은 없어지지 않습니다. Circle 프로토콜에 받는 사람 앞으로 남아 있고, <a href='/bridge'>복구</a> 화면에서 언제든 수령을 끝낼 수 있습니다. 소각 트랜잭션 해시는 브라우저에 저장되므로 브라우저 데이터를 지울 거라면 따로 적어 두십시오.</p>
+<h2>5. 단일 RPC 의존</h2>
+<p>Arc는 사실상 공개 RPC가 하나뿐입니다. 그게 죽으면 인터페이스가 체인 상태를 못 읽을 수 있고, 그럴 때는 추측하지 않고 못 읽는다고 말합니다. 지연은 생기지만 그 자체로 자금이 위험해지지는 않습니다.</p>
+<h2>6. 가스는 이용자 부담</h2>
+<p>Arc에서는 USDC가 가스 토큰이기도 해서 잔액을 전부 브릿지하면 가스를 낼 돈이 남지 않습니다. 조금 남겨 두십시오. 도착 체인에서 수령할 때도 그 체인의 가스가 듭니다.</p>
+<h2>7. 지갑 경고</h2>
+<p>보안 업체들이 새 크립토 도메인을 종종 신고 목록에 올립니다. 이 도메인도 출시 때 올라갔다가 검토 후 해제되었고, 개별 지갑의 목록이 갱신될 때까지 경고가 남아 있을 수 있습니다. 이 사이트가 무엇을 서빙하는지는 언제든 확인할 수 있습니다. 공개된 소스가 라이브 페이지와 바이트 단위로 같기 때문입니다(<a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>소스</a>).</p>
+<h2>8. OTC 위험, 구매자가 내는 프리미엄</h2>
+<p><a href='/'>OTC 마켓</a>에서는 판매자가 정한 값으로 Arc USDC를 1대1보다 비싸게 삽니다. 프리미엄은 수급에 따라 움직입니다. 오늘 낸 값이 내일은 비싸 보일 수 있고, 어떤 프리미엄으로든 되팔 수 있다는 보장은 없습니다. 사기 전에 총액을 그냥 <a href='/bridge'>브릿지</a>하는 쪽과 비교해 보십시오.</p>
+<h2>9. OTC 위험, 판매자가 실제로 받는 금액</h2>
+<p>2% 수수료는 배달분의 Arc USDC에서 걷히므로 예치한 금액보다 등록되는 금액이 조금 적고, <b>설정한 프리미엄은 예치액이 아니라 등록된 금액에 붙습니다</b>. 따라서 예치한 Arc USDC 1개당 실제 수령액은 프리미엄 숫자가 주는 인상보다 낮습니다. 판매 화면이 서명 전에 정확한 수령액을 보여 주고, <a href='/terms'>이용약관 4항</a>에 숫자로 계산이 적혀 있습니다. 가격을 정하기 전에 읽으십시오.</p>
+<h2>10. OTC 위험, 감시 프로그램이 할 수 있는 일과 없는 일</h2>
+<p>배달과 정산은 이 사이트가 운영하는 자동 감시 프로그램(이하 "키퍼")이 실행합니다. 컨트랙트는 키퍼가 <b>결제금의 행선지를 바꿀 수 없게</b> 짜여 있습니다. 정산은 체결 시점에 고정된 금액을 판매자와 수수료 지갑에 보내고, 환불은 구매자에게 전액을 보내며, 두 컨트랙트 어디에도 일괄인출이나 회수 기능이 없습니다. 키퍼가 할 수 있는 일은 잘못된 시점에 실행하거나 실행하지 않는 것입니다. 그 결과를 소스에 묻어 두지 않고 여기 적습니다.</p>
+<p><b>파는 쪽이라면</b> 금고에 예치한 잔액이 키퍼 키에 노출됩니다. 배달을 푸는 것은 키퍼의 판단이고, Arc 컨트랙트는 Base 결제를 볼 수 없어서 그 판단을 검증할 방법이 없습니다. <b>키퍼 키가 탈취되면 결제가 들어오지 않았는데도 예치 잔액이 나갈 수 있습니다.</b> 노출 한도는 예치했고 아직 빼지 않은 금액까지이며, 금고는 그 밖의 자산에 손댈 수 없고, 출금에는 누구의 허가도 필요 없습니다. 잃어도 되는 금액보다 많이 금고에 두지 말고, 안 팔리는 물량은 빼십시오.</p>
+<p><b>사는 쪽이라면</b> 결제금은 배달이 확인될 때까지 에스크로에 있고, 아무것도 오지 않으면 45분 뒤에 본인이 직접 되찾을 수 있습니다. 남는 경우는 키퍼 키 탈취와 공격자가 스스로 올린 매물이 겹치는 상황이며, 이때는 배달 없이 열린 체결을 정산해 버릴 수 있습니다. 노출 범위는 45분 창과 그 시점에 열려 있는 체결 총액으로 제한됩니다.</p>
+<p>감시 프로그램이 그냥 멈춘 경우에는 잃는 것이 없습니다. 새 배달만 일어나지 않아서 구매는 배달되지 않고 금고 물량은 팔리지 않으며, 환불과 출금은 저희 없이 계속 작동합니다.</p>
+<h2>11. OTC 위험, 구매자가 나타난다는 보장은 없음</h2>
+<p>등록은 판매가 아닙니다. 그 가격에 사려는 사람이 없으면 매물은 얼마든지 그대로 남아 있고, 이 호가창 뒤에 시장조성자는 없습니다. 정해진 시점까지 Arc USDC를 빼야 한다면 기다리지 말고 금고에서 출금해 <a href='/bridge'>브릿지</a>를 쓰십시오.</p>
+<h2>12. OTC 위험, 수수료는 바뀔 수 있음</h2>
+<p>에스크로와 금고에는 각각 소유자 주소가 있고 수수료율과 키퍼 주소만 바꿀 수 있습니다. 요율에는 배포 시점에 각 컨트랙트에 변경 불가능하게 새겨진 <b>5%</b> 상한이 있고 저희를 포함해 누구도 그 위로 올릴 수 없습니다. 변경으로 보유 자금을 가져갈 수는 없지만 등록 중인 매물이 막힐 수는 있습니다. 매물이 올라가 있는 동안 요율이 오르면 금고가 등록 수량과 새 수수료를 함께 감당하지 못하게 되고, 그 매물에 대한 배달은 다시 등록할 때까지 실패합니다. 거기 걸린 구매자는 45분 뒤 환불받고, 예치금은 그동안 계속 출금 가능합니다.</p>
+<h2>13. 알림은 최선 노력</h2>
+<p>판매 알림은 페이지가 열려 있는 동안에만 돕니다. 알림을 놓쳐도 자금이 없어지지 않고 아는 시점만 늦어집니다.</p>
+<h2>14. 자문 아님, 준법은 본인 책임</h2>
+<p>여기 어떤 내용도 금융, 투자, 법률, 세무 자문이 아닙니다. 본인에게 적용되는 법을 지키는 것과 세금은 본인 책임입니다.</p>
+<p class='sub' style='margin-top:26px'>확신이 안 서면 소액으로 먼저 옮겨 보고 도착을 확인하십시오.</p>
+</div>
+
+<div class='doc' data-lang='zh' hidden>
+<h1>风险披露</h1>
+<p class='sub'>2026-08-30 跨链或交易前请阅读</p>
+<div class='lead'><p>你签署的每一笔交易都是最终的。区块链无法撤销，我们和任何人都无法撤回这里发生的事。<b>请先用小额试一次。</b></p></div>
+<h2>1. 无法撤销的失误</h2>
+<p>收款地址填错、金额打错，或匆忙签署的交易，都可能造成无法挽回的损失。界面会在你签名前显示每一个数值，但真正执行的是你所签署的内容。</p>
+<h2>2. Arc 属于正式上线前的基础设施</h2>
+<p>Arc 主网在公开上线之前就已运行。Circle 可以在不通知的情况下更改限额、暂停证明或改变行为。界面会在每次提取前检查 Circle 近期是否为真实销毁签过名，无法确认时会拦下流程。这项检查降低风险，但不能消除风险。证明和交付的时点完全取决于 Circle。</p>
+<h2>3. 智能合约风险</h2>
+<p>辅助合约体量小、开源、有自动化测试覆盖并且已公开，但<b>未经第三方审计</b>。无论是我们这一层、Circle 这一层、你的钱包还是 RPC 节点，出现漏洞、被利用或非预期的交互，都可能导致资金损失。</p>
+<h2>4. 中断的跨链转账</h2>
+<p>如果在销毁之后、领取之前会话结束，资金不会丢失。它们留在 Circle 协议中，指向你的收款人，<a href='/bridge'>恢复</a>页面随时可以完成领取。销毁交易哈希保存在你的浏览器中，如果要清除浏览器数据，请先另行记录。</p>
+<h2>5. 单一 RPC 依赖</h2>
+<p>Arc 实际上只有一个公开 RPC 节点。它下线时界面可能无法读取链上状态，此时它会直说读不到，而不是猜测。这会造成延迟，但本身不会危及资金。</p>
+<h2>6. 手续费由你承担</h2>
+<p>在 Arc 上 USDC 同时是 gas 代币，所以把全部余额都跨走就没有钱付 gas 了。请留一点余额。在目标链上领取同样要付该链的 gas。</p>
+<h2>7. 钱包警告</h2>
+<p>安全厂商有时会把新的加密域名列入名单。本域名在上线时被标记，经复核后已移除，个别钱包在其名单刷新前可能仍显示残留警告。本站所服务的内容随时可以核验，因为公开的源码与线上页面逐字节一致（<a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>源码</a>）。</p>
+<h2>8. OTC 风险，买方支付的溢价</h2>
+<p>在 <a href='/'>OTC 市场</a>上，你按卖方设定的价格以高于 1:1 的价格买入 Arc USDC。溢价随供求波动。你今天付的价格，明天可能显得很贵，而且没有任何东西保证你能以任何溢价转手。买入前请把总价与直接<a href='/bridge'>跨链</a>做个比较。</p>
+<h2>9. OTC 风险，卖方实际收到多少</h2>
+<p>2% 的手续费从交付的 Arc USDC 中收取，所以挂出的数量略少于存入的数量，而且<b>你设定的溢价作用于挂出的数量，而不是你存入的数量</b>。因此，按存入的每个 Arc USDC 计算，你的实际收款低于溢价数字给人的印象。卖出表单会在签名前显示确切收款额，<a href='/terms'>条款第 4 节</a>用数字完整演算了一遍。定价之前请先读它。</p>
+<h2>10. OTC 风险，监视程序能做什么、不能做什么</h2>
+<p>交付与结算由本站运行的自动监视程序（下称"keeper"）执行。合约的写法使 keeper <b>无法改变款项的去向</b>：结算按成交时固定的金额支付给卖方和手续费钱包，退款全额支付给买方，两个合约都没有清扫或救援功能。keeper 能做的，是在错误的时点执行或不执行。我们把后果写在这里，而不是留在源码里。</p>
+<p><b>如果你在卖出</b>，你存入金库的余额暴露在 keeper 私钥之下。放行交付是 keeper 的判断，而 Arc 合约看不到 Base 上的付款，因此无法核验这个判断。<b>keeper 私钥若被窃取，可能在从未收到付款的情况下放走你存入的余额。</b>你的暴露上限是已存入且尚未取回的金额，金库触及不到你的其他资产，取回也不需要任何人许可。不要在金库里放超过你愿意承担风险的金额，卖不掉的部分请取回。</p>
+<p><b>如果你在买入</b>，你的付款会留在托管中直到交付被确认，若什么都没到，45 分钟后你可以自己取回。剩下的情形是 keeper 私钥被窃取，加上攻击者自己挂出的报价，可能在不交付的情况下结算掉未完成的成交。暴露范围受限于那 45 分钟窗口，以及当时未完成成交的总额。</p>
+<p>如果监视程序只是离线，不会有任何损失。只是不再产生新的交付，买入不会被交付，金库中的存货不会售出，而退款和取回不需要我们也照常运行。</p>
+<h2>11. OTC 风险，没有任何东西保证会有买家</h2>
+<p>挂单不等于卖出。只要没有人愿意按你的价格买，报价就可以一直挂着，这个盘口背后没有做市商。如果你必须在某个时点前把 Arc USDC 取出，请从金库取回并使用<a href='/bridge'>跨链桥</a>，而不是等待。</p>
+<h2>12. OTC 风险，费率可能变动</h2>
+<p>托管合约和金库各有一个所有者地址，只能更改费率和 keeper 地址。费率有一个在部署时以不可变值写入每个合约的 <b>5%</b> 上限，包括我们在内谁都无法超过。变动无法拿走你持有的资产，但可能让在挂的报价卡住：如果在你的报价挂出期间费率被调高，金库就无法同时覆盖挂出数量和新的手续费，针对该报价的交付会一直失败，直到你重新挂单。被卡住的买方在 45 分钟后获得退款，你的存入在此期间始终可以取回。</p>
+<h2>13. 通知尽力而为</h2>
+<p>售出提醒只在页面打开时运行。错过提醒不会损失资金，只会让你晚一点知道。</p>
+<h2>14. 不构成建议，法律由你负责</h2>
+<p>这里的任何内容都不构成金融、投资、法律或税务建议。遵守适用于你的法律以及缴纳你应缴的税款，由你自己负责。</p>
+<p class='sub' style='margin-top:26px'>如有疑虑，先小额转一次，确认到账。</p>
+</div>
+
+<footer><a href='/'>Market</a><a href='/bridge'>Bridge</a><a href='/terms'>Terms</a><a href='/risk'>Risk</a><a href='/privacy'>Privacy</a><a href='https://x.com/arcexit' target='_blank' rel='noopener'>@arcexit</a><span class="note">2026-08-30</span></footer>
+</div>
+<script>"use strict";
+(function(){
+  var root=document.documentElement;
+  var docs=[].slice.call(document.querySelectorAll(".doc"));
+  var btns=[].slice.call(document.querySelectorAll("#lang button"));
+  var lang="en";
+  try{
+    var s=localStorage.getItem("arcExitLang");
+    if(s==="ko"||s==="zh") lang=s;
+  }catch(e){}
+  var HTMLLANG={en:"en",ko:"ko",zh:"zh-Hans"};
+  function paintLang(){
+    docs.forEach(function(d){ d.hidden = d.dataset.lang!==lang; });
+    btns.forEach(function(b){ b.classList.toggle("on", b.dataset.lang===lang); });
+    root.setAttribute("lang", HTMLLANG[lang]||"en");
+    var t=document.querySelector('.doc[data-lang="'+lang+'"] h1');
+    if(t) document.title=t.textContent+" \u00b7 arcexit";
+  }
+  btns.forEach(function(b){
+    b.onclick=function(){
+      lang=b.dataset.lang;
+      try{ localStorage.setItem("arcExitLang",lang); }catch(e){}
+      paintLang();
+    };
+  });
+  paintLang();
+
+  /* The glyph names the mode you would switch TO, so the button reads as an
+     action rather than a status, and needs no translation. */
+  var btn=document.getElementById("theme-toggle");
+  var mql=window.matchMedia("(prefers-color-scheme: dark)");
+  function current(){ return root.dataset.theme || "dark"; }
+  function paintTheme(){
+    var other = current()==="dark" ? "light" : "dark";
+    btn.textContent = other==="dark" ? "\u263e" : "\u2600";
+    btn.setAttribute("aria-label","Switch to "+other+" theme");
+  }
+  btn.onclick=function(){
+    var next = current()==="dark" ? "light" : "dark";
+    root.dataset.theme=next;
+    try{ localStorage.setItem("arc-theme",next); }catch(e){}
+    paintTheme();
+  };
+  mql.addEventListener("change",paintTheme);
+  paintTheme();
+})();</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+Contact: mailto:security@arcexit.com
+Contact: https://github.com/arcexit/arcexit/issues
+Contact: https://x.com/arcexit
+Expires: 2027-08-14T00:00:00.000Z
+Preferred-Languages: en, ko
+Canonical: https://arcexit.com/.well-known/security.txt
+
+# arcexit.com is a non-custodial USDC bridge for Arc mainnet (chain 5042),
+# plus an on-chain OTC market at /otc. Every transaction is signed in the
+# visitor's own wallet, and the site stores no user data.
+#
+# The BRIDGE holds no funds and runs no backend. The OTC MARKET moves funds
+# only through the open-source escrow and vault contracts below; an automated
+# settlement watcher delivers and settles trades but cannot redirect funds
+# (the escrow fixes the recipient at fill time and refunds go only to the
+# buyer). See https://arcexit.com/terms and /risk.
+#
+# Circle's official CCTP v2 deployments, identical on every supported chain:
+#   TokenMessengerV2     0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d
+#   MessageTransmitterV2 0x81D40F21F12A8F0E3252Bccb954D722d4c464B64
+#   TokenMinterV2        0xfd78EE919681417d192449715b2594ab58f5D002
+#
+# Two helper contracts published by this site. Arc caps a CCTP message at
+# 1 USDC, so a 400 USDC withdrawal is 400 separate burns and 400 separate
+# collections; these exist only to fold that into one signature each. Neither
+# custodies funds.
+#   ArcBatchExit (Arc)    0x477cecd9cad406c58a76dd048393b680be29ecfd
+#     Pulls exactly principal + fee, burns the principal in a loop, and pays
+#     the fee to a fixed recipient on Arc. No withdraw, rescue or sweep
+#     function exists. The fee is bounded by an immutable MAX_FEE_BPS = 500
+#     (5.00%). Supersedes 0x83839c096c71f3af1732a3685adc1c33db8f661d, which
+#     burned the fee to the destination chain instead; that contract remains
+#     deployed and functional.
+#   ArcClaimBatch (Base)  0x174a6cf1382a2e496dbc642461711b59e5d4e0b7
+#     Calls MessageTransmitterV2.receiveMessage in a loop. It has no owner, no
+#     admin function, and never touches a token: funds go to the mintRecipient
+#     sealed inside each Circle-attested message, which it cannot alter.
+#
+# OTC market contracts (open source, not third-party audited):
+#   ArcOtcVault (Arc)     0xe7f4c15b0919e7707360c0d962322cbccc93abce
+#     Holds sellers' deposited Arc USDC. Sellers withdraw their own balance
+#     permissionlessly; the keeper can only release to a fill's fixed recipient.
+#   ArcOtcEscrow (Base)   0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e
+#     Holds buyers' Base USDC per fill. Pays the seller only on a delivered
+#     fill; refunds the buyer after the delivery window. No sweep function; the
+#     fee is bounded by an immutable MAX_FEE_BPS = 500 (5.00%).
+#
+# Token approvals are always for the exact amount being bridged; the site
+# never requests an unlimited allowance and never calls setApprovalForAll.
+# Source: https://github.com/bongbongcrypto/arc-bridge-site

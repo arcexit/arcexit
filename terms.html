@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="index,follow">
+<meta name="description" content="This site is software. You move your own USDC with your own wallet through public smart contracts, and we never hold your funds. If you are selling, read section 4: the fee changes">
+<meta name="theme-color" content="#11161a">
+<meta name="twitter:site" content="@arcexit">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='3' fill='%236fb4dc'/><path d='M4 17h16M4 12h10M4 7h6' stroke='%230b1216' stroke-width='2.4' stroke-linecap='square'/></svg>">
+<title>Terms of Use &#183; arcexit</title>
+<style>
+  :root{
+    --paper:#11161a; --sheet:#171e23; --sink:#1f272d;
+    --ink:#e2e8ec; --muted:#98a3aa; --faint:#79848b;
+    --rule:#2b343b; --rule2:#3c4750;
+    --sig:#6fb4dc; --sig-dim:rgba(111,180,220,.14); --sig-ink:#0b1216;
+    --note-fg:#e0c58c; --note-strong:#f4e6c4;
+    --tap:rgba(226,232,236,.14);
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Malgun Gothic",monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,"Noto Sans KR","Noto Sans SC",sans-serif;
+    --t1:11px; --t2:12px; --t3:14px; --t4:16px; --t5:22px;
+    color-scheme:dark;
+  }
+  @media(prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+      --ink:#101312; --muted:#565d59; --faint:#646b66;
+      --rule:#c9cec9; --rule2:#a9b0aa;
+      --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+      --note-fg:#5f4310; --note-strong:#432f08;
+      --tap:rgba(16,19,18,.1);
+      color-scheme:light;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+    --ink:#101312; --muted:#565d59; --faint:#646b66;
+    --rule:#c9cec9; --rule2:#a9b0aa;
+    --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+    --note-fg:#5f4310; --note-strong:#432f08;
+    --tap:rgba(16,19,18,.1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-tap-highlight-color:var(--tap)}
+  button,a{font-family:inherit;touch-action:manipulation}
+  h1,h2{text-wrap:balance}
+  p,li{text-wrap:pretty}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:var(--t3)/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+  .rail{max-width:760px;margin:0 auto;padding:0 20px}
+  @media(max-width:640px){.rail{padding:0 12px}}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;
+    text-decoration-color:var(--rule2)}
+  a:hover{text-decoration-color:var(--ink)}
+  :focus-visible{outline:2px solid var(--sig);outline-offset:1px}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 0 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:9px;font-size:var(--t4);
+    font-weight:600;text-decoration:none;letter-spacing:-.01em}
+  .brand small{color:var(--muted);font-weight:400;font-size:var(--t2)}
+  .hgroup{display:flex;align-items:center;gap:8px}
+  .lang{display:inline-flex;border:1px solid var(--rule);border-radius:3px;
+    overflow:hidden}
+  .lang button{background:none;border:0;color:var(--muted);cursor:pointer;
+    padding:5px 8px;font-size:var(--t1);border-right:1px solid var(--rule)}
+  .lang button:last-child{border-right:0}
+  .lang button.on{background:var(--sig-dim);color:var(--ink)}
+  .tgl{background:none;border:1px solid var(--rule);border-radius:3px;
+    color:var(--muted);cursor:pointer;padding:4px 8px;font-size:var(--t3);
+    line-height:1.2}
+  .tgl:hover,.lang button:hover{color:var(--ink)}
+
+  h1{margin:34px 0 4px;font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+  .sub{color:var(--faint);font-size:var(--t2);margin:0 0 26px}
+  h2{margin:30px 0 7px;font-size:var(--t3);font-weight:600;letter-spacing:-.01em}
+  .doc{font-family:var(--sans);font-size:15px;line-height:1.62}
+  .doc p{color:var(--muted);margin:0 0 11px}
+  .doc b,.doc strong{color:var(--ink);font-weight:600}
+  .lead{border:1px solid var(--rule);border-left:2px solid var(--sig);
+    background:var(--sheet);padding:14px 16px;margin:0 0 8px;border-radius:3px}
+  .lead p{color:var(--ink);margin:0}
+  footer{border-top:1px solid var(--rule);margin-top:44px;padding:16px 0 40px;
+    color:var(--faint);font-size:var(--t2);display:flex;gap:14px;flex-wrap:wrap}
+  footer a{color:var(--faint)}
+  .note{margin-left:auto;font-family:var(--sans)}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;
+    transition-duration:.01ms!important}}
+</style>
+<script>(function(){
+  try{
+    var t=localStorage.getItem("arc-theme");
+    if(t==="light"||t==="dark") document.documentElement.dataset.theme=t;
+  }catch(e){}
+})();</script>
+</head>
+<body>
+<div class="rail">
+
+<header>
+  <a class="brand" href="/"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="var(--sig)"/><path d="M4 17h16M4 12h10M4 7h6" stroke="var(--sig-ink)" stroke-width="2.4" stroke-linecap="square"/></svg> Arc USDC <small>arcexit.com</small></a>
+  <span class="hgroup">
+    <span class="lang" id="lang"><button data-lang="en" class="on">EN</button><button data-lang="ko">&#54620;&#44397;&#50612;</button><button data-lang="zh">&#20013;&#25991;</button></span>
+    <button class="tgl" id="theme-toggle" aria-label="Switch between dark and light">&#9728;</button>
+  </span>
+</header>
+
+<div class='doc' data-lang='en'>
+<h1>Terms of Use</h1>
+<p class='sub'>2026-08-30 applies to arcexit.com</p>
+<div class='lead'><p>This site is software. You move your own USDC with your own wallet through public smart contracts, and we never hold your funds. If you are selling, read section 4: the fee changes what your deposit lists for. Before trading, read the <a href='/risk'>Risk Disclosure</a>. If you do not agree with these terms, do not use the site.</p></div>
+<h2>1. What this is</h2>
+<p>arcexit.com (the "interface") is a web front end to public, non-custodial smart contracts: Circle's CCTP v2 deployments and the open-source helper contracts published by this site, every one of them listed at <a href='/.well-known/security.txt'>/.well-known/security.txt</a>. Arc caps a CCTP message at 1 USDC, which is why the bridge helpers exist at all: they fold the resulting hundreds of transactions into one signature each. Every transaction is composed in your browser and signed in your own wallet.</p>
+<h2>2. What the interface does, and what it does not</h2>
+<p>The interface holds no funds outside the disclosed contracts, takes no deposit into any account of ours, quotes no price of its own, and never chooses a counterparty for you.</p>
+<p>On the <a href='/bridge'>bridge</a>, you move your own assets to an address you choose. Nobody is on the other side of that transfer.</p>
+<p>On the <a href='/'>OTC market</a>, a seller publishes an offer on-chain at a price the seller alone sets, and a buyer picks an offer and pays into an on-chain escrow. Both sides sign their own transactions. We do not negotiate, do not match anyone at our discretion, and do not guarantee either side's performance.</p>
+<p>What we do operate is the automated watcher that observes payments and executes deliveries, and we take a service fee on each completed fill. Both are described in sections 3 and 4, and what the watcher can and cannot do to your funds is set out in the <a href='/risk'>Risk Disclosure</a>.</p>
+<p>We are not a bank, a custodian, or an exchange, and we hold no client money. Whether running software of this kind requires a licence where <b>you</b> live is a question of your own country's law, and not something these terms can settle. If it would, do not use the interface.</p>
+<h2>3. The OTC market</h2>
+<p>The market lets holders of Arc USDC sell it for Base USDC at a premium the <b>seller alone chooses</b>. A seller deposits Arc USDC into an open-source vault contract and lists an offer. A buyer pays Base USDC into an open-source escrow contract. The watcher observes the payment, delivers the bought amount from the seller's vault to the buyer's Arc address, and only then releases the escrowed payment to the seller. Each partial fill settles separately.</p>
+<p>The safety valves do not depend on us. If delivery does not happen within 45 minutes, the buyer's full payment, fee included, becomes refundable directly from the escrow contract, with no signature or permission from us. A seller can withdraw any unsold vault balance at any time, also without us. The escrow contract has no function that pays anyone except the seller of a delivered fill or the buyer of an undelivered one. If the watcher is offline, no new deliveries happen, and refunds and withdrawals keep working.</p>
+<h2>4. Fees</h2>
+<p>The interface charges a service fee, currently <b>2%</b>, shown on screen before you sign.</p>
+<p><b>On the bridge</b> it is included in the quoted amount and collected by the on-chain contract at execution. It is non-refundable once your burn transaction is confirmed. Circle's own network fee, if any, is separate and disclosed on screen.</p>
+<p><b>On the OTC market the buyer pays it</b>, and it is collected in Arc USDC by the vault contract out of the same delivery that goes to the buyer, rather than in Base USDC out of the payment. Two consequences follow for a seller, and the sell form shows both before you deposit.</p>
+<p><b>A deposit lists for less than it holds</b>, because the vault has to keep back the fee that will travel with the delivery. At a 2% fee, a 100 Arc USDC deposit lists <b>98.039215</b> for sale.</p>
+<p><b>The premium you set applies to the listed amount, not to the deposit.</b> At a 20% premium that 98.039215 sells for <b>117.647058</b> Base USDC, which is what you receive. The buyer pays 120.00, and the difference is the fee. So if you want a particular price per Arc USDC <b>deposited</b>, set the premium to match: to clear 1.20 Base USDC per Arc USDC deposited at a 2% fee, you set 22.4%, not 20%. The sell form shows your exact proceeds before you sign, so you never have to do this arithmetic yourself.</p>
+<p>Nothing is collected unless a fill completes. If a fill is refunded instead, the buyer's entire payment including the fee returns to the buyer, and the seller's deposit stays in the vault, withdrawable at any time.</p>
+<h2>5. Non-custodial mechanics</h2>
+<p>Because we never hold your funds outside the disclosed contracts, we cannot freeze, reverse, or refund anything by hand. If a bridge transfer is interrupted after burning, your funds sit in Circle's protocol until collected, and the <a href='/bridge'>Recover</a> screen exists so that you can finish collection yourself at any time.</p>
+<p>The bridge helper contracts contain no withdraw, rescue, or sweep function, and the collection contract has no owner and no admin function at all. The OTC escrow and vault likewise contain no sweep function, and their refund and withdraw paths are callable by you alone.</p>
+<h2>6. What the operator can change, and what it cannot</h2>
+<p>The OTC escrow and vault each have an owner address that can change exactly two things: the fee rate and the keeper address. There is no third power. No owner action can withdraw, sweep, or rescue a token, because no such function exists in the compiled code.</p>
+<p>The fee rate is bounded by a ceiling of <b>5%</b> written into each contract as an immutable value when it was deployed. It cannot be raised beyond that by anyone, including us.</p>
+<p>A fee change cannot take anything you hold, but it can strand a live offer. If the rate is raised while your offer is listed, the vault no longer holds enough to cover the listed amount plus the new fee, and deliveries against that offer fail until you relist. A buyer caught by this is refunded after the 45 minutes, and the seller's deposit stays withdrawable throughout.</p>
+<h2>7. Eligibility and lawful use</h2>
+<p>You may use the interface only if you are of legal age and legally permitted to do so where you live. Do not use it if you are located in, or a resident of, a jurisdiction where such use is prohibited, or if you are subject to sanctions. <b>The availability of the interface in your location is not a determination that your use is lawful there.</b> You are responsible for the laws that apply to you and for any taxes you owe.</p>
+<h2>8. No advice</h2>
+<p>Nothing on this site is financial, investment, legal, or tax advice, or a recommendation to acquire, hold, or dispose of any asset. OTC premiums are set by sellers and accepted by buyers. They are market prices, not our valuation of anything.</p>
+<h2>9. The interface may pause or change</h2>
+<p>We may change, pause, or discontinue the interface at any time, with or without notice. Because the contracts are public and the source is published, anyone can run an equivalent front end, so discontinuing this site does not strand funds. Refunds and withdrawals are callable directly on the contracts.</p>
+<h2>10. No warranty</h2>
+<p>The interface, the contracts, and everything published here are provided <b>as is</b> and <b>as available</b>, without warranty of any kind, express or implied, including but not limited to merchantability, fitness for a particular purpose, title, and non-infringement.</p>
+<p>We do not warrant that the interface will be available or uninterrupted, that it will be free of errors, that the watcher will be running at any given moment, or that any offer shown will still be fillable when you sign.</p>
+<h2>11. Limitation of liability</h2>
+<p>To the maximum extent permitted by law, the operator and contributors are not liable for any indirect, incidental, special, or consequential damages, or for any loss of funds, profits, or data, arising from use of the interface, the contracts, Circle's protocol, or any blockchain. Your sole remedy is to stop using the interface. Where liability cannot be excluded, it is limited to the service fees you paid in the thirty days before the claim.</p>
+<h2>12. Verification and contact</h2>
+<p>The source served by this site is published at <a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>GitHub</a> and is byte-identical to what the site serves; you can confirm that in two commands without trusting us. Every contract the interface can call is listed at <a href='/.well-known/security.txt'>/.well-known/security.txt</a>. Contact: <a href='mailto:hello@arcexit.com'>hello@arcexit.com</a>, or <a href='mailto:security@arcexit.com'>security@arcexit.com</a> for anything that should not be public.</p>
+<p class='sub' style='margin-top:26px'>Non-custodial software. The English version controls.</p>
+</div>
+
+<div class='doc' data-lang='ko' hidden>
+<h1>이용약관</h1>
+<p class='sub'>2026-08-30 arcexit.com에 적용됩니다</p>
+<div class='lead'><p>이 사이트는 소프트웨어입니다. 본인 지갑으로 본인 USDC를 공개 스마트 컨트랙트를 통해 옮기며, 저희는 자금을 보관하지 않습니다. 파는 쪽이라면 4항을 읽으십시오. 수수료 때문에 예치한 금액과 등록되는 금액이 다릅니다. 거래 전에 <a href='/risk'>위험 고지</a>를 읽으십시오. 이 약관에 동의하지 않으면 사이트를 이용하지 마십시오.</p></div>
+<h2>1. 이 서비스는 무엇인가</h2>
+<p>arcexit.com(이하 "인터페이스")은 공개된 비수탁 스마트 컨트랙트의 웹 프론트엔드입니다. Circle의 CCTP v2 배포분과 이 사이트가 공개한 오픈소스 보조 컨트랙트를 쓰며, 전부 <a href='/.well-known/security.txt'>/.well-known/security.txt</a>에 적혀 있습니다. Arc는 CCTP 메시지 하나를 1 USDC로 제한합니다. 브릿지 보조 컨트랙트가 존재하는 이유가 이것이며, 그 때문에 생기는 수백 건의 트랜잭션을 각각 서명 한 번으로 묶습니다. 모든 트랜잭션은 브라우저에서 만들어져 본인 지갑에서 서명됩니다.</p>
+<h2>2. 인터페이스가 하는 일과 하지 않는 일</h2>
+<p>인터페이스는 공개된 컨트랙트 밖에서 자금을 보관하지 않고, 저희 계정으로 예치를 받지 않으며, 자체 가격을 제시하지 않고, 거래 상대를 대신 고르지 않습니다.</p>
+<p><a href='/bridge'>브릿지</a>에서는 본인 자산을 본인이 지정한 주소로 옮깁니다. 그 전송에는 상대방이 없습니다.</p>
+<p><a href='/'>OTC 마켓</a>에서는 판매자가 스스로 정한 가격으로 온체인에 매물을 올리고, 구매자가 매물을 골라 온체인 에스크로에 결제합니다. 양쪽 다 각자 트랜잭션에 서명합니다. 저희는 가격을 흥정하지 않고, 임의로 매칭하지 않으며, 어느 쪽의 이행도 보증하지 않습니다.</p>
+<p>저희가 실제로 운영하는 것은 결제를 감시하고 배달을 실행하는 자동 감시 프로그램이며, 체결된 거래마다 서비스 수수료를 받습니다. 둘 다 3항과 4항에 적었고, 그 프로그램이 자금에 무엇을 할 수 있고 무엇을 할 수 없는지는 <a href='/risk'>위험 고지</a>에 적었습니다.</p>
+<p>저희는 은행도 수탁기관도 거래소도 아니며 고객 자금을 보유하지 않습니다. 다만 이런 소프트웨어를 운영하는 데 <b>이용자</b>가 사는 나라에서 인허가가 필요한지는 그 나라 법이 정할 문제이고 이 약관이 정할 수 있는 것이 아닙니다. 필요하다면 인터페이스를 이용하지 마십시오.</p>
+<h2>3. OTC 마켓</h2>
+<p>이 마켓에서는 Arc USDC 보유자가 <b>판매자가 직접 정한</b> 프리미엄을 붙여 Base USDC를 받고 팝니다. 판매자가 오픈소스 금고 컨트랙트에 Arc USDC를 예치하고 매물을 등록합니다. 구매자는 오픈소스 에스크로 컨트랙트에 Base USDC를 결제합니다. 감시 프로그램이 결제를 확인해 판매자 금고에서 구매한 수량을 구매자의 Arc 주소로 보내고, 그다음에야 에스크로에 잠긴 결제금을 판매자에게 풉니다. 부분 체결은 각각 따로 정산됩니다.</p>
+<p>안전장치는 저희에게 의존하지 않습니다. 45분 안에 배달이 이뤄지지 않으면 구매자가 낸 결제금 전액이, 수수료를 포함해, 에스크로 컨트랙트에서 직접 환불 가능해집니다. 저희 서명도 허가도 필요 없습니다. 판매자는 안 팔린 금고 잔액을 언제든 뺄 수 있고 이때도 저희가 필요 없습니다. 에스크로 컨트랙트에는 배달된 거래의 판매자와 배달되지 않은 거래의 구매자 말고 누구에게도 돈을 보내는 기능이 없습니다. 감시 프로그램이 멈추면 새 배달만 일어나지 않고, 환불과 출금은 계속 작동합니다.</p>
+<h2>4. 수수료</h2>
+<p>인터페이스는 서비스 수수료를 받습니다. 현재 <b>2%</b>이며 서명 전에 화면에 표시됩니다.</p>
+<p><b>브릿지</b>에서는 제시된 금액에 이미 포함되어 있고 실행 시점에 온체인 컨트랙트가 가져갑니다. 소각 트랜잭션이 확정되면 환불되지 않습니다. Circle의 네트워크 수수료가 있다면 별도이며 화면에 표시됩니다.</p>
+<p><b>OTC 마켓에서는 구매자가 냅니다.</b> 결제된 Base USDC에서 떼지 않고, 구매자에게 가는 바로 그 배달분의 Arc USDC에서 금고 컨트랙트가 가져갑니다. 판매자 입장에서 결과가 두 가지 생기며, 예치 전에 판매 화면이 둘 다 보여 줍니다.</p>
+<p><b>예치한 금액보다 등록되는 금액이 적습니다.</b> 배달과 함께 나갈 수수료를 금고가 남겨 둬야 하기 때문입니다. 수수료 2%에서 100 Arc USDC를 예치하면 <b>98.039215</b>가 판매 등록됩니다.</p>
+<p><b>설정한 프리미엄은 예치액이 아니라 등록된 금액에 붙습니다.</b> 프리미엄 20%라면 그 98.039215가 <b>117.647058</b> Base USDC에 팔리고, 그게 판매자가 받는 금액입니다. 구매자는 120.00를 내고 차액이 수수료입니다. 그러므로 <b>예치한</b> Arc USDC 1개당 받고 싶은 금액이 정해져 있다면 프리미엄을 그에 맞춰 올려야 합니다. 수수료 2%에서 예치한 Arc USDC 1개당 1.20 Base USDC를 받으려면 22.4%가 아니라 20%로 설정합니다. 판매 화면이 서명 전에 정확한 수령액을 보여 주므로 이 계산을 직접 할 일은 없습니다.</p>
+<p>체결되지 않으면 아무것도 걷지 않습니다. 체결 대신 환불되면 구매자가 낸 돈은 수수료까지 전액 구매자에게 돌아가고, 판매자 예치금은 금고에 그대로 남아 언제든 뺄 수 있습니다.</p>
+<h2>5. 비수탁 구조</h2>
+<p>공개된 컨트랙트 밖에서 자금을 보관하지 않기 때문에 저희가 손으로 동결하거나 되돌리거나 환불해 줄 수 없습니다. 브릿지 전송이 소각 후에 끊기면 자금은 수령될 때까지 Circle 프로토콜에 남아 있고, <a href='/bridge'>복구</a> 화면이 있는 이유가 이것입니다. 언제든 본인이 직접 수령을 끝낼 수 있습니다.</p>
+<p>브릿지 보조 컨트랙트에는 출금, 회수, 일괄인출 기능이 없고, 수령 컨트랙트에는 소유자도 관리자 기능도 아예 없습니다. OTC 에스크로와 금고에도 일괄인출 기능이 없으며, 환불과 출금 경로는 본인만 호출할 수 있습니다.</p>
+<h2>6. 운영자가 바꿀 수 있는 것과 없는 것</h2>
+<p>OTC 에스크로와 금고에는 각각 소유자 주소가 있고, 바꿀 수 있는 것은 딱 두 가지입니다. 수수료율과 감시 프로그램 주소입니다. 세 번째 권한은 없습니다. 소유자가 무엇을 하든 토큰을 빼내거나 회수할 수 없습니다. 컴파일된 코드에 그런 기능 자체가 없기 때문입니다.</p>
+<p>수수료율에는 <b>5%</b> 상한이 있습니다. 배포 시점에 각 컨트랙트에 변경 불가능한 값으로 새겨졌으며, 저희를 포함해 누구도 그 위로 올릴 수 없습니다.</p>
+<p>수수료 변경으로 보유 자금을 가져갈 수는 없지만, 등록 중인 매물이 막힐 수는 있습니다. 매물이 올라가 있는 동안 요율이 오르면 금고에 등록 수량과 새 수수료를 합한 만큼이 남아 있지 않게 되고, 그 매물에 대한 배달은 다시 등록할 때까지 실패합니다. 그 사이에 걸린 구매자는 45분 뒤 환불받고, 판매자 예치금은 그동안 계속 출금 가능합니다.</p>
+<h2>7. 이용 자격과 준법</h2>
+<p>법적 성년이고 거주지에서 이용이 허용되는 경우에만 인터페이스를 이용할 수 있습니다. 이용이 금지된 관할에 있거나 그곳 거주자이거나 제재 대상이라면 이용하지 마십시오. <b>거주지에서 인터페이스에 접속된다는 사실이 그곳에서 이용이 적법하다는 판단은 아닙니다.</b> 본인에게 적용되는 법과 세금은 본인 책임입니다.</p>
+<h2>8. 자문이 아님</h2>
+<p>이 사이트의 어떤 내용도 금융, 투자, 법률, 세무 자문이 아니며 어떤 자산의 취득, 보유, 처분 권유도 아닙니다. OTC 프리미엄은 판매자가 정하고 구매자가 받아들인 값입니다. 시장 가격이지 저희의 평가액이 아닙니다.</p>
+<h2>9. 중단과 변경</h2>
+<p>저희는 사전 통지 여부와 관계없이 언제든 인터페이스를 변경하거나 중단할 수 있습니다. 컨트랙트가 공개되어 있고 소스도 공개되어 있어 누구든 같은 기능의 프론트엔드를 띄울 수 있으므로, 이 사이트가 없어져도 자금이 갇히지 않습니다. 환불과 출금은 컨트랙트에서 직접 호출할 수 있습니다.</p>
+<h2>10. 무보증</h2>
+<p>인터페이스, 컨트랙트, 여기 공개된 모든 것은 <b>있는 그대로</b>, <b>이용 가능한 상태 그대로</b> 제공되며, 상품성, 특정 목적 적합성, 권원, 비침해를 포함해 명시적이든 묵시적이든 어떤 보증도 하지 않습니다.</p>
+<p>인터페이스가 항상 이용 가능하다거나 끊기지 않는다거나 오류가 없다고 보증하지 않고, 감시 프로그램이 특정 시점에 돌고 있다고 보증하지 않으며, 화면에 보이는 매물이 서명하는 순간에도 체결 가능하다고 보증하지 않습니다.</p>
+<h2>11. 책임의 제한</h2>
+<p>법이 허용하는 최대 범위에서, 운영자와 기여자는 인터페이스, 컨트랙트, Circle 프로토콜, 블록체인의 이용으로 발생하는 간접, 부수, 특별, 결과적 손해나 자금, 이익, 데이터의 손실에 책임지지 않습니다. 이용자의 유일한 구제 수단은 이용을 중단하는 것입니다. 책임을 배제할 수 없는 경우 책임 범위는 청구 이전 30일 동안 지급한 서비스 수수료로 제한됩니다.</p>
+<h2>12. 검증과 연락처</h2>
+<p>이 사이트가 서빙하는 소스는 <a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>GitHub</a>에 공개되어 있고 실제 서빙되는 것과 바이트 단위로 같습니다. 저희를 믿지 않아도 명령어 두 줄로 확인할 수 있습니다. 인터페이스가 호출할 수 있는 모든 컨트랙트는 <a href='/.well-known/security.txt'>/.well-known/security.txt</a>에 있습니다. 연락처는 <a href='mailto:hello@arcexit.com'>hello@arcexit.com</a>이고, 공개되면 안 되는 내용은 <a href='mailto:security@arcexit.com'>security@arcexit.com</a>으로 보내십시오.</p>
+<p class='sub' style='margin-top:26px'>비수탁 소프트웨어입니다. 해석에 다툼이 있으면 영문본이 우선합니다.</p>
+</div>
+
+<div class='doc' data-lang='zh' hidden>
+<h1>使用条款</h1>
+<p class='sub'>2026-08-30 适用于 arcexit.com</p>
+<div class='lead'><p>本站是软件。你用自己的钱包、通过公开的智能合约转移自己的 USDC，我们不保管你的资金。如果你是卖方，请阅读第 4 节，手续费会让你存入的数量和挂出的数量不同。交易前请阅读<a href='/risk'>风险披露</a>。如果你不同意本条款，请不要使用本站。</p></div>
+<h2>1. 这项服务是什么</h2>
+<p>arcexit.com（下称"界面"）是公开的非托管智能合约的网页前端，使用 Circle 的 CCTP v2 部署以及本站发布的开源辅助合约，全部列在<a href='/.well-known/security.txt'>/.well-known/security.txt</a>。Arc 把单条 CCTP 消息限制为 1 USDC，桥的辅助合约正是因此存在，把由此产生的数百笔交易各自合并为一次签名。每一笔交易都在你的浏览器中构造，并在你自己的钱包中签名。</p>
+<h2>2. 界面做什么，不做什么</h2>
+<p>界面不在已披露的合约之外保管资金，不接受存入我们任何账户的款项，不给出自己的报价，也从不替你挑选交易对手。</p>
+<p>在<a href='/bridge'>跨链桥</a>上，你把自己的资产转到自己选定的地址，这笔转账没有对手方。</p>
+<p>在 <a href='/'>OTC 市场</a>上，卖方按<b>自己单独设定</b>的价格在链上挂出报价，买方选中一个报价并付款到链上托管合约。双方各自签署自己的交易。我们不议价，不按自己的判断撮合，也不担保任何一方的履约。</p>
+<p>我们实际运行的是那个监视付款并执行交付的自动程序，并对每一笔完成的成交收取服务费。两者都写在第 3 节和第 4 节，而该程序对资金能做什么、不能做什么，写在<a href='/risk'>风险披露</a>里。</p>
+<p>我们不是银行、托管方或交易所，也不持有客户资金。但运行这类软件在<b>你</b>所在的国家是否需要牌照，属于该国法律的问题，不是本条款能够决定的。如果需要，请不要使用本界面。</p>
+<h2>3. OTC 市场</h2>
+<p>该市场让持有 Arc USDC 的人按<b>卖方自行决定</b>的溢价换取 Base USDC。卖方把 Arc USDC 存入开源金库合约并挂出报价，买方把 Base USDC 付入开源托管合约。监视程序确认付款后，从卖方金库把买到的数量发到买方的 Arc 地址，之后才把托管中的款项释放给卖方。每一笔部分成交单独结算。</p>
+<p>安全阀不依赖我们。如果 45 分钟内没有完成交付，买方的全部付款（含手续费）可以直接从托管合约退回，不需要我们的签名或许可。卖方随时可以取回未售出的金库余额，同样不需要我们。托管合约没有任何功能可以把钱付给已交付成交的卖方或未交付成交的买方以外的人。监视程序离线时，只是不再产生新的交付，退款和取回照常运行。</p>
+<h2>4. 费用</h2>
+<p>界面收取服务费，目前为 <b>2%</b>，在你签名前显示在屏幕上。</p>
+<p><b>在跨链桥上</b>，它已包含在报价金额中，由链上合约在执行时收取，销毁交易确认后不可退还。Circle 自己的网络费（如有）另计，并显示在屏幕上。</p>
+<p><b>在 OTC 市场上由买方承担。</b>它不从付出的 Base USDC 中扣除，而是由金库合约从发给买方的那一笔 Arc USDC 交付中收取。这对卖方产生两个结果，卖出表单在你存入前都会显示。</p>
+<p><b>挂出的数量少于存入的数量</b>，因为金库必须留出随交付一起发出的手续费。在 2% 费率下，存入 100 Arc USDC，挂出 <b>98.039215</b>。</p>
+<p><b>你设定的溢价作用于挂出的数量，而不是存入的数量。</b>在 20% 溢价下，那 98.039215 会以 <b>117.647058</b> Base USDC 售出，这就是你收到的金额。买方支付 120.00，差额即手续费。因此，如果你对<b>每一个存入的</b> Arc USDC 有目标价格，就要相应提高溢价：在 2% 费率下，想让每个存入的 Arc USDC 拿到 1.20 Base USDC，应设为 22.4% 而不是 20%。卖出表单在签名前会显示你的确切收款额，所以你不必自己算。</p>
+<p>未成交则不收取任何费用。若成交被退款，买方的全部付款（含手续费）退还买方，卖方的存入留在金库中，随时可以取回。</p>
+<h2>5. 非托管结构</h2>
+<p>由于我们从不在已披露的合约之外保管资金，我们无法人工冻结、撤销或退款。如果跨链转账在销毁之后中断，资金会留在 Circle 协议中直到被领取，<a href='/bridge'>恢复</a>页面正是为此存在，你随时可以自己完成领取。</p>
+<p>桥的辅助合约没有提取、救援或清扫功能，领取合约根本没有所有者，也没有任何管理功能。OTC 托管合约和金库同样没有清扫功能，其退款和取回路径只有你本人可以调用。</p>
+<h2>6. 运营方能改什么，不能改什么</h2>
+<p>OTC 托管合约和金库各有一个所有者地址，能改的只有两样：费率和监视程序地址。没有第三种权限。所有者的任何操作都无法提取、清扫或救援代币，因为编译后的代码里根本没有这种功能。</p>
+<p>费率有 <b>5%</b> 的上限，在部署时作为不可变值写入每个合约，包括我们在内，任何人都无法超过它。</p>
+<p>改动费率无法拿走你持有的资产，但可能让在挂的报价卡住。如果在你的报价挂出期间费率被调高，金库中就不再有足够金额同时覆盖挂出数量和新的手续费，针对该报价的交付会一直失败，直到你重新挂单。期间被卡住的买方在 45 分钟后获得退款，卖方的存入始终可以取回。</p>
+<h2>7. 资格与合法使用</h2>
+<p>只有在你已达法定年龄且在你居住地被允许的情况下，才可以使用本界面。如果你位于或居住于禁止此类使用的司法辖区，或你属于受制裁对象，请不要使用。<b>界面在你所在地可以访问，并不意味着你在当地的使用是合法的。</b>适用于你的法律和你应缴的税款由你自己负责。</p>
+<h2>8. 不构成建议</h2>
+<p>本站的任何内容都不构成金融、投资、法律或税务建议，也不构成取得、持有或处分任何资产的推荐。OTC 溢价由卖方设定、买方接受，那是市场价格，不是我们对任何东西的估值。</p>
+<h2>9. 界面可能暂停或变更</h2>
+<p>我们可以随时变更、暂停或终止本界面，无论是否事先通知。由于合约是公开的、源码也是公开的，任何人都可以运行一个等效的前端，因此本站停止运行不会让资金被困。退款和取回可以直接在合约上调用。</p>
+<h2>10. 无担保</h2>
+<p>界面、合约以及此处发布的一切均按<b>现状</b>和<b>现有可用状态</b>提供，不作任何明示或默示的担保，包括但不限于适销性、特定用途适用性、所有权和不侵权。</p>
+<p>我们不担保界面可用或不中断，不担保没有错误，不担保监视程序在任一时刻正在运行，也不担保屏幕上显示的报价在你签名时仍然可以成交。</p>
+<h2>11. 责任限制</h2>
+<p>在法律允许的最大范围内，运营方和贡献者不对因使用本界面、合约、Circle 协议或任何区块链而产生的任何间接、附带、特殊或后果性损害，或任何资金、利润、数据的损失承担责任。你唯一的救济是停止使用本界面。在责任无法排除的情况下，责任以你在索赔前三十天内支付的服务费为限。</p>
+<h2>12. 验证与联系方式</h2>
+<p>本站所服务的源码发布在 <a href='https://github.com/arcexit/arcexit' target='_blank' rel='noopener'>GitHub</a>，与实际服务的内容逐字节一致，你不必信任我们，两条命令即可核对。界面可以调用的每一个合约都列在<a href='/.well-known/security.txt'>/.well-known/security.txt</a>。联系方式：<a href='mailto:hello@arcexit.com'>hello@arcexit.com</a>；不宜公开的内容请发送至<a href='mailto:security@arcexit.com'>security@arcexit.com</a>。</p>
+<p class='sub' style='margin-top:26px'>非托管软件。以英文版为准。</p>
+</div>
+
+<footer><a href='/'>Market</a><a href='/bridge'>Bridge</a><a href='/terms'>Terms</a><a href='/risk'>Risk</a><a href='/privacy'>Privacy</a><a href='https://x.com/arcexit' target='_blank' rel='noopener'>@arcexit</a><span class="note">2026-08-30</span></footer>
+</div>
+<script>"use strict";
+(function(){
+  var root=document.documentElement;
+  var docs=[].slice.call(document.querySelectorAll(".doc"));
+  var btns=[].slice.call(document.querySelectorAll("#lang button"));
+  var lang="en";
+  try{
+    var s=localStorage.getItem("arcExitLang");
+    if(s==="ko"||s==="zh") lang=s;
+  }catch(e){}
+  var HTMLLANG={en:"en",ko:"ko",zh:"zh-Hans"};
+  function paintLang(){
+    docs.forEach(function(d){ d.hidden = d.dataset.lang!==lang; });
+    btns.forEach(function(b){ b.classList.toggle("on", b.dataset.lang===lang); });
+    root.setAttribute("lang", HTMLLANG[lang]||"en");
+    var t=document.querySelector('.doc[data-lang="'+lang+'"] h1');
+    if(t) document.title=t.textContent+" \u00b7 arcexit";
+  }
+  btns.forEach(function(b){
+    b.onclick=function(){
+      lang=b.dataset.lang;
+      try{ localStorage.setItem("arcExitLang",lang); }catch(e){}
+      paintLang();
+    };
+  });
+  paintLang();
+
+  /* The glyph names the mode you would switch TO, so the button reads as an
+     action rather than a status, and needs no translation. */
+  var btn=document.getElementById("theme-toggle");
+  var mql=window.matchMedia("(prefers-color-scheme: dark)");
+  function current(){ return root.dataset.theme || "dark"; }
+  function paintTheme(){
+    var other = current()==="dark" ? "light" : "dark";
+    btn.textContent = other==="dark" ? "\u263e" : "\u2600";
+    btn.setAttribute("aria-label","Switch to "+other+" theme");
+  }
+  btn.onclick=function(){
+    var next = current()==="dark" ? "light" : "dark";
+    root.dataset.theme=next;
+    try{ localStorage.setItem("arc-theme",next); }catch(e){}
+    paintTheme();
+  };
+  mql.addEventListener("change",paintTheme);
+  paintTheme();
+})();</script>
+</body>
+</html>

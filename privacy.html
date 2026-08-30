@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="index,follow">
+<meta name="description" content="No accounts, no KYC, no analytics, no cookies, no server-side database. We do not ask for your name, ID, or email, and we have no way to associate a wallet with a person.">
+<meta name="theme-color" content="#11161a">
+<meta name="twitter:site" content="@arcexit">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='3' fill='%236fb4dc'/><path d='M4 17h16M4 12h10M4 7h6' stroke='%230b1216' stroke-width='2.4' stroke-linecap='square'/></svg>">
+<title>Privacy &#183; arcexit</title>
+<style>
+  :root{
+    --paper:#11161a; --sheet:#171e23; --sink:#1f272d;
+    --ink:#e2e8ec; --muted:#98a3aa; --faint:#79848b;
+    --rule:#2b343b; --rule2:#3c4750;
+    --sig:#6fb4dc; --sig-dim:rgba(111,180,220,.14); --sig-ink:#0b1216;
+    --note-fg:#e0c58c; --note-strong:#f4e6c4;
+    --tap:rgba(226,232,236,.14);
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Malgun Gothic",monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,"Noto Sans KR","Noto Sans SC",sans-serif;
+    --t1:11px; --t2:12px; --t3:14px; --t4:16px; --t5:22px;
+    color-scheme:dark;
+  }
+  @media(prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+      --ink:#101312; --muted:#565d59; --faint:#646b66;
+      --rule:#c9cec9; --rule2:#a9b0aa;
+      --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+      --note-fg:#5f4310; --note-strong:#432f08;
+      --tap:rgba(16,19,18,.1);
+      color-scheme:light;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+    --ink:#101312; --muted:#565d59; --faint:#646b66;
+    --rule:#c9cec9; --rule2:#a9b0aa;
+    --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+    --note-fg:#5f4310; --note-strong:#432f08;
+    --tap:rgba(16,19,18,.1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-tap-highlight-color:var(--tap)}
+  button,a{font-family:inherit;touch-action:manipulation}
+  h1,h2{text-wrap:balance}
+  p,li{text-wrap:pretty}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:var(--t3)/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+  .rail{max-width:760px;margin:0 auto;padding:0 20px}
+  @media(max-width:640px){.rail{padding:0 12px}}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;
+    text-decoration-color:var(--rule2)}
+  a:hover{text-decoration-color:var(--ink)}
+  :focus-visible{outline:2px solid var(--sig);outline-offset:1px}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 0 16px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:9px;font-size:var(--t4);
+    font-weight:600;text-decoration:none;letter-spacing:-.01em}
+  .brand small{color:var(--muted);font-weight:400;font-size:var(--t2)}
+  .hgroup{display:flex;align-items:center;gap:8px}
+  .lang{display:inline-flex;border:1px solid var(--rule);border-radius:3px;
+    overflow:hidden}
+  .lang button{background:none;border:0;color:var(--muted);cursor:pointer;
+    padding:5px 8px;font-size:var(--t1);border-right:1px solid var(--rule)}
+  .lang button:last-child{border-right:0}
+  .lang button.on{background:var(--sig-dim);color:var(--ink)}
+  .tgl{background:none;border:1px solid var(--rule);border-radius:3px;
+    color:var(--muted);cursor:pointer;padding:4px 8px;font-size:var(--t3);
+    line-height:1.2}
+  .tgl:hover,.lang button:hover{color:var(--ink)}
+
+  h1{margin:34px 0 4px;font-size:var(--t5);font-weight:600;letter-spacing:-.02em}
+  .sub{color:var(--faint);font-size:var(--t2);margin:0 0 26px}
+  h2{margin:30px 0 7px;font-size:var(--t3);font-weight:600;letter-spacing:-.01em}
+  .doc{font-family:var(--sans);font-size:15px;line-height:1.62}
+  .doc p{color:var(--muted);margin:0 0 11px}
+  .doc b,.doc strong{color:var(--ink);font-weight:600}
+  .lead{border:1px solid var(--rule);border-left:2px solid var(--sig);
+    background:var(--sheet);padding:14px 16px;margin:0 0 8px;border-radius:3px}
+  .lead p{color:var(--ink);margin:0}
+  footer{border-top:1px solid var(--rule);margin-top:44px;padding:16px 0 40px;
+    color:var(--faint);font-size:var(--t2);display:flex;gap:14px;flex-wrap:wrap}
+  footer a{color:var(--faint)}
+  .note{margin-left:auto;font-family:var(--sans)}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;
+    transition-duration:.01ms!important}}
+</style>
+<script>(function(){
+  try{
+    var t=localStorage.getItem("arc-theme");
+    if(t==="light"||t==="dark") document.documentElement.dataset.theme=t;
+  }catch(e){}
+})();</script>
+</head>
+<body>
+<div class="rail">
+
+<header>
+  <a class="brand" href="/"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="var(--sig)"/><path d="M4 17h16M4 12h10M4 7h6" stroke="var(--sig-ink)" stroke-width="2.4" stroke-linecap="square"/></svg> Arc USDC <small>arcexit.com</small></a>
+  <span class="hgroup">
+    <span class="lang" id="lang"><button data-lang="en" class="on">EN</button><button data-lang="ko">&#54620;&#44397;&#50612;</button><button data-lang="zh">&#20013;&#25991;</button></span>
+    <button class="tgl" id="theme-toggle" aria-label="Switch between dark and light">&#9728;</button>
+  </span>
+</header>
+
+<div class='doc' data-lang='en'>
+<h1>Privacy</h1>
+<p class='sub'>2026-08-30 no accounts, no KYC, no analytics</p>
+<div class='lead'><p>No accounts, no KYC, no analytics, no cookies, no server-side database. We do not ask for your name, ID, or email, and we have no way to associate a wallet with a person.</p></div>
+<h2>1. What we collect</h2>
+<p><b>Nothing on our side.</b> The pages are static files with no backend. There is no sign-up, no form, no tracking pixel, and no analytics script. We cannot see who you are, and we do not try.</p>
+<h2>2. The watcher</h2>
+<p>The OTC service includes an automated watcher that we run, because someone has to observe payments and execute deliveries. It reads <b>public blockchain data only</b>: offers, payments, and deliveries, the same things a block explorer shows anyone. Nothing reaches it from your browser, it sets no cookie, and it stores no personal data. It can tell no more about who you are than any other observer of a public chain.</p>
+<h2>3. What stays in your browser</h2>
+<p>The pages keep a small amount of state in your browser's local storage so you do not lose work. In full, that is: your language and theme choice; whether you connected a wallet last time and which wallet software it was, so the page can reconnect without asking; the source and destination chains you last picked on the bridge; the transaction hashes of your recent burns; the progress of an in-flight batch collection; whether you have already seen the first-run guide; and, on the market, the vault deposits made from the address you connected plus two counters recording how far your browser has scanned the chain for trade statistics and sale alerts.</p>
+<p>These never leave your device, and clearing browser data deletes them. Note that the burn hashes are your recovery keys, so record them elsewhere if you clear data mid-transfer.</p>
+<h2>4. What is public anyway</h2>
+<p>Everything you sign is public on the blockchains involved: addresses, amounts, timestamps. That is a property of public blockchains, not of this site. Assume on-chain activity is permanently visible to everyone, including the fact that a given address bought or sold on this market.</p>
+<h2>5. Third parties the page talks to</h2>
+<p>Your browser talks directly to blockchain RPC endpoints and to Circle's public attestation API in order to compose and track transfers. Those services see your IP address and the addresses you query, under their own policies. The page's security headers list every host it may contact, and it can reach nothing else.</p>
+<h2>6. Contact</h2>
+<p><a href='mailto:hello@arcexit.com'>hello@arcexit.com</a>, or <a href='mailto:security@arcexit.com'>security@arcexit.com</a> for anything that should not be public.</p>
+<p class='sub' style='margin-top:26px'>No accounts, no KYC, no analytics. Static pages.</p>
+</div>
+
+<div class='doc' data-lang='ko' hidden>
+<h1>개인정보</h1>
+<p class='sub'>2026-08-30 계정 없음, 신원확인 없음, 분석도구 없음</p>
+<div class='lead'><p>계정도 신원확인도 분석도구도 쿠키도 서버 데이터베이스도 없습니다. 이름, 신분증, 이메일을 묻지 않으며, 지갑과 사람을 연결할 방법 자체가 없습니다.</p></div>
+<h2>1. 저희가 수집하는 것</h2>
+<p><b>저희 쪽에는 없습니다.</b> 페이지는 백엔드 없는 정적 파일입니다. 가입도 양식도 추적 픽셀도 분석 스크립트도 없습니다. 이용자가 누구인지 볼 수 없고, 보려 하지도 않습니다.</p>
+<h2>2. 감시 프로그램</h2>
+<p>OTC 서비스에는 저희가 돌리는 자동 감시 프로그램이 있습니다. 결제를 확인하고 배달을 실행할 주체가 필요하기 때문입니다. 이 프로그램은 <b>공개된 블록체인 데이터만</b> 읽습니다. 매물, 결제, 배달이며 블록 탐색기가 누구에게나 보여 주는 것과 같습니다. 브라우저에서 이쪽으로 오는 정보는 없고, 쿠키를 심지 않으며, 개인정보를 저장하지 않습니다. 공개 체인을 보는 다른 누구보다 이용자에 대해 더 알 수 있는 것이 없습니다.</p>
+<h2>3. 브라우저에 남는 것</h2>
+<p>작업이 날아가지 않도록 페이지가 브라우저 로컬 저장소에 약간의 상태를 둡니다. 전부 적으면 이렇습니다. 선택한 언어와 테마, 지난번에 지갑을 연결했는지와 어떤 지갑 프로그램이었는지(다시 묻지 않고 재연결하기 위한 것), 브릿지에서 마지막으로 고른 출발 체인과 도착 체인, 최근 소각 트랜잭션 해시, 진행 중인 일괄 수령의 진척도, 첫 실행 안내를 봤는지 여부, 그리고 마켓에서는 연결한 주소로 한 금고 예치 내역과 거래 통계 및 판매 알림을 위해 체인을 어디까지 훑었는지 기록하는 카운터 두 개입니다.</p>
+<p>이 값들은 기기를 벗어나지 않고 브라우저 데이터를 지우면 함께 지워집니다. 소각 해시는 복구 열쇠이므로 전송 도중에 데이터를 지울 거라면 따로 적어 두십시오.</p>
+<h2>4. 어차피 공개되는 것</h2>
+<p>서명한 내용은 해당 블록체인에 전부 공개됩니다. 주소, 금액, 시각이 그렇습니다. 이 사이트의 성질이 아니라 공개 블록체인의 성질입니다. 특정 주소가 이 마켓에서 사고팔았다는 사실을 포함해, 온체인 활동은 누구에게나 영구히 보인다고 가정하십시오.</p>
+<h2>5. 페이지가 통신하는 외부 서비스</h2>
+<p>브라우저가 블록체인 RPC 엔드포인트와 Circle의 공개 증명 API에 직접 통신해 전송을 구성하고 추적합니다. 그 서비스들은 각자의 정책에 따라 이용자의 IP 주소와 조회한 주소를 봅니다. 페이지의 보안 헤더에 접속 가능한 호스트가 전부 적혀 있고, 그 밖의 어디에도 접속할 수 없습니다.</p>
+<h2>6. 연락처</h2>
+<p><a href='mailto:hello@arcexit.com'>hello@arcexit.com</a>이고, 공개되면 안 되는 내용은 <a href='mailto:security@arcexit.com'>security@arcexit.com</a>으로 보내십시오.</p>
+<p class='sub' style='margin-top:26px'>계정 없음, 신원확인 없음, 분석도구 없음. 정적 페이지입니다.</p>
+</div>
+
+<div class='doc' data-lang='zh' hidden>
+<h1>隐私</h1>
+<p class='sub'>2026-08-30 无账户、无 KYC、无分析工具</p>
+<div class='lead'><p>没有账户，没有 KYC，没有分析工具，没有 cookie，没有服务端数据库。我们不索取你的姓名、证件或邮箱，也没有任何办法把一个钱包和一个人对应起来。</p></div>
+<h2>1. 我们收集什么</h2>
+<p><b>我们这边什么都没有。</b>页面是没有后端的静态文件。没有注册，没有表单，没有跟踪像素，没有分析脚本。我们看不到你是谁，也不打算去看。</p>
+<h2>2. 监视程序</h2>
+<p>OTC 服务包含一个由我们运行的自动监视程序，因为总要有人监视付款并执行交付。它<b>只读取公开的区块链数据</b>：报价、付款和交付，与区块浏览器向任何人展示的内容相同。没有任何信息从你的浏览器传到它那里，它不设置 cookie，也不存储个人数据。关于你是谁，它知道的不会比任何一个观察公链的人更多。</p>
+<h2>3. 留在你浏览器里的东西</h2>
+<p>为了不让你的操作白费，页面会在浏览器本地存储中保留少量状态。完整列举如下：你选择的语言和主题；上次是否连接过钱包以及用的是哪个钱包程序（用于不再询问就重新连接）；你在跨链桥上最后选择的源链和目标链；你最近的销毁交易哈希；进行中的批量领取进度；你是否已经看过首次使用引导；以及在市场页面上，用你所连接地址进行的金库存入记录，外加两个计数器，记录你的浏览器为交易统计和售出提醒扫描链上数据的进度。</p>
+<p>这些值不会离开你的设备，清除浏览器数据即会删除。请注意销毁哈希是你的恢复钥匙，如果要在转账途中清除数据，请先另行记录。</p>
+<h2>4. 本来就公开的东西</h2>
+<p>你签署的一切在相关区块链上都是公开的：地址、金额、时间戳。这是公链的性质，不是本站的性质。请假定链上活动对所有人永久可见，包括某个地址曾在本市场买入或卖出这一事实。</p>
+<h2>5. 页面会联系的第三方</h2>
+<p>你的浏览器直接与区块链 RPC 节点以及 Circle 的公开证明 API 通信，以构造和跟踪转账。这些服务会按其自身政策看到你的 IP 地址和你查询的地址。页面的安全响应头列出了它可能联系的每一个主机，除此之外它无法访问任何地方。</p>
+<h2>6. 联系方式</h2>
+<p><a href='mailto:hello@arcexit.com'>hello@arcexit.com</a>；不宜公开的内容请发送至<a href='mailto:security@arcexit.com'>security@arcexit.com</a>。</p>
+<p class='sub' style='margin-top:26px'>无账户、无 KYC、无分析工具。静态页面。</p>
+</div>
+
+<footer><a href='/'>Market</a><a href='/bridge'>Bridge</a><a href='/terms'>Terms</a><a href='/risk'>Risk</a><a href='/privacy'>Privacy</a><a href='https://x.com/arcexit' target='_blank' rel='noopener'>@arcexit</a><span class="note">2026-08-30</span></footer>
+</div>
+<script>"use strict";
+(function(){
+  var root=document.documentElement;
+  var docs=[].slice.call(document.querySelectorAll(".doc"));
+  var btns=[].slice.call(document.querySelectorAll("#lang button"));
+  var lang="en";
+  try{
+    var s=localStorage.getItem("arcExitLang");
+    if(s==="ko"||s==="zh") lang=s;
+  }catch(e){}
+  var HTMLLANG={en:"en",ko:"ko",zh:"zh-Hans"};
+  function paintLang(){
+    docs.forEach(function(d){ d.hidden = d.dataset.lang!==lang; });
+    btns.forEach(function(b){ b.classList.toggle("on", b.dataset.lang===lang); });
+    root.setAttribute("lang", HTMLLANG[lang]||"en");
+    var t=document.querySelector('.doc[data-lang="'+lang+'"] h1');
+    if(t) document.title=t.textContent+" \u00b7 arcexit";
+  }
+  btns.forEach(function(b){
+    b.onclick=function(){
+      lang=b.dataset.lang;
+      try{ localStorage.setItem("arcExitLang",lang); }catch(e){}
+      paintLang();
+    };
+  });
+  paintLang();
+
+  /* The glyph names the mode you would switch TO, so the button reads as an
+     action rather than a status, and needs no translation. */
+  var btn=document.getElementById("theme-toggle");
+  var mql=window.matchMedia("(prefers-color-scheme: dark)");
+  function current(){ return root.dataset.theme || "dark"; }
+  function paintTheme(){
+    var other = current()==="dark" ? "light" : "dark";
+    btn.textContent = other==="dark" ? "\u263e" : "\u2600";
+    btn.setAttribute("aria-label","Switch to "+other+" theme");
+  }
+  btn.onclick=function(){
+    var next = current()==="dark" ? "light" : "dark";
+    root.dataset.theme=next;
+    try{ localStorage.setItem("arc-theme",next); }catch(e){}
+    paintTheme();
+  };
+  mql.addEventListener("change",paintTheme);
+  paintTheme();
+})();</script>
+</body>
+</html>

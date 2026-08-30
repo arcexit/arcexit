@@ -1,0 +1,1713 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="description" content="Over-the-counter market for Arc USDC. Sellers set the price, buyers pay on Base, delivery lands on Arc in under a minute.">
+<meta property="og:title" content="Arc USDC Market">
+<meta property="og:description" content="Buy and sell Arc USDC over the counter.">
+<meta property="og:url" content="https://arcexit.com/">
+<meta property="og:image" content="https://arcexit.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@arcexit">
+<meta name="theme-color" content="#11161a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#edefec" media="(prefers-color-scheme: light)">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="3" fill="%230e5c8a"/><path d="M4 17h16M4 12h10M4 7h6" stroke="%23f2f6f8" stroke-width="2.4" stroke-linecap="square"/></svg>'>
+<title>Arc USDC Market</title>
+<style>
+  /* DIRECTION A, "quote sheet", dual mode with dark as the default.
+
+     The subject is a dealing desk, so the book is the page: it opens on live
+     rows, not on a headline, and hierarchy comes from weight and rule
+     thickness rather than type scale.
+
+     Deliberately not the reference. dyorarc.fun is a one-way gateway and leads
+     with a 72px display line over warm cream, soft-lifted cards, pill buttons
+     and a graph-paper texture; an earlier draft here had all thirteen of its
+     core tokens byte-identical, which is a copy wearing a new accent. Nothing
+     below is taken from it.
+
+     Dark is the default because a dealing screen is dark, but the two AI-tell
+     traps in that are near-black grounds and an acid accent. So the ground is
+     a cool slate that is not black, and the signal colour is the SAME steel
+     blue in both modes, lightened for the dark ground rather than swapped for
+     something louder. Every colour is a token and every token is defined three
+     times: the dark default, the light swap under prefers-color-scheme, and
+     both again under data-theme for the manual toggle. */
+  :root{
+    --paper:#11161a; --sheet:#171e23; --sink:#1f272d;
+    --ink:#e2e8ec; --muted:#98a3aa; --faint:#79848b;
+    --rule:#2b343b; --rule2:#3c4750;
+    --sig:#6fb4dc; --sig-dim:rgba(111,180,220,.14); --sig-ink:#0b1216;
+    --sig-hover:#8cc6e8;
+    --btn-hover:#f2f6f8;
+    --bad:#e59a90; --warn:#d9a95f;
+    --note-fg:#e0c58c; --note-strong:#f4e6c4;
+    --scrim:rgba(6,9,11,.68); --tap:rgba(226,232,236,.14);
+    --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%2398a3aa' stroke-width='1.5'/%3E%3C/svg%3E");
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,"Noto Sans KR",sans-serif;
+    --t1:11px; --t2:12px; --t3:14px; --t4:16px; --t5:22px; --t6:34px;
+    color-scheme:dark;
+  }
+  @media(prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+      --ink:#101312; --muted:#565d59; --faint:#646b66;
+      --rule:#c9cec9; --rule2:#a9b0aa;
+      --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+      --sig-hover:#0b4b71;
+      --btn-hover:#1d2220;
+      --bad:#8f2a20; --warn:#7a5510;
+      --note-fg:#5f4310; --note-strong:#432f08;
+      --scrim:rgba(16,19,18,.42); --tap:rgba(16,19,18,.1);
+      --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%23565d59' stroke-width='1.5'/%3E%3C/svg%3E");
+      color-scheme:light;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#edefec; --sheet:#f7f8f6; --sink:#e2e5e1;
+    --ink:#101312; --muted:#565d59; --faint:#646b66;
+    --rule:#c9cec9; --rule2:#a9b0aa;
+    --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
+    --sig-hover:#0b4b71;
+    --btn-hover:#1d2220;
+    --bad:#8f2a20; --warn:#7a5510;
+    --note-fg:#5f4310; --note-strong:#432f08;
+    --scrim:rgba(16,19,18,.42); --tap:rgba(16,19,18,.1);
+    --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%23565d59' stroke-width='1.5'/%3E%3C/svg%3E");
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-tap-highlight-color:var(--tap)}
+  button,input,select,a,summary{font-family:inherit;touch-action:manipulation}
+  h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
+  p,li{text-wrap:pretty}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:var(--t3)/1.5 var(--mono);-webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;
+    text-decoration-color:var(--rule2)}
+  a:hover{text-decoration-color:var(--ink)}
+  :focus-visible{outline:2px solid var(--sig);outline-offset:1px}
+  .rail{max-width:1120px;margin:0 auto;padding:0 20px}
+  @media(max-width:640px){.rail{padding:0 12px}}
+  .prose{font-family:var(--sans)}
+
+  /* masthead. a desk header, one line, ruled off. */
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 0 11px;border-bottom:2px solid var(--ink)}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:var(--t3);
+    letter-spacing:.02em;text-decoration:none;text-transform:uppercase;
+    color:var(--ink)}
+  .brand small{font-weight:400;color:var(--muted);text-transform:none;
+    letter-spacing:0}
+  .hgroup{display:flex;align-items:center;gap:8px}
+  .lang{display:flex;border:1px solid var(--rule2);border-radius:3px;overflow:hidden}
+  .lang button{background:none;border:0;color:var(--muted);padding:5px 9px;
+    font-size:var(--t1);font-weight:700;cursor:pointer;font-family:var(--mono)}
+  .lang button:hover{color:var(--ink)}
+  .lang button.on{background:var(--sink);color:var(--ink)}
+  @media(max-width:640px){.lang button{padding:5px 7px}}
+  .what{margin:11px 0 0;font-family:var(--sans);font-size:var(--t3);
+    color:var(--muted);max-width:74ch}
+  .what b{color:var(--ink);font-weight:600}
+
+  /* the strip. label over figure, divided by hairlines, flat on the ground.
+     no card, no radius, no shadow: a printed form does not float. */
+  /* The price is a headline, not a cell. It used to span two columns inside
+     the grid, which made its row twice as tall as the rest and left the
+     neighbours' vertical rules running down the side of the wrapped unit line. */
+  .price{margin:18px 0 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .price .lbl{width:100%;margin:0 0 4px;font-size:var(--t1);font-weight:600;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .price b{font-size:var(--t6);line-height:1;letter-spacing:-.02em;
+    color:var(--sig);font-weight:600}
+  .price b.flat{color:var(--faint)}
+  .price em{font-style:normal;font-family:var(--sans);font-size:var(--t2);
+    color:var(--muted)}
+  /* Six equal cells. The dividers are drawn by a 1px gap over a ruled ground,
+     so they stay correct however the grid wraps instead of depending on which
+     cell happens to be last in a row. */
+  .strip{display:grid;grid-template-columns:repeat(6,1fr);
+    gap:1px;background:var(--rule);margin:18px 0 0;
+    border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  @media(max-width:900px){.strip{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:470px){.strip{grid-template-columns:repeat(2,1fr)}}
+  .strip div{background:var(--paper);padding:10px 13px 11px}
+  .strip span{display:block;font-size:var(--t1);font-weight:600;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .strip b{font-size:var(--t4);font-weight:600;color:var(--ink)}
+
+  .note{margin:14px 0 0;padding:10px 13px;background:var(--sink);
+    border-left:3px solid var(--warn);font-size:var(--t2);color:var(--note-fg);
+    line-height:1.55;font-family:var(--sans)}
+  .note b{font-weight:700;color:var(--note-strong)}
+
+  /* the book is the page */
+  .bhead{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin:26px 0 0;flex-wrap:wrap}
+  .bhead h2{font-size:var(--t1);font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted)}
+  .bhead .sub{font-family:var(--sans);font-size:var(--t2);color:var(--muted);
+    margin-left:10px;font-weight:400;letter-spacing:0;text-transform:none}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .filters select{background:var(--sheet);border:1px solid var(--rule2);border-radius:3px;
+    color:var(--ink);padding:5px 26px 5px 9px;font-size:var(--t2);cursor:pointer;
+    appearance:none;font-family:var(--mono);background-image:var(--arrow);
+    background-repeat:no-repeat;background-position:right 9px center}
+  .filters select:hover{border-color:var(--ink)}
+  .filters select:focus{outline:0;border-color:var(--sig);box-shadow:0 0 0 2px var(--sig-dim)}
+  .wrap{overflow-x:auto;background:var(--sheet);border:1px solid var(--rule);
+    margin:9px 0 0}
+  table{width:100%;border-collapse:collapse;font-size:var(--t3)}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:var(--t1);
+    letter-spacing:.12em;text-transform:uppercase;padding:9px 16px 8px;
+    border-bottom:1px solid var(--ink);white-space:nowrap;background:var(--sink)}
+  th.sort{cursor:pointer;user-select:none}
+  th.sort:hover{color:var(--ink)}
+  td{padding:10px 16px;border-bottom:1px solid var(--rule);color:var(--muted)}
+  tr:last-child td{border-bottom:0}
+  td:first-child{color:var(--sig);font-weight:600}
+  tr.click{cursor:pointer}
+  tr.click:hover td{background:var(--sink)}
+  tr.sel td{background:var(--sig-dim);color:var(--ink)}
+  tr.off td{opacity:.36}
+  /* the cheapest line is marked the way a dealer marks one: a bar in the
+     margin, not a badge in the row. */
+  tr:has(.pill) td:first-child{box-shadow:inset 4px 0 0 var(--sig)}
+  .pill{display:inline-block;font-size:var(--t1);color:var(--muted);
+    font-weight:600;margin-left:9px;letter-spacing:.1em}
+  .muted{color:var(--muted);font-family:var(--sans);font-size:var(--t2)}
+
+  /* the ticket */
+  .tabs{display:flex;gap:0;margin:30px 0 0;border-bottom:1px solid var(--rule)}
+  .tabs button{background:none;border:1px solid transparent;border-bottom:0;
+    color:var(--muted);padding:8px 18px;cursor:pointer;font-size:var(--t1);
+    font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    font-family:var(--mono);margin-bottom:-1px}
+  .tabs button:hover{color:var(--ink)}
+  .tabs button.on{background:var(--sheet);border-color:var(--rule);
+    border-bottom-color:var(--sheet);color:var(--ink)}
+  .panel{padding:22px;background:var(--sheet);border:1px solid var(--rule);
+    border-top:0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr;gap:20px}.panel{padding:16px}}
+  label{display:block;color:var(--muted);font-size:var(--t1);font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;margin:0 0 7px}
+  .lrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .field{margin:0 0 18px}
+  input.f{background:var(--paper);border:1px solid var(--rule2);border-radius:3px;
+    color:var(--ink);padding:10px 12px;font-size:var(--t3);width:100%;
+    font-family:var(--mono);font-variant-numeric:tabular-nums}
+  input.f::placeholder{color:var(--faint)}
+  input.f:focus{outline:0;border-color:var(--sig);box-shadow:0 0 0 2px var(--sig-dim)}
+  input.f.big{font-size:var(--t5);padding:11px 12px;font-weight:600}
+  input[aria-invalid="true"]{border-color:var(--bad)}
+  button.tiny{background:none;border:1px solid var(--rule2);border-radius:3px;
+    padding:3px 7px;font-size:var(--t1);color:var(--muted);cursor:pointer;
+    font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  button.tiny:hover{border-color:var(--ink);color:var(--ink)}
+
+  /* controls are square, like everything a form prints on */
+  .btn{background:var(--ink);color:var(--paper);border:1px solid var(--ink);
+    border-radius:3px;padding:9px 16px;font-weight:700;font-size:var(--t2);
+    cursor:pointer;font-family:var(--mono);letter-spacing:.08em;
+    text-transform:uppercase}
+  .btn:hover:not(:disabled){background:var(--btn-hover);border-color:var(--btn-hover)}
+  .btn:disabled{background:var(--sink);border-color:var(--rule2);color:var(--muted);
+    cursor:not-allowed}
+  .btn.ghost{background:none;color:var(--ink);border-color:var(--rule2)}
+  .btn.ghost:hover:not(:disabled){border-color:var(--ink);background:var(--sink)}
+  .btn.sm{padding:4px 10px;font-size:var(--t1)}
+  #theme-toggle{font-size:14px;line-height:1;padding:5px 9px;min-width:30px}
+  .btn.wide{width:100%;padding:14px 16px;font-size:var(--t3);background:var(--sig);
+    border-color:var(--sig);color:var(--sig-ink)}
+  .btn.wide:hover:not(:disabled){background:var(--sig-hover);border-color:var(--sig-hover)}
+  .btn.wide:disabled{background:var(--sink);border-color:var(--rule2);color:var(--muted)}
+
+  .quote{margin:0 0 16px;font-size:var(--t2)}
+  .quote div{display:flex;justify-content:space-between;gap:12px;padding:5px 0;
+    color:var(--muted)}
+  .quote div:last-child{border-top:1px solid var(--ink);margin-top:6px;padding-top:9px;
+    color:var(--ink)}
+  .quote b{font-weight:700;color:var(--ink)}
+  .msg{margin:12px 0 0;font-size:var(--t2);color:var(--muted);min-height:20px;
+    font-family:var(--sans)}
+  .ok{color:var(--sig)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+  .mono{font-family:var(--mono)}
+
+  .fee{margin:22px 0 0;padding:14px 0 0;border-top:1px solid var(--rule)}
+  .fee h3{font-size:var(--t1);font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .fee p{margin:0;font-family:var(--sans);font-size:var(--t2);color:var(--muted);
+    line-height:1.65;max-width:52ch}
+  .accept{font-family:var(--sans);font-size:var(--t1);color:var(--faint);
+    margin:9px 0 0;text-align:center}
+  .accept a{color:var(--faint)}
+  .accept a:hover{color:var(--ink)}
+  .dim{color:var(--faint)}
+  .flow{margin:11px 0 0;padding:9px 12px;background:var(--sink);font-size:var(--t2);
+    color:var(--muted)}
+  .flow b{color:var(--ink);font-weight:700}
+  .colhead{font-size:var(--t1);font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+
+  .prints{background:var(--sheet);border:1px solid var(--rule);margin:9px 0 0}
+  .prints .tr{display:flex;justify-content:space-between;gap:14px;
+    padding:10px 16px;border-bottom:1px solid var(--rule);font-size:var(--t3);
+    color:var(--ink)}
+  .prints .tr:last-child{border-bottom:0}
+  .tiny{color:var(--muted);font-size:var(--t2)}
+
+  .tools{margin:32px 0 0;padding:14px 0 0;border-top:1px solid var(--rule);
+    display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;
+    font-family:var(--sans);font-size:var(--t2);color:var(--muted)}
+  .exit{margin:26px 0 0;padding:18px;background:var(--sink);
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+    flex-wrap:wrap}
+  .exit p{margin:0;font-family:var(--sans);color:var(--muted);font-size:var(--t2);
+    max-width:52ch;line-height:1.65}
+  .exit b{color:var(--ink);font-weight:700}
+
+  footer{margin:36px 0 0;padding:14px 0 40px;border-top:2px solid var(--ink);
+    display:flex;gap:16px;flex-wrap:wrap;font-size:var(--t2);color:var(--muted)}
+  footer a{color:var(--muted)}
+
+  #toasts{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;
+    gap:7px;z-index:50}
+  .toast{background:var(--sheet);border:1px solid var(--ink);padding:11px 13px;
+    font-size:var(--t2);max-width:320px}
+  #wpick{position:fixed;inset:0;overscroll-behavior:contain;background:var(--scrim);
+    display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+  #wpick .sheet{background:var(--sheet);border:1px solid var(--ink);padding:18px;
+    min-width:288px}
+  #wpick button{display:flex;align-items:center;gap:10px;width:100%;margin:6px 0;
+    background:var(--paper);border:1px solid var(--rule2);border-radius:3px;
+    color:var(--ink);padding:10px 12px;font-size:var(--t2);cursor:pointer;
+    font-family:var(--mono)}
+  #wpick button:hover{border-color:var(--ink)}
+  #wpick img{width:20px;height:20px}
+  @media(max-width:640px){
+    input.f,.filters select{font-size:16px}
+    .filters select{flex:1 1 calc(50% - 3px)}
+    .strip .lead{grid-column:span 2}
+    th,td{padding-left:12px;padding-right:12px}
+  }
+  @media(hover:none){tr.click:hover td{background:transparent}}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  @supports(padding:max(0px)){
+    body{padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right))}
+    footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
+  }
+</style>
+<script>
+/* Page chrome only: nothing here touches a wallet, a contract or a number.
+   It runs in <head> and before the body paints so a saved choice does not
+   flash the other theme first. */
+(function(){
+  try{
+    var t=localStorage.getItem("arc-theme");
+    if(t==="light"||t==="dark") document.documentElement.dataset.theme=t;
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+<div class="rail">
+
+<header>
+  <a class="brand" href="/">
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <rect width="24" height="24" rx="3" fill="var(--sig)"/>
+      <path d="M4 17h16M4 12h10M4 7h6" stroke="var(--sig-ink)" stroke-width="2.4"
+        stroke-linecap="square"/>
+    </svg>
+    Arc USDC <small data-t="m_otc">over the counter</small>
+  </a>
+  <span class="hgroup">
+    <span class="lang" id="lang">
+      <button data-lang="en" class="on">EN</button><button data-lang="ko">한국어</button><button data-lang="zh">中文</button>
+    </span>
+    <button class="btn ghost sm" id="theme-toggle"
+      aria-label="Switch between dark and light">&#9728;</button>
+    <button class="btn" id="b-connect">Connect wallet</button>
+  </span>
+</header>
+
+<p class="what prose" data-h="m_what">Sellers set their own price. Pay on Base,
+  <b>receive on Arc in under a minute</b>. If it does not arrive, you are
+  refunded automatically.</p>
+
+<div class="price">
+  <span class="lbl" data-t="m_last">Last</span>
+  <b class="flat" id="tape-price">&#8230;</b>
+  <em id="tape-unit">Base USDC per 1 Arc USDC, last trade</em>
+</div>
+
+<div class="strip">
+  <div><span data-t="m_offers">Offers</span><b id="stOffers">-</b></div>
+  <div><span data-t="m_available">Available</span><b id="stAvail">-</b></div>
+  <div><span data-t="m_cheapest">Cheapest</span><b id="stBest">-</b></div>
+  <div><span data-t="m_settled">Settled</span><b id="stDone">-</b></div>
+  <div><span data-t="m_fee">Fee</span><b id="feeShow">2%</b></div>
+  <div><span data-t="m_book">Book</span><b id="bookAge">-</b></div>
+</div>
+
+<div class="note" id="keeperNote" style="display:none"></div>
+
+<div class="bhead">
+  <h2><span data-t="m_orderbook">Order book</span><span class="sub" data-t="m_backed">every line is backed by deposited inventory</span></h2>
+  <div class="filters">
+    <select id="fSize" aria-label="Minimum size">
+      <option value="" data-t="m_anysize">any size</option><option value="10">10+</option>
+      <option value="50">50+</option><option value="100">100+</option>
+      <option value="500">500+</option><option value="1000">1,000+</option>
+    </select>
+    <select id="fPrem" aria-label="Maximum premium">
+      <option value="" data-t="m_anyprem">any premium</option><option value="15">up to 15%</option>
+      <option value="20">up to 20%</option><option value="25">up to 25%</option>
+      <option value="30">up to 30%</option>
+    </select>
+    <select id="fSell" aria-label="Seller"><option value="" data-t="m_allsellers">all sellers</option></select>
+  </div>
+</div>
+
+<div class="wrap"><table id="book">
+  <thead><tr>
+    <th class="sort" id="th-prem">Premium &#8593;</th>
+    <th data-t="m_youpay">You pay per 1</th>
+    <th class="sort" id="th-avail">Available</th>
+    <th data-t="m_seller">Seller</th>
+  </tr></thead>
+  <tbody><tr><td colspan="4" class="muted">Loading&#8230;</td></tr></tbody>
+</table></div>
+
+<div class="tabs">
+  <button id="t-buy" class="on" aria-pressed="true" data-t="m_buy">Buy</button>
+  <button id="t-sell" aria-pressed="false" data-t="m_sell">Sell</button>
+  <button id="t-mine" aria-pressed="false" data-t="m_orders">Orders</button>
+</div>
+
+<div class="panel" id="v-buy">
+  <div class="grid">
+    <div>
+      <div class="field">
+        <div class="lrow"><label for="buyAmt" data-t="m_amtbuy">Amount to buy</label>
+          <span class="mono" id="buyBal" style="font-size:var(--t1);color:var(--muted)"></span></div>
+        <input id="buyAmt" name="buy-amount" class="f big" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="buyRecv" data-t="m_recv">Arc address to receive</label>
+        <input id="buyRecv" name="arc-recipient" class="f mono" placeholder="0x&#8230;" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="fee">
+        <h3 data-t="m_whatpay">What you pay</h3>
+        <p data-h="m_paytext">The board price is what you pay per Arc USDC.
+        The premium and the 2% fee are already in it. If delivery fails, you get
+        everything back.</p>
+      </div>
+    </div>
+    <div>
+      <div class="quote" id="buyQuote" style="display:none"></div>
+      <button class="btn wide" id="b-buy" disabled>Connect wallet</button>
+      <p class="accept" data-h="m_accept">By continuing you accept the <a href="/terms">Terms</a> and the <a href="/risk">Risk Disclosure</a>.</p>
+      <div class="msg" id="say" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="v-sell" style="display:none">
+  <div class="grid">
+    <div>
+      <div class="field">
+        <label for="sellPrem" data-t="m_prem">Premium %</label>
+        <input id="sellPrem" name="premium" class="f" inputmode="decimal" placeholder="20" autocomplete="off">
+      </div>
+      <div class="field">
+        <div class="lrow"><label for="sellAmt" data-t="m_amtdep">Amount to deposit</label>
+          <button type="button" class="tiny" id="sellBal"
+            aria-label="Use your full Arc USDC balance"></button></div>
+        <input id="sellAmt" name="deposit-amount" class="f big" inputmode="decimal" placeholder="0" autocomplete="off">
+      </div>
+      <div class="fee">
+        <h3 data-t="m_whopays">Who pays the 2%</h3>
+        <p data-h="m_feetext">The buyer pays it. We take it in Arc USDC, so your
+        listing shows slightly less than you deposited, and your premium applies
+        to the listed amount.</p>
+        <div class="flow" data-h="m_flow">deposit <b>100.00</b> &rarr; lists <b>98.039215</b>
+          &rarr; sold at 20% pays you <b>117.647058</b> USDC <span class="dim">(buyer pays 120.00)</span></div>
+        <p style="margin:12px 0 0" data-h="m_wait">Whatever has not sold can be
+        withdrawn any time. To get out immediately, use
+        <a href="/bridge">the bridge</a>.</p>
+      </div>
+    </div>
+    <div>
+      <div class="quote" id="sellQuote" style="display:none"></div>
+      <button class="btn wide" id="b-post" disabled>Connect wallet</button>
+      <p class="accept" data-h="m_accept">By continuing you accept the <a href="/terms">Terms</a> and the <a href="/risk">Risk Disclosure</a>.</p>
+      <div class="msg" id="say2" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="v-mine" style="display:none">
+  <div class="grid">
+    <div>
+      <h2 class="colhead" data-t="m_purchases">Purchases</h2>
+      <div class="wrap"><table id="myFills">
+        <thead><tr><th>#</th><th>Size</th><th>Paid</th><th>Status</th><th></th></tr></thead>
+        <tbody></tbody></table></div>
+    </div>
+    <div>
+      <h2 class="colhead" data-t="m_myoffers">My offers</h2>
+      <div class="wrap"><table id="myOffers">
+        <thead><tr><th>#</th><th>Premium</th><th>Vault</th><th></th></tr></thead>
+        <tbody></tbody></table></div>
+      <div class="msg" id="say3" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<section id="trades" style="display:none">
+  <div class="bhead" style="margin-top:30px"><h2 data-t="m_prints">Prints</h2></div>
+  <div id="tradeRows" class="prints"></div>
+</section>
+
+<section class="tools">
+  <span data-t="m_other">Other tokens on Arc</span>
+  <a href="/bridge#cashout" data-t="m_cashout">Cash out leftovers</a>
+  <a href="/bridge#history" data-t="m_history">History</a>
+  <a href="/bridge#recover" data-t="m_recover">Recover an interrupted exit</a>
+</section>
+
+<section class="exit">
+  <p data-h="m_exit">Need it out now? <b>Use the bridge.</b> 2% fee.</p>
+  <a class="btn" href="/bridge" data-t="m_bridgebtn">Bridge</a>
+</section>
+
+<footer>
+  <a href="/bridge" data-t="m_bridge">Bridge</a><a href="/terms" data-t="m_terms">Terms</a><a href="/risk" data-t="m_risk">Risk</a>
+  <a href="/privacy" data-t="m_privacy">Privacy</a>
+  <a href="https://basescan.org/address/0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e" target="_blank" rel="noopener">Escrow</a>
+  <a href="https://arc.exploreme.pro/address/0xe7f4c15b0919e7707360c0d962322cbccc93abce" target="_blank" rel="noopener">Vault</a>
+  <a href="https://github.com/arcexit/arcexit" target="_blank" rel="noopener" data-t="m_source">Source</a>
+  <a href="https://x.com/arcexit" target="_blank" rel="noopener">@arcexit</a>
+  <span id="build"></span>
+</footer>
+
+</div>
+<div id="toasts" role="status" aria-live="polite"></div>
+<div id="wpick" role="dialog" aria-modal="true" aria-label="Choose a wallet"><div class="sheet">
+  <div class="lrow" style="margin-bottom:12px"><b data-t="m_choosewallet">Choose a wallet</b>
+    <button class="btn sm ghost" id="wpick-x" aria-label="Close">&#215;</button></div>
+  <div id="wlist"></div></div></div>
+<script>
+/* Three languages, English by default, stored under the key the bridge uses so
+   a choice made on one page carries to the other. Only the markup is covered
+   here; the trading script's own messages are still English and are handled in
+   their own pass, because rewriting strings inside a tested money path on the
+   way into a deployment is the wrong order. */
+var M_I18N={
+ en:{},
+ ko:{
+  m_otc:"장외거래", m_last:"최근 체결",
+  m_offers:"매물", m_available:"판매 가능",
+  m_cheapest:"최저가", m_settled:"체결 완료",
+  m_fee:"수수료", m_book:"호가 상태",
+  m_orderbook:"호가창",
+  m_backed:"모든 매물은 예치된 물량이 뒷받침합니다",
+  m_anysize:"수량 전체", m_anyprem:"프리미엄 전체",
+  m_allsellers:"판매자 전체", m_youpay:"1개당 지불",
+  m_seller:"판매자", m_buy:"구매", m_sell:"판매",
+  m_orders:"내 주문", m_amtbuy:"구매 수량",
+  m_recv:"받을 Arc 주소", m_prem:"프리미엄 %",
+  m_amtdep:"예치 수량", m_whatpay:"얼마를 내는가",
+  m_whopays:"2% 수수료는 누가 내는가",
+  m_purchases:"구매 내역", m_myoffers:"내 매물",
+  m_prints:"최근 체결", m_other:"Arc에 남은 다른 토큰",
+  m_cashout:"잔여 토큰 정리", m_history:"내역",
+  m_recover:"중단된 출금 복구", m_bridgebtn:"브릿지",
+  m_bridge:"브릿지", m_terms:"이용약관", m_risk:"위험 고지",
+  m_privacy:"개인정보", m_source:"소스", m_choosewallet:"지갑 선택",
+  m_what:"판매자가 가격을 직접 정합니다. Base에서 결제하면 <b>1분 안에 Arc로 받습니다</b>. 안 오면 자동 환불됩니다.",
+  m_paytext:"표에 뜬 값이 Arc USDC 1개당 내는 금액입니다. 프리미엄과 2% 수수료가 이미 들어 있습니다. 배달 실패 시 전액 환불됩니다.",
+  m_feetext:"구매자가 냅니다. Arc USDC로 받기 때문에 등록 수량이 예치한 양보다 조금 적게 표시되고, 프리미엄은 등록 수량에 붙습니다.",
+  m_accept:"계속하면 <a href='/terms'>이용약관</a>과 <a href='/risk'>위험 고지</a>에 동의하는 것입니다.",
+  m_flow:"예치 <b>100.00</b> &rarr; 등록 <b>98.039215</b> &rarr; 프리미엄 20%로 전량 판매 시 <b>117.647058</b> USDC <span class='dim'>(구매자 결제액 120.00)</span>",
+  m_wait:"안 팔린 물량은 언제든 금고에서 뺄 수 있습니다. 즉시 빼려면 <a href='/bridge'>브릿지</a>를 쓰십시오.",
+  m_exit:"지금 바로 빼야 합니까? <b>브릿지를 쓰십시오.</b> 수수료 2%."
+ },
+ zh:{
+  m_otc:"场外交易", m_last:"最新成交",
+  m_offers:"挂单", m_available:"可买数量",
+  m_cheapest:"最低价", m_settled:"已成交",
+  m_fee:"手续费", m_book:"盘口状态",
+  m_orderbook:"订单簿",
+  m_backed:"每一笔挂单都有已存入的库存支撑",
+  m_anysize:"全部数量", m_anyprem:"全部溢价",
+  m_allsellers:"全部卖家", m_youpay:"每 1 个支付",
+  m_seller:"卖家", m_buy:"买入", m_sell:"卖出",
+  m_orders:"我的订单", m_amtbuy:"买入数量",
+  m_recv:"接收的 Arc 地址", m_prem:"溢价 %",
+  m_amtdep:"存入数量", m_whatpay:"你支付多少",
+  m_whopays:"2% 手续费由谁承担",
+  m_purchases:"买入记录", m_myoffers:"我的挂单",
+  m_prints:"最近成交", m_other:"Arc 上的其他代币",
+  m_cashout:"清理零散代币", m_history:"记录",
+  m_recover:"恢复中断的提现", m_bridgebtn:"跨链桥",
+  m_bridge:"跨链桥", m_terms:"条款", m_risk:"风险提示",
+  m_privacy:"隐私", m_source:"源码", m_choosewallet:"选择钱包",
+  m_what:"卖家自行定价。在 Base 上付款，<b>一分钟内在 Arc 上收到</b>。没到账会自动退款。",
+  m_paytext:"盘口价格就是每个 Arc USDC 你要付的钱，已含溢价和 2% 手续费。交付失败全额退回。",
+  m_feetext:"由买家承担。我们用 Arc USDC 收取，所以挂单数量比存入量略少，而你的溢价作用于挂出的数量。",
+  m_accept:"继续即表示你接受<a href='/terms'>使用条款</a>和<a href='/risk'>风险披露</a>。",
+  m_flow:"存入 <b>100.00</b> &rarr; 挂出 <b>98.039215</b> &rarr; 按 20% 溢价全部卖出可得 <b>117.647058</b> USDC <span class='dim'>(买方支付 120.00)</span>",
+  m_wait:"没卖掉的部分随时可以取回。想立刻取出，请使用<a href='/bridge'>跨链桥</a>。",
+  m_exit:"需要立刻取出？<b>请使用跨链桥。</b>手续费 2%。"
+ }};
+(function(){
+  var root=document.documentElement, box=document.getElementById("lang");
+  if(!box) return;
+  var LANG="en";
+  try{ LANG=localStorage.getItem("arcExitLang")||"en"; }catch(e){}
+  if(!M_I18N[LANG]) LANG="en";
+  /* The English strings live in the markup, so switching back to English means
+     restoring what was there rather than looking anything up. Capture it once. */
+  var ORIG={};
+  document.querySelectorAll("[data-t]").forEach(function(el){
+    ORIG[el.getAttribute("data-t")]=el.textContent; });
+  document.querySelectorAll("[data-h]").forEach(function(el){
+    ORIG[el.getAttribute("data-h")]=el.innerHTML; });
+  function apply(){
+    root.lang = LANG==="zh" ? "zh-CN" : LANG;
+    var d=M_I18N[LANG]||{};
+    document.querySelectorAll("[data-t]").forEach(function(el){
+      var k=el.getAttribute("data-t");
+      el.textContent = d[k]!==undefined ? d[k] : ORIG[k]; });
+    document.querySelectorAll("[data-h]").forEach(function(el){
+      var k=el.getAttribute("data-h");
+      el.innerHTML = d[k]!==undefined ? d[k] : ORIG[k]; });
+    box.querySelectorAll("button").forEach(function(b){
+      var on=b.getAttribute("data-lang")===LANG;
+      b.classList.toggle("on",on); b.setAttribute("aria-pressed",String(on)); });
+    /* The trading script owns its own strings and repaints itself; this only
+       tells it which language to use. Guarded because the preview page ships
+       without that script. */
+    if(typeof window.__setTradingLang==="function") window.__setTradingLang(LANG);
+  }
+  box.querySelectorAll("button").forEach(function(b){
+    b.onclick=function(){
+      LANG=b.getAttribute("data-lang");
+      try{ localStorage.setItem("arcExitLang",LANG); }catch(e){}
+      apply(); };
+  });
+  apply();
+})();
+/* The toggle. Kept apart from the trading script, which is copied in verbatim
+   and must stay that way. The label names the mode you would switch TO, so the
+   button always reads as an action rather than a status. */
+(function(){
+  var root=document.documentElement, btn=document.getElementById("theme-toggle");
+  if(!btn) return;
+  var mql=window.matchMedia("(prefers-color-scheme: dark)");
+  function current(){
+    return root.dataset.theme || (mql.matches ? "dark" : "dark");
+  }
+  function paint(){
+    var other = current()==="dark" ? "light" : "dark";
+    /* The glyph names the mode you would switch TO: a sun to go light, a moon
+       to go dark. A word here would be one more thing to translate and reads
+       as a status rather than an action. */
+    btn.textContent = other==="dark" ? "☾" : "☀";
+    btn.setAttribute("aria-label","Switch to "+other+" theme");
+  }
+  btn.onclick=function(){
+    var next = current()==="dark" ? "light" : "dark";
+    root.dataset.theme=next;
+    try{ localStorage.setItem("arc-theme",next); }catch(e){}
+    paint();
+  };
+  mql.addEventListener("change",paint);
+  paint();
+})();
+</script>
+<script>
+"use strict";
+/* ---- language ---------------------------------------------------------
+   Every string a person reads here is looked up rather than written inline.
+   The key IS the English sentence: English needs no table, a missing entry
+   falls back to something a reader can act on instead of an identifier, and
+   the code still says what it will show. The page chrome switches this by
+   calling __setTradingLang, and stores the choice under the same key the
+   bridge uses so one choice covers both pages. */
+let SLANG="en";
+try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
+const TS={
+ ko:{
+  "Connect wallet":"지갑 연결",
+  "Your wallet is a smart contract on Base. Enter the Arc address that should receive the USDC (it may differ).":"이 지갑은 Base의 스마트 컨트랙트입니다. USDC를 받을 Arc 주소를 입력하십시오. 지갑 주소와 다를 수 있습니다.",
+  "No wallet found. Install MetaMask or OKX.":"지갑을 찾지 못했습니다. MetaMask 또는 OKX를 설치하십시오.",
+  "No account was shared.":"지갑이 계정을 넘겨주지 않았습니다.",
+  "Base balance ":"Base 잔고 ",
+  "MAX ":"최대 ",
+  "Arc RPC unreachable":"Arc RPC 응답 없음",
+  "live":"실시간",
+  "RPC unreachable":"RPC 응답 없음",
+  "No open offers. Be the first to post on the Sell tab.":"올라온 매물이 없습니다. 판매 탭에서 첫 매물을 올려 보십시오.",
+  "No offers match the filters.":"필터에 맞는 매물이 없습니다.",
+  "The escrow contract is being deployed. The book below goes live the moment it lands.":"에스크로 컨트랙트를 배포하는 중입니다. 배포되는 즉시 아래 호가창이 열립니다.",
+  "The book opens when the escrow contract lands.":"에스크로 컨트랙트가 배포되면 호가창이 열립니다.",
+  "<b>New purchases are paused right now.</b> Existing orders still deliver, refund, and withdraw as normal.":"<b>지금은 신규 구매가 멈춰 있습니다.</b> 기존 주문의 배달과 환불, 출금은 평소대로 됩니다.",
+  "No settlement has been observed in the last 24h. Buyers are always protected by the automatic refund; <b>sellers should test with a small deposit first</b>.":"최근 24시간 동안 정산 기록이 없습니다. 구매자는 자동 환불로 보호되지만, <b>판매자는 소액으로 먼저 시험해 보십시오</b>.",
+  "No offer can fill that amount":"그 수량을 채울 매물이 없습니다",
+  "No open offers":"올라온 매물 없음",
+  "Enter an amount":"수량을 입력하십시오",
+  "You receive on Arc":"Arc에서 받는 수량",
+  "Seller premium":"판매자 프리미엄",
+  "Service fee":"서비스 수수료",
+  "You pay on Base":"Base에서 내는 금액",
+  "New fills are paused":"신규 체결이 멈춰 있습니다",
+  "Pay {0} USDC on Base":"Base에서 {0} USDC 결제",
+  "Premium":"프리미엄",
+  "Available":"판매 가능",
+  "Base USDC per 1 Arc USDC, last trade ":"Arc USDC 1개당 Base USDC, 최근 체결 ",
+  "just now":"방금",
+  "{0}m ago":"{0}분 전",
+  "{0}h ago":"{0}시간 전",
+  "{0}d ago":"{0}일 전",
+  "Enter an amount the book can fill.":"호가창이 채울 수 있는 수량을 입력하십시오.",
+  "Recipient must be a full 0x address (the Arc wallet that should receive the USDC).":"받는 주소는 완전한 0x 주소여야 합니다. USDC를 받을 Arc 지갑 주소입니다.",
+  "Checking allowance…":"승인 한도 확인 중…",
+  "1/2 approve the exact amount in your wallet":"1/2 지갑에서 정확한 금액을 승인하십시오",
+  "2/2 confirm the purchase":"2/2 구매를 확정하십시오",
+  "The offer changed while approving. Check the price and pick again.":"승인하는 사이에 매물이 바뀌었습니다. 가격을 확인하고 다시 고르십시오.",
+  "Transaction reverted - the offer may have just been taken. Pick again.":"거래가 되돌려졌습니다. 방금 다른 사람이 가져갔을 수 있습니다. 다시 고르십시오.",
+  "Paid into escrow.":"에스크로에 결제했습니다.",
+  "Delivery of {0} USDC to":"{0} USDC 배달이",
+  "is on its way - usually under a minute.":"진행 중입니다. 보통 1분 안에 끝납니다.",
+  "Track it in <b>My orders</b>; if it cannot be delivered, the payment refunds itself.":"<b>내 주문</b>에서 확인할 수 있고, 배달되지 못하면 결제 금액은 저절로 환불됩니다.",
+  "Opens at launch":"출시하면 열립니다",
+  "Enter premium and amount":"프리미엄과 수량을 입력하십시오",
+  "Premium out of range (0-10,000%).":"프리미엄이 범위를 벗어났습니다 (0에서 10,000%).",
+  "Amount is too small to list.":"등록하기에 너무 작은 수량입니다.",
+  "You deposit (Arc USDC)":"예치하는 Arc USDC",
+  "Listed for sale, after the {0}% fee":"수수료 {0}% 제외 후 등록 수량",
+  "If fully sold you receive on Base":"전량 팔리면 Base에서 받는 금액",
+  "Deposit & list":"예치하고 등록",
+  "Fill premium and amount.":"프리미엄과 수량을 채우십시오.",
+  "The market opens when the escrow contract lands. Deposits are disabled until then.":"에스크로 컨트랙트가 배포되면 시장이 열립니다. 그때까지 예치는 막혀 있습니다.",
+  "1/3 approve the vault on Arc…":"1/3 Arc에서 금고를 승인하십시오…",
+  "2/3 deposit into the vault…":"2/3 금고에 예치하십시오…",
+  "3/3 list the offer on Base…":"3/3 Base에 매물을 등록하십시오…",
+  "Vault deposit reverted.":"금고 예치가 되돌려졌습니다.",
+  "Deposit event not found. If USDC left your wallet, open My orders to withdraw it.":"예치 기록을 찾지 못했습니다. USDC가 지갑에서 나갔다면 내 주문에서 출금하십시오.",
+  "Live.":"등록됐습니다.",
+  "Fills now deliver themselves; you can walk away. Keep this tab open to get a sale alert, or just check back - either way nothing depends on you.":"이제 체결은 알아서 배달됩니다. 자리를 비우셔도 됩니다. 이 탭을 열어 두면 판매 알림을 받고, 아니면 나중에 확인하셔도 됩니다. 어느 쪽이든 사람 손이 필요 없습니다.",
+  "Listing did not go through. Your deposit is safe in the vault - open My orders and use Withdraw (vault #":"등록이 되지 않았습니다. 예치금은 금고에 안전합니다. 내 주문에서 출금하십시오 (금고 #",
+  "Delist":"내리기",
+  "unlisted":"미등록",
+  "Refund":"환불",
+  "refund available":"환불 가능",
+  "Refunding your payment…":"결제 금액을 환불하는 중…",
+  "Refund did not go through - it may have just been auto-refunded or delivered. Refreshing.":"환불이 되지 않았습니다. 방금 자동 환불되었거나 배달되었을 수 있습니다. 다시 불러옵니다.",
+  "Refunded to your wallet.":"지갑으로 환불했습니다.",
+  "None yet.":"아직 없습니다.",
+  "Could not load your orders (RPC). ":"주문을 불러오지 못했습니다 (RPC). ",
+  "Withdraw":"출금",
+  "Withdrawing from the vault on Arc…":"Arc 금고에서 출금하는 중…",
+  "Vault balance withdrawn to your wallet.":"금고 잔액을 지갑으로 출금했습니다.",
+  "Withdraw reverted - the balance may have changed. Refreshing.":"출금이 되돌려졌습니다. 잔액이 바뀌었을 수 있습니다. 다시 불러옵니다.",
+  "Arc OTC - sold":"Arc OTC 판매 완료"
+ },
+ zh:{
+  "Connect wallet":"连接钱包",
+  "Your wallet is a smart contract on Base. Enter the Arc address that should receive the USDC (it may differ).":"你的钱包是 Base 上的智能合约。请填写接收 USDC 的 Arc 地址，它可能与钱包地址不同。",
+  "No wallet found. Install MetaMask or OKX.":"未找到钱包。请安装 MetaMask 或 OKX。",
+  "No account was shared.":"钱包没有提供账户。",
+  "Base balance ":"Base 余额 ",
+  "MAX ":"最大 ",
+  "Arc RPC unreachable":"Arc RPC 无法连接",
+  "live":"实时",
+  "RPC unreachable":"RPC 无法连接",
+  "No open offers. Be the first to post on the Sell tab.":"暂无挂单。到卖出页发布第一笔吧。",
+  "No offers match the filters.":"没有符合筛选条件的挂单。",
+  "The escrow contract is being deployed. The book below goes live the moment it lands.":"托管合约正在部署。部署完成后下方盘口立即开放。",
+  "The book opens when the escrow contract lands.":"托管合约部署后盘口开放。",
+  "<b>New purchases are paused right now.</b> Existing orders still deliver, refund, and withdraw as normal.":"<b>目前暂停新的买入。</b>已有订单的交付、退款和提取一切照常。",
+  "No settlement has been observed in the last 24h. Buyers are always protected by the automatic refund; <b>sellers should test with a small deposit first</b>.":"过去 24 小时没有观察到成交。买家始终受自动退款保护，<b>卖家请先用小额试一次</b>。",
+  "No offer can fill that amount":"没有挂单能满足该数量",
+  "No open offers":"暂无挂单",
+  "Enter an amount":"请输入数量",
+  "You receive on Arc":"你在 Arc 上收到",
+  "Seller premium":"卖家溢价",
+  "Service fee":"服务费",
+  "You pay on Base":"你在 Base 上支付",
+  "New fills are paused":"已暂停新的成交",
+  "Pay {0} USDC on Base":"在 Base 上支付 {0} USDC",
+  "Premium":"溢价",
+  "Available":"可买",
+  "Base USDC per 1 Arc USDC, last trade ":"每 1 个 Arc USDC 的 Base USDC，最近成交 ",
+  "just now":"刚刚",
+  "{0}m ago":"{0} 分钟前",
+  "{0}h ago":"{0} 小时前",
+  "{0}d ago":"{0} 天前",
+  "Enter an amount the book can fill.":"请输入盘口能够成交的数量。",
+  "Recipient must be a full 0x address (the Arc wallet that should receive the USDC).":"接收地址必须是完整的 0x 地址，也就是接收 USDC 的 Arc 钱包。",
+  "Checking allowance…":"正在检查授权额度…",
+  "1/2 approve the exact amount in your wallet":"1/2 在钱包中授权确切金额",
+  "2/2 confirm the purchase":"2/2 确认买入",
+  "The offer changed while approving. Check the price and pick again.":"授权期间挂单发生了变化。请核对价格后重新选择。",
+  "Transaction reverted - the offer may have just been taken. Pick again.":"交易被回滚，该挂单可能刚被别人买走。请重新选择。",
+  "Paid into escrow.":"已付入托管。",
+  "Delivery of {0} USDC to":"{0} USDC 正在发往",
+  "is on its way - usually under a minute.":"通常一分钟内到账。",
+  "Track it in <b>My orders</b>; if it cannot be delivered, the payment refunds itself.":"可在<b>我的订单</b>中查看；如果无法交付，款项会自动退回。",
+  "Opens at launch":"上线后开放",
+  "Enter premium and amount":"请输入溢价和数量",
+  "Premium out of range (0-10,000%).":"溢价超出范围（0 到 10,000%）。",
+  "Amount is too small to list.":"数量太小，无法挂单。",
+  "You deposit (Arc USDC)":"你存入的 Arc USDC",
+  "Listed for sale, after the {0}% fee":"扣除 {0}% 手续费后的挂单数量",
+  "If fully sold you receive on Base":"全部售出后你在 Base 上收到",
+  "Deposit & list":"存入并挂单",
+  "Fill premium and amount.":"请填写溢价和数量。",
+  "The market opens when the escrow contract lands. Deposits are disabled until then.":"托管合约部署后市场开放。在此之前无法存入。",
+  "1/3 approve the vault on Arc…":"1/3 在 Arc 上授权金库…",
+  "2/3 deposit into the vault…":"2/3 存入金库…",
+  "3/3 list the offer on Base…":"3/3 在 Base 上挂单…",
+  "Vault deposit reverted.":"金库存入被回滚。",
+  "Deposit event not found. If USDC left your wallet, open My orders to withdraw it.":"未找到存入记录。如果 USDC 已离开你的钱包，请在我的订单中提取。",
+  "Live.":"已挂单。",
+  "Fills now deliver themselves; you can walk away. Keep this tab open to get a sale alert, or just check back - either way nothing depends on you.":"成交现在会自动交付，你可以离开。保持此标签页打开可以收到成交提醒，或稍后再来查看，两种方式都不需要你守着。",
+  "Listing did not go through. Your deposit is safe in the vault - open My orders and use Withdraw (vault #":"挂单没有成功。你的存款安全地留在金库里，请在我的订单中提取（金库 #",
+  "Delist":"撤单",
+  "unlisted":"未挂单",
+  "Refund":"退款",
+  "refund available":"可退款",
+  "Refunding your payment…":"正在退回你的款项…",
+  "Refund did not go through - it may have just been auto-refunded or delivered. Refreshing.":"退款没有成功，可能刚刚已自动退款或已交付。正在刷新。",
+  "Refunded to your wallet.":"已退回你的钱包。",
+  "None yet.":"暂无。",
+  "Could not load your orders (RPC). ":"无法加载你的订单（RPC）。",
+  "Withdraw":"提取",
+  "Withdrawing from the vault on Arc…":"正在从 Arc 金库提取…",
+  "Vault balance withdrawn to your wallet.":"金库余额已提取到你的钱包。",
+  "Withdraw reverted - the balance may have changed. Refreshing.":"提取被回滚，余额可能已变化。正在刷新。",
+  "Arc OTC - sold":"Arc OTC 已售出"
+ }};
+const T=(k,...a)=>{
+  const d=TS[SLANG];
+  let v=(d&&d[k]!==undefined)?d[k]:k;
+  a.forEach((x,i)=>{ v=v.split("{"+i+"}").join(x); });
+  return v;
+};
+// ---- chain + contract constants -------------------------------------------
+const OTC_BUILD="o8";
+const ESCROW="0x8eb82c4ed189ed310f3c0a4de44a68b82a05eb7e";
+const VAULT="0xe7f4c15b0919e7707360c0d962322cbccc93abce"; // Arc-side delivery vault
+const ESCROW_BLOCK=50643295;      // escrow deploy block; stats scan starts here
+const BASE_ID=8453, BASE_HEX="0x2105";
+const ARC_ID=5042,  ARC_HEX="0x13b2";
+const BASE_RPCS=["https://mainnet.base.org","https://base-rpc.publicnode.com"];
+const ARC_RPCS=["https://sharc.fun/rpc"];
+const USDC_BASE="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const USDC_ARC="0x3600000000000000000000000000000000000000";
+// Min fill is not a user choice: 1 USDC flat (or the whole offer when the
+// offer itself is smaller). One fewer field, no dust griefing.
+const MIN_FILL=1000000n;
+const SEL={ // escrow (Base)
+  postOffer:"0x9bf50ed7", reduceOffer:"0xf7d2db39", fill:"0x5265cf0e",
+  refund:"0xd7194ccb", offers:"0x2ebb620c", fills:"0x98922f00",
+  nextOfferId:"0x5f5d0655", nextFillId:"0xc56b7923", feeBps:"0x24a9d853",
+  acceptingFills:"0xa6c4bbc3",
+  // vault (Arc)
+  vOpen:"0x35499b4c", vTopUp:"0x91821b21", vWithdraw:"0x254bba5c", voffers:"0xbf36d63f",
+  vAvail:"0x84bed06e",
+  // erc20
+  approve:"0x095ea7b3", allowance:"0xdd62ed3e", balanceOf:"0x70a08231", transfer:"0xa9059cbb"};
+const TOPIC_FILLED="0xad6d72f4dbd1686c3b48668fc7d6e58b72b8f597a601ce4d78ad4392158f506e";
+const TOPIC_SETTLED="0x702d6ba463a9d19f67d6b3ada754d6fffa92a52b279940f1d8b709b29bca6767";
+const TOPIC_DEPOSITED="0xee6b87136d2ce2885b4a10d9e1882eab0e4167f758605e6be14600aa1c163bde";
+
+// ---- tiny rpc/abi helpers --------------------------------------------------
+const pad=(h)=>h.toLowerCase().replace("0x","").padStart(64,"0");
+const hexNum=(n)=>"0x"+BigInt(n).toString(16);
+const numHex=(h)=>BigInt(h||"0x0");
+// Every amount on this page is a 6-decimal integer of micro-USDC, and the old
+// version divided it as a float. Above about nine billion USDC that loses
+// precision and prints a figure that is simply wrong: 999999999999 came back
+// as 999,999,999,999.0001. No real balance is that large, but a money
+// formatter should not have a size at which it starts lying, and the fix costs
+// nothing. Grouped and trimmed exactly as before, in integer arithmetic.
+const usd=(v)=>{
+  let n; try{ n=BigInt(v); }catch(e){ return "0"; }
+  const neg=n<0n, a=neg?-n:n;
+  const frac=(a%1000000n).toString().padStart(6,"0").replace(/0+$/,"");
+  const whole=(a/1000000n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");
+  return (neg?"-":"")+whole+(frac?"."+frac:"");
+};
+const short=(a)=>a?a.slice(0,6)+"…"+a.slice(-4):"";
+async function rpcVia(urls,method,params){
+  let last;
+  for(const u of urls){
+    try{
+      const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});
+      const j=await r.json();
+      if(j.error){last=j.error;continue}
+      return j.result;
+    }catch(e){last=e}
+  }
+  throw last||new Error(method+" failed");
+}
+const baseRead=(m,p)=>rpcVia(BASE_RPCS,m,p);
+const arcRead=(m,p)=>rpcVia(ARC_RPCS,m,p);
+const baseCall=(to,data)=>baseRead("eth_call",[{to,data},"latest"]);
+
+// ---- wallet (lean EIP-6963 with a picker only when it matters) -------------
+let PROV=null,ACCT=null;
+const provs=[];
+window.addEventListener("eip6963:announceProvider",e=>{
+  if(!provs.some(p=>p.info&&e.detail.info&&p.info.uuid===e.detail.info.uuid)) provs.push(e.detail);
+});
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+function pickProvider(){
+  return new Promise((res)=>{
+    if(provs.length===0) return res(window.ethereum||null);
+    if(provs.length===1) return res(provs[0].provider);
+    const box=document.getElementById("wpick"), list=document.getElementById("wlist");
+    list.innerHTML="";
+    for(const p of provs){
+      // DOM-built: extension names and icons must not inject markup here.
+      const b=document.createElement("button");
+      if(p.info&&p.info.icon){const im=document.createElement("img");im.src=p.info.icon;im.alt="";b.appendChild(im);}
+      b.appendChild(document.createTextNode((p.info&&p.info.name)||"Wallet"));
+      b.onclick=()=>{box.style.display="none";res(p.provider)};
+      list.appendChild(b);
+    }
+    const opener=document.activeElement;
+    const shut=()=>{box.style.display="none";res(null);if(opener&&opener.focus)opener.focus()};
+    const xb=document.getElementById("wpick-x");
+    xb.onclick=shut;
+    box.style.display="flex";
+    xb.focus();                 // move focus into the dialog
+    box.onclick=(e)=>{if(e.target===box) shut()};
+  });
+}
+let RECV_TOUCHED=false;   // did the user edit the recipient themselves?
+document.getElementById("buyRecv").addEventListener("input",()=>{RECV_TOUCHED=true;});
+async function adoptAccount(a){
+  ACCT=a||null;
+  document.getElementById("b-connect").textContent=ACCT?short(ACCT):T("Connect wallet");
+  const r=document.getElementById("buyRecv");
+  if(ACCT&&!RECV_TOUCHED){
+    r.value=ACCT;
+    // A Base smart-contract wallet (e.g. Coinbase Smart Wallet) has no contract
+    // at the same address on Arc, so delivering there could strand funds. Warn
+    // and clear the autofill rather than pre-filling a risky recipient.
+    try{
+      const code=await baseRead("eth_getCode",[ACCT,"latest"]);
+      if(code&&code!=="0x"){ r.value="";
+        say(T("Your wallet is a smart contract on Base. Enter the Arc address that should receive the USDC (it may differ).")); }
+    }catch(e){}
+  }
+  refreshBalances(); quote(); sellQuote(); renderMine();
+}
+async function connect(){
+  try{
+    const p=await pickProvider();
+    if(!p){say(T("No wallet found. Install MetaMask or OKX."));return}
+    PROV=p;
+    const acc=await p.request({method:"eth_requestAccounts"});
+    if(!acc||!acc.length){say(T("No account was shared."));return}
+    if(PROV.on&&!PROV._otcWired){
+      PROV._otcWired=true;
+      PROV.on("accountsChanged",a=>adoptAccount((a&&a[0])||null));
+      PROV.on("chainChanged",()=>{ if(ACCT) refreshBalances(); });
+    }
+    await adoptAccount(acc[0]);
+  }catch(e){ say('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+}
+let ARC_BAL=null;   // last known Arc USDC balance, for the MAX button
+async function refreshBalances(){
+  if(!ACCT) return;
+  try{
+    const b=numHex(await baseCall(USDC_BASE,SEL.balanceOf+pad(ACCT)));
+    document.getElementById("buyBal").textContent=T("Base balance ")+usd(b);
+  }catch(e){}
+  try{
+    const a=numHex(await arcRead("eth_call",[{to:USDC_ARC,data:SEL.balanceOf+pad(ACCT)},"latest"]));
+    ARC_BAL=a;
+    document.getElementById("sellBal").textContent=T("MAX ")+usd(a);
+  }catch(e){}
+}
+// Read ARC_BAL live at click time, not a stale closure captured at render.
+document.getElementById("sellBal").onclick=()=>{
+  if(ARC_BAL===null) return;
+  document.getElementById("sellAmt").value=(Number(ARC_BAL)/1e6).toString(); sellQuote();
+};
+async function ensureChain(idHex,addParams){
+  const cur=await PROV.request({method:"eth_chainId"});
+  if(cur===idHex) return;
+  try{ await PROV.request({method:"wallet_switchEthereumChain",params:[{chainId:idHex}]}); }
+  catch(e){
+    // 4902 = chain not added yet: add it, then switch. Any other error (4001
+    // user rejected, etc.) must propagate, not trigger a second add prompt.
+    if(addParams&&(e&&(e.code===4902||e.code===-32603))){
+      await PROV.request({method:"wallet_addEthereumChain",params:[addParams]});
+      await PROV.request({method:"wallet_switchEthereumChain",params:[{chainId:idHex}]}); }
+    else throw e;
+  }
+}
+const ARC_ADD={chainId:ARC_HEX,chainName:"Arc",nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},
+  rpcUrls:ARC_RPCS,blockExplorerUrls:["https://arc.exploreme.pro"]};
+async function sendTx(to,data,chainHex,addParams){
+  await ensureChain(chainHex,addParams);
+  // Wallet RPCs for new chains are routinely stale; feed gas from a live node.
+  const reader=chainHex===ARC_HEX?arcRead:baseRead;
+  const gas=await reader("eth_estimateGas",[{from:ACCT,to,data}]);
+  const tx={from:ACCT,to,data,gas:hexNum((numHex(gas)*15n)/10n)};
+  return PROV.request({method:"eth_sendTransaction",params:[tx]});
+}
+async function waitReceipt(h,reader){
+  for(let i=0;i<120;i++){
+    const r=await reader("eth_getTransactionReceipt",[h]);
+    if(r) return r;
+    await new Promise(s=>setTimeout(s,2500));
+  }
+  throw new Error("no receipt");
+}
+
+// ---- state -----------------------------------------------------------------
+let FEE_BPS=200n, BOOK=[], SELECTED=null, PINNED=false, ACCEPTING=true;
+let SORT={key:"prem",dir:1};
+const FILTER={size:0n,prem:null,seller:""};
+// One predicate for every place the dashboard filters the book, so the row
+// list, the pinned-offer check and auto-pick can never disagree.
+const passF=(o)=>o.eff>=FILTER.size
+  &&(FILTER.prem===null||o.premiumBps<=FILTER.prem)
+  &&(!FILTER.seller||o.maker.toLowerCase().includes(FILTER.seller));
+// Wallet/RPC error strings land in innerHTML; strip markup before they do.
+const esch=(s)=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const say=(t)=>{document.getElementById("say").innerHTML=t};
+const say2=(t)=>{document.getElementById("say2").innerHTML=t};
+const say3=(t)=>{document.getElementById("say3").innerHTML=t};
+function toast(html){
+  const d=document.createElement("div");d.className="toast";d.innerHTML=html;
+  document.getElementById("toasts").appendChild(d);
+  setTimeout(()=>d.remove(),12000);
+}
+
+function comingSoon(){
+  if(ESCROW) return false;
+  document.getElementById("keeperNote").style.display="";
+  document.getElementById("keeperNote").innerHTML=
+    T("The escrow contract is being deployed. The book below goes live the moment it lands.");
+  document.querySelector("#book tbody").innerHTML=
+    '<tr><td colspan="4" class="muted">'+T("The book opens when the escrow contract lands.")+'</td></tr>';
+  return true;
+}
+
+// ---- book ------------------------------------------------------------------
+async function decodeOffer(id){
+  const r=await baseCall(ESCROW,SEL.offers+pad(hexNum(id)));
+  const f=(i)=>r.slice(2+64*i,2+64*(i+1));
+  return {id, maker:"0x"+f(0).slice(24), arcSender:"0x"+f(1).slice(24),
+          premiumBps:Number(BigInt("0x"+f(2))), remaining:BigInt("0x"+f(3)),
+          minFill:BigInt("0x"+f(4)), vaultId:Number(BigInt("0x"+f(5)))};
+}
+async function vaultBal(vid){
+  try{
+    const r=await arcRead("eth_call",[{to:VAULT,data:SEL.voffers+pad(hexNum(vid))},"latest"]);
+    return BigInt("0x"+r.slice(2+64,2+128));
+  }catch(e){ return null; }
+}
+// What a vault offer can still DELIVER, which is its balance minus the venue
+// fee the same delivery pays. Withdraw is unaffected and still returns the raw
+// balance, so the two readers are deliberately separate: quoting a buyer off
+// the raw balance would offer a size the vault reverts on, and quoting a
+// seller's withdraw off this one would strand the fee-sized remainder.
+async function vaultAvail(vid){
+  try{
+    const r=await arcRead("eth_call",[{to:VAULT,data:SEL.vAvail+pad(hexNum(vid))},"latest"]);
+    return BigInt(r);
+  }catch(e){ return null; }
+}
+// A fill can take min(remaining, vault balance); taking the WHOLE remaining
+// additionally bypasses minFill (the contract's rump rule). Keep this the
+// single source of truth for what is buyable, used by both the row dimming
+// and the pre-flight check, so screen and chain can never disagree.
+function canFill(o,amt){
+  if(amt<=0n||amt>o.eff) return false;
+  if(amt>=o.minFill) return true;
+  return amt===o.remaining;            // rump: whole remainder only
+}
+async function loadBook(){
+  if(comingSoon()) return;
+  try{
+    FEE_BPS=numHex(await baseCall(ESCROW,SEL.feeBps));
+    document.getElementById("feeShow").textContent=(Number(FEE_BPS)/100)+"%";
+    const n=Number(numHex(await baseCall(ESCROW,SEL.nextOfferId)));
+    // Newest first, bounded scan: posting is nearly free, so an oldest-first
+    // cap would let junk bury every real offer posted after it.
+    const ids=[]; for(let i=n-1;i>=1&&ids.length<400;i--) ids.push(i);
+    const offers=[];
+    for(let i=0;i<ids.length;i+=10){
+      const chunk=await Promise.all(ids.slice(i,i+10).map(decodeOffer));
+      offers.push(...chunk);
+    }
+    // Whether the escrow is accepting fills at all. During an owner pause the
+    // book still renders (so sellers can withdraw) but buying is disabled.
+    try{ ACCEPTING=numHex(await baseCall(ESCROW,SEL.acceptingFills))!==0n; }catch(e){ ACCEPTING=true; }
+    // Vault lookups only for offers that could possibly show (listed, funded
+    // mode, still has size) - the Arc RPC is a single public endpoint and
+    // does not deserve 400 calls every refresh.
+    const live=offers.filter(o=>o.vaultId>0&&o.remaining>0n).slice(0,60);
+    let vaultFails=0;
+    for(const o of live){
+      const vb=await vaultAvail(o.vaultId);
+      if(vb===null) vaultFails++;
+      // null = Arc read failed (unknown), not zero backing. Only a real zero
+      // balance removes an offer; a failed read leaves eff undefined so the
+      // offer is not falsely shown as sold out.
+      o.eff=(vb===null)?null:(o.remaining<vb?o.remaining:vb);
+    }
+    // If every vault read failed, the delivery-side chain is unreachable. Keep
+    // the last good book instead of flashing an empty "no offers" venue.
+    if(live.length&&vaultFails===live.length){
+      setBookAge("Arc RPC unreachable");
+      renderBook();
+      return;
+    }
+    BOOK=live.filter(o=>o.eff!==null&&o.eff>0n).sort((a,b)=>a.premiumBps-b.premiumBps);
+    renderBook();
+    setBookAge("live");
+    keeperLiveness();
+  }catch(e){ setBookAge("RPC unreachable"); }
+}
+function renderBook(){
+  const amt=parseAmt(document.getElementById("buyAmt").value)||0n;
+  // Auto-pick the cheapest offer that can fill the typed amount, unless the
+  // user pinned one by clicking; a pinned offer that can no longer fill
+  // unpins itself rather than silently misquoting.
+  if(PINNED&&SELECTED){
+    const cur=BOOK.find(o=>o.id===SELECTED.id);
+    const visible=cur&&passF(cur);
+    if(!cur||!visible||(amt>0n&&!canFill(cur,amt))) PINNED=false; else SELECTED=cur;
+  }
+  if(!PINNED){
+    SELECTED=amt>0n?(BOOK.find(o=>canFill(o,amt))||null):null;
+  }
+  // Dashboard filters HIDE rows; the typed buy amount only DIMS them.
+  let rows=BOOK.filter(passF);
+  rows=rows.slice().sort((a,b)=>SORT.key==="prem"
+    ?(a.premiumBps-b.premiumBps)*SORT.dir
+    :(a.eff===b.eff?0:(a.eff<b.eff?-1:1))*SORT.dir);
+  // Auto-pick works over what is visible, so filters and BEST never disagree.
+  if(!PINNED){
+    SELECTED=amt>0n?(rows.slice().sort((a,b)=>a.premiumBps-b.premiumBps)
+      .find(o=>canFill(o,amt))||null):null;
+  }
+  // stat tiles derived from the live book
+  const cheapest=BOOK.length?BOOK.reduce((m,o)=>o.premiumBps<m.premiumBps?o:m):null;
+  document.getElementById("stBest").textContent=cheapest
+    ?(((10000+cheapest.premiumBps)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3)+"\u00d7"):"-";
+  document.getElementById("stOffers").textContent=String(BOOK.length);
+  document.getElementById("stAvail").textContent=
+    BOOK.length?usd(BOOK.reduce((t,o)=>t+o.eff,0n)):"0";
+  const tb=document.querySelector("#book tbody");
+  // Remember which offer the keyboard was on, so a 30s rebuild does not dump
+  // focus to <body>; restore it to the same offer's new row after rebuild.
+  const active=document.activeElement;
+  const focusedId=(active&&active.closest&&active.closest("#book tr"))?active.__oid:null;
+  tb.innerHTML="";
+  for(const o of rows){
+    const allin=(10000+o.premiumBps)/10000*(1+Number(FEE_BPS)/10000);
+    const eligible=amt===0n||canFill(o,amt);
+    const tr=document.createElement("tr");
+    tr.__oid=o.id;
+    tr.className=(eligible?"click":"click off")+(SELECTED&&SELECTED.id===o.id?" sel":"");
+    const best=SELECTED&&SELECTED.id===o.id&&!PINNED&&amt>0n;
+    tr.innerHTML=`<td>${(o.premiumBps/100).toFixed(2)}%${best?'<span class="pill">BEST</span>':''}</td>
+      <td>${allin.toFixed(3)}×</td>
+      <td>${usd(o.eff)}</td>
+      <td class="mono tiny">${esch(short(o.maker))}</td>`;
+    tr.onclick=()=>{SELECTED=o;PINNED=true;renderBook();};
+    tr.tabIndex=0;
+    tr.onkeydown=(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tr.onclick();}};
+    tb.appendChild(tr);
+  }
+  if(focusedId!=null){
+    const again=[...tb.children].find(r=>r.__oid===focusedId);
+    if(again) again.focus();
+  }
+  if(!BOOK.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No open offers. Be the first to post on the Sell tab.")+'</td></tr>';
+  else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
+  quote();
+}
+async function keeperLiveness(){
+  const note=document.getElementById("keeperNote");
+  if(!ACCEPTING){
+    note.style.display="";
+    note.innerHTML=T("<b>New purchases are paused right now.</b> Existing orders still deliver, refund, and withdraw as normal.");
+    return;
+  }
+  try{
+    const tip=Number(numHex(await baseRead("eth_blockNumber",[])));
+    // 24h of Base blocks is far past the 10,000-block getLogs cap, so walk it
+    // in chunks; a single wide query throws and the canary never shows.
+    const logs=await getLogsChunked(ESCROW,[TOPIC_SETTLED],Math.max(0,tip-43200),tip);
+    if(!logs.length){
+      note.style.display="";
+      note.innerHTML=T("No settlement has been observed in the last 24h. Buyers are always protected by the automatic refund; <b>sellers should test with a small deposit first</b>.");
+    } else note.style.display="none";
+  }catch(e){}
+}
+
+// ---- buy flow --------------------------------------------------------------
+function parseAmt(s){ // USDC 6dp
+  s=String(s||"").trim();   // a pasted figure often arrives with spaces
+  if(!/^\d+(\.\d{0,6})?$/.test(s)) return null;
+  // Pad the FRACTION to 6 places (right-pad), then concatenate. The earlier
+  // form padded between integer and fraction, so "1.5" became 1.000005.
+  const [a,b=""]=s.split("."); return BigInt(a+(b+"000000").slice(0,6));
+}
+function quote(){
+  const q=document.getElementById("buyQuote");
+  const btn=document.getElementById("b-buy");
+  const amt=parseAmt(document.getElementById("buyAmt").value);
+  if(!amt||!SELECTED||!canFill(SELECTED,amt)){
+    q.style.display="none";
+    btn.disabled=true;
+    btn.textContent=ACCT?(amt?(BOOK.length?T("No offer can fill that amount"):T("No open offers"))
+                              :T("Enter an amount")):T("Connect wallet");
+    if(!ACCT) btn.disabled=false, btn.textContent=T("Connect wallet");
+    return null;
+  }
+  const proceeds=amt*(10000n+BigInt(SELECTED.premiumBps))/10000n;
+  const fee=(proceeds*FEE_BPS+9999n)/10000n;
+  const paid=proceeds+fee;
+  q.style.display="";
+  q.innerHTML=`<div><span>${T("You receive on Arc")}</span><b>${usd(amt)} USDC</b></div>
+    <div><span>${T("Seller premium")} (${(SELECTED.premiumBps/100).toFixed(2)}%)</span><span>${usd(proceeds-amt)}</span></div>
+    <div><span>${T("Service fee")} (${Number(FEE_BPS)/100}%)</span><span>${usd(fee)}</span></div>
+    <div><span>${T("You pay on Base")}</span><b>${usd(paid)} USDC</b></div>`;
+  // Do not walk a buyer into approve+fill while fills are paused: the fill
+  // would revert after they already spent gas on the approval.
+  if(!ACCEPTING){ btn.disabled=true; btn.textContent=T("New fills are paused"); return null; }
+  btn.disabled=!ACCT;
+  btn.textContent=ACCT?T("Pay {0} USDC on Base",usd(paid)):T("Connect wallet");
+  return {amt,proceeds,fee,paid};
+}
+document.getElementById("buyAmt").addEventListener("input",()=>{PINNED=false;renderBook();});
+document.getElementById("fSize").addEventListener("input",e=>{
+  FILTER.size=parseAmt(e.target.value)||0n;PINNED=false;renderBook();});
+document.getElementById("fPrem").addEventListener("input",e=>{
+  const v=e.target.value;
+  FILTER.prem=/^\d+(\.\d{0,2})?$/.test(v)?Math.round(parseFloat(v)*100):null;
+  PINNED=false;renderBook();});
+document.getElementById("fSell").addEventListener("input",e=>{
+  FILTER.seller=e.target.value.trim().toLowerCase();PINNED=false;renderBook();});
+function setSort(key){
+  SORT.dir=SORT.key===key?-SORT.dir:1;SORT.key=key;
+  paintSortHeaders();
+}
+/* Kept apart from setSort so a language switch can repaint these without
+   reversing the reader's sort. */
+function paintSortHeaders(){
+  document.getElementById("th-prem").textContent=T("Premium")+(SORT.key==="prem"?(SORT.dir===1?" \u2191":" \u2193"):"");
+  document.getElementById("th-avail").textContent=T("Available")+(SORT.key==="avail"?(SORT.dir===1?" \u2191":" \u2193"):"");
+  document.getElementById("th-prem").setAttribute("aria-sort",
+    SORT.key==="prem"?(SORT.dir===1?"ascending":"descending"):"none");
+  document.getElementById("th-avail").setAttribute("aria-sort",
+    SORT.key==="avail"?(SORT.dir===1?"ascending":"descending"):"none");
+  renderBook();
+}
+
+/* The page chrome calls this when the reader picks a language. It repaints
+   from cached state rather than refetching: nothing on chain changed, only the
+   words did. Each redraw is guarded on its own so a panel that is not on
+   screen cannot stop the rest from updating. */
+window.__setTradingLang=function(l){
+  SLANG=(l==="ko"||l==="zh")?l:"en";
+  try{ paintSortHeaders(); }catch(e){}
+  try{ if(LAST_BOOK_AGE) setBookAge(LAST_BOOK_AGE); }catch(e){}
+  try{ document.getElementById("b-connect").textContent=
+         ACCT?short(ACCT):T("Connect wallet"); }catch(e){}
+  try{ if(LAST_TRADES) renderTrades(LAST_TRADES,LAST_TIP); }catch(e){}
+  try{ quote(); }catch(e){}
+  try{ sellQuote(); }catch(e){}
+  try{ refreshBalances(); }catch(e){}
+  try{ comingSoon(); }catch(e){}
+  try{ if(document.getElementById("v-mine").style.display!=="none") renderMine(); }catch(e){}
+};
+for(const id of ["th-prem","th-avail"]){
+  const th=document.getElementById(id);
+  th.onclick=()=>setSort(id==="th-prem"?"prem":"avail");
+  th.tabIndex=0; th.setAttribute("role","button");
+  th.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();th.onclick();}});
+}
+
+// Cumulative settled count + volume, kept incrementally in localStorage so a
+// visit only ever scans blocks it has not seen. Volume counts maker proceeds
+// of settled fills - money that actually changed hands, refunds excluded.
+// A settled fill also carries the market print (size + implied premium), so the
+// same incremental scan feeds the "Recent trades" list at no extra RPC cost.
+let LAST_TRADES=null,LAST_TIP=0,LAST_BOOK_AGE="";
+/* The status is stored in English and translated on the way to the screen, so
+   a language switch can restate it without another round trip. */
+function setBookAge(k){ LAST_BOOK_AGE=k;
+  document.getElementById("bookAge").textContent=T(k); }
+function renderTrades(list,tip){
+  LAST_TRADES=list; LAST_TIP=tip;
+  const box=document.getElementById("trades");
+  if(!list||!list.length){box.style.display="none";return}
+  box.style.display="";
+  const ago=(b)=>{const m=Math.max(0,Math.round((tip-b)*2/60));   // Base ~2s blocks
+    return m<1?T("just now"):(m<60?T("{0}m ago",m)
+      :(m<2880?T("{0}h ago",Math.floor(m/60)):T("{0}d ago",Math.floor(m/1440))));};
+  document.getElementById("tradeRows").innerHTML=list.slice(0,6).map(t=>
+    '<div class="tr"><span>'+usd(BigInt(t.a))+' USDC <span class="tiny">@ '
+      +(t.p/100).toFixed(2)+'%</span></span><span class="tiny">'+ago(t.b)+'</span></div>'
+  ).join("");
+  // The market page leads with the last print, and the same all-in formula the
+  // board's column uses, so the headline and the rows can never quote two
+  // different prices. This page has no tape, hence the guard rather than a
+  // second copy of the script that would then drift from the tested one.
+  const tp=document.getElementById("tape-price"),tu=document.getElementById("tape-unit");
+  if(tp){
+    const t=list[0];    // recent is unshifted, so index 0 is the newest print
+    tp.textContent=((10000+t.p)/10000*(1+Number(FEE_BPS)/10000)).toFixed(3);
+    // "flat" greys the price out until a print exists. Which element carries
+    // it is a markup decision, so clear it on both rather than pinning the
+    // script to one shape of the page.
+    tp.classList.remove("flat");
+    if(tp.parentElement) tp.parentElement.classList.remove("flat");
+    if(tu) tu.textContent=T("Base USDC per 1 Arc USDC, last trade ")+ago(t.b);
+  }
+}
+async function computeStats(){
+  if(comingSoon()) return;
+  let st={cursor:ESCROW_BLOCK,trades:0,vol:"0",recent:[]};
+  try{const raw=localStorage.getItem("otc-stats-v1");if(raw) st=JSON.parse(raw);}catch(e){}
+  // Harden against a malformed/older blob so one bad field cannot throw every
+  // 60s or poison the counters.
+  // These checks used to test the TYPE of each field and stop there, which let
+  // a negative trade count through and put "-4 settled" on screen. A stored
+  // blob is not trusted input: it survives schema changes, half-written saves
+  // and anything the visitor's own devtools did to it. Check the range too.
+  if(!st||typeof st!=="object") st={cursor:ESCROW_BLOCK,trades:0,vol:"0",recent:[]};
+  st.cursor=Number.isFinite(st.cursor)?Math.max(ESCROW_BLOCK,Math.floor(st.cursor)):ESCROW_BLOCK;
+  st.trades=Number.isFinite(st.trades)?Math.max(0,Math.floor(st.trades)):0;
+  if(!/^\d+$/.test(String(st.vol))) st.vol="0";
+  // Every print is read back as a number and a block height. One malformed
+  // entry would throw inside the render and silently take the whole list with
+  // it, so they are filtered rather than trusted.
+  st.recent=Array.isArray(st.recent)?st.recent.filter(x=>x&&typeof x==="object"
+    &&/^\d+$/.test(String(x.a))&&Number.isFinite(x.p)&&Number.isFinite(x.b)):[];
+  try{
+    const tip=Number(numHex(await baseRead("eth_blockNumber",[])));
+    // Never let the cursor move backward: an RPC failover to a lagging node
+    // would re-scan already-counted settles and inflate volume forever.
+    if(tip<st.cursor){
+      document.getElementById("stDone").textContent=st.trades+" · "+usd(BigInt(st.vol));
+      renderTrades(st.recent,st.cursor); return;
+    }
+    let b=st.cursor+1, vol=BigInt(st.vol);
+    while(b<=tip){
+      const e=Math.min(b+8999,tip);
+      const logs=await baseRead("eth_getLogs",[{address:ESCROW,
+        fromBlock:hexNum(b),toBlock:hexNum(e),topics:[TOPIC_SETTLED]}]);
+      for(const L of logs){
+        const fid=Number(BigInt(L.topics[1]));
+        const f=await decodeFill(fid);
+        st.trades+=1; vol+=f.proceeds;
+        const prem=f.amountArc>0n?Number(f.proceeds*10000n/f.amountArc-10000n):0;
+        st.recent.unshift({a:f.amountArc.toString(),p:prem,b:Number(BigInt(L.blockNumber))});
+      }
+      // Persist per chunk so an interrupted long catch-up keeps its progress.
+      st.recent=st.recent.slice(0,12); st.cursor=e; st.vol=vol.toString();
+      try{localStorage.setItem("otc-stats-v1",JSON.stringify(st));}catch(e2){}
+      b=e+1;
+    }
+    document.getElementById("stDone").textContent=st.trades+" · "+usd(vol);
+    renderTrades(st.recent,tip);
+  }catch(e){
+    document.getElementById("stDone").textContent=(st.trades||0)+" · "+usd(BigInt(st.vol||"0"));
+    renderTrades(st.recent,st.cursor||0);
+  }
+}
+setInterval(computeStats,60000);
+let BUSY=false;   // one in-flight signing flow at a time (buy or sell)
+async function doBuy(){
+  if(!ACCT){connect();return}
+  if(BUSY) return;
+  const qq=quote(); if(!qq){say(T("Enter an amount the book can fill."));return}
+  // Pin the offer and its premium for the whole flow. The book refreshes on a
+  // 30s timer during the approve, which rebinds the global SELECTED; building
+  // the fill from that live global would sign against a different offer than
+  // the one quoted, defeating the on-chain price pin.
+  const off=SELECTED, quotedPrem=off.premiumBps;
+  const {amt,paid}=qq;
+  const rEl=document.getElementById("buyRecv");
+  const recv=rEl.value.trim();
+  if(!/^0x[0-9a-fA-F]{40}$/.test(recv)){
+    rEl.setAttribute("aria-invalid","true"); rEl.focus();
+    say(T("Recipient must be a full 0x address (the Arc wallet that should receive the USDC)."));return}
+  rEl.removeAttribute("aria-invalid");
+  const btn=document.getElementById("b-buy");
+  BUSY=true; btn.disabled=true;
+  try{
+    say(T("Checking allowance…"));
+    const cur=numHex(await baseCall(USDC_BASE,SEL.allowance+pad(ACCT)+pad(ESCROW)));
+    if(cur<paid){
+      say(T("1/2 approve the exact amount in your wallet"));
+      const h=await sendTx(USDC_BASE,SEL.approve+pad(ESCROW)+pad(hexNum(paid)),BASE_HEX);
+      await waitReceipt(h,baseRead);
+    }
+    // Re-verify the pinned offer can still take this amount after the approve;
+    // if the seller withdrew or it filled, stop before signing a bad fill.
+    if(!canFill(off,amt)){
+      say('<span class="bad">'+T("The offer changed while approving. Check the price and pick again.")+'</span>');
+      loadBook();return}
+    say(T("2/2 confirm the purchase"));
+    const data=SEL.fill+pad(hexNum(off.id))+pad(hexNum(amt))+pad(recv)
+      +pad(hexNum(quotedPrem));
+    const h2=await sendTx(ESCROW,data,BASE_HEX);
+    const rc=await waitReceipt(h2,baseRead);
+    if(rc.status!=="0x1"){say('<span class="bad">Transaction reverted - the offer may have just been taken. Pick again.</span>');loadBook();return}
+    say(`<span class="ok">${T("Paid into escrow.")}</span> ${T("Delivery of {0} USDC to",usd(amt))}
+      <span class="mono">${esch(short(recv))}</span> ${T("is on its way - usually under a minute.")}
+      ${T("Track it in <b>My orders</b>; if it cannot be delivered, the payment refunds itself.")}`);
+    refreshBalances();
+    loadBook();
+  }catch(e){ say('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+  finally{ BUSY=false; quote(); }   // quote() restores the button's enabled state
+}
+document.getElementById("b-buy").onclick=doBuy;
+
+// ---- sell flow (deposit once) ----------------------------------------------
+function sellQuote(){
+  const q=document.getElementById("sellQuote");
+  const btn=document.getElementById("b-post");
+  // Until the escrow contract lands, a deposit could not be listed and would
+  // strand funds, so the whole sell action is disabled at the UI too.
+  if(!ESCROW){ q.style.display="none"; btn.disabled=true; btn.textContent=T("Opens at launch"); return null; }
+  const amt=parseAmt(document.getElementById("sellAmt").value);
+  const prem=document.getElementById("sellPrem").value;
+  const okPrem=/^\d+(\.\d{0,2})?$/.test(prem||"");
+  if(!amt||!okPrem){
+    q.style.display="none";
+    btn.disabled=!(!ACCT);
+    btn.textContent=ACCT?T("Enter premium and amount"):T("Connect wallet");
+    if(!ACCT){btn.disabled=false}
+    return null;
+  }
+  const bps=BigInt(Math.round(parseFloat(prem)*100));
+  if(bps<0n||bps>1000000n){
+    q.style.display="";q.innerHTML='<span class="bad">'+T("Premium out of range (0-10,000%).")+'</span>';
+    btn.disabled=true;return null}
+  // The venue fee is taken on the Arc leg: the vault holds it back out of the
+  // same delivery, and the whole Base payment goes to the seller. So a deposit
+  // lists for slightly less than it holds, while what the seller is paid for
+  // what they put in is unchanged - that second number is the headline, and it
+  // is the one shown in bold.
+  const listed=amt*10000n/(10000n+FEE_BPS);
+  if(listed<=0n){
+    q.style.display="";q.innerHTML='<span class="bad">'+T("Amount is too small to list.")+'</span>';
+    btn.disabled=true;return null}
+  const proceeds=listed*(10000n+bps)/10000n;
+  // Mirror the escrow's rounding exactly (fee rounds UP there). A convenient
+  // proceeds*1.02 here would sit one micro-USDC under what the chain actually
+  // pays, and a quote that disagrees with the settlement is a support ticket.
+  const payout=proceeds+(proceeds*FEE_BPS+9999n)/10000n;
+  q.style.display="";
+  q.innerHTML=`<div><span>${T("You deposit (Arc USDC)")}</span><b>${usd(amt)}</b></div>
+    <div><span>${T("Listed for sale, after the {0}% fee",Number(FEE_BPS)/100)}</span><b>${usd(listed)}</b></div>
+    <div><span>${T("If fully sold you receive on Base")}</span><b>${usd(payout)} USDC</b></div>`;
+  btn.disabled=!ACCT;
+  btn.textContent=ACCT?T("Deposit & list"):T("Connect wallet");
+  return {amt,bps,listed};
+}
+document.getElementById("sellAmt").addEventListener("input",sellQuote);
+document.getElementById("sellPrem").addEventListener("input",sellQuote);
+// A vault deposit that never got listed (rejected/failed Base tx, or a deposit
+// made while the market was still coming soon) is otherwise invisible: My
+// offers only walks escrow offers. Record every deposit's vault id locally the
+// instant it lands, so renderMine can always surface a Withdraw path.
+function rememberDeposit(vid){
+  if(!ACCT) return;
+  const k="otc-deposits-"+ACCT.toLowerCase();
+  let a=[]; try{a=JSON.parse(localStorage.getItem(k)||"[]")}catch(e){}
+  if(!a.includes(vid)){a.push(vid); try{localStorage.setItem(k,JSON.stringify(a))}catch(e){}}
+}
+function myDepositIds(){
+  if(!ACCT) return [];
+  try{return JSON.parse(localStorage.getItem("otc-deposits-"+ACCT.toLowerCase())||"[]")}catch(e){return[]}
+}
+async function doPost(){
+  if(!ACCT){connect();return}
+  // The sell flow moves real Arc USDC on step 2 (vOpen). Without an escrow
+  // contract the step-3 listing cannot happen, so a deposit here would strand
+  // funds behind a raw "Invalid params". Refuse before touching the wallet.
+  if(!ESCROW){say2('<span class="warn">The market opens when the escrow contract lands. Deposits are disabled until then.</span>');return}
+  if(BUSY) return;
+  const q=sellQuote(); if(!q){say2(T("Fill premium and amount."));return}
+  const min=q.listed<MIN_FILL?q.listed:MIN_FILL;
+  const btn=document.getElementById("b-post");
+  BUSY=true; btn.disabled=true;
+  try{
+    const cur=numHex(await arcRead("eth_call",[{to:USDC_ARC,
+      data:SEL.allowance+pad(ACCT)+pad(VAULT)},"latest"]));
+    if(cur<q.amt){
+      say2(T("1/3 approve the vault on Arc…"));
+      const h1=await sendTx(USDC_ARC,SEL.approve+pad(VAULT)+pad(hexNum(q.amt)),ARC_HEX,ARC_ADD);
+      await waitReceipt(h1,arcRead);
+    }
+    say2(T("2/3 deposit into the vault…"));
+    const h2=await sendTx(VAULT,SEL.vOpen+pad(hexNum(q.amt)),ARC_HEX,ARC_ADD);
+    const rc2=await waitReceipt(h2,arcRead);
+    if(rc2.status!=="0x1"){say2('<span class="bad">'+T("Vault deposit reverted.")+'</span>');return}
+    const dep=(rc2.logs||[]).find(L=>(L.topics||[])[0]===TOPIC_DEPOSITED);
+    if(!dep){say2('<span class="bad">'+T("Deposit event not found. If USDC left your wallet, open My orders to withdraw it.")+'</span>');return}
+    const vid=BigInt(dep.topics[1]);
+    rememberDeposit(Number(vid));       // backstop before the riskier Base tx
+    say2(T("3/3 list the offer on Base…"));
+    // Listed size is the deposit net of the fee the delivery will pay. Listing
+    // the full deposit would leave the last fill undeliverable by exactly the
+    // fee, and the buyer would sit through the 45-minute refund for nothing.
+    const data=SEL.postOffer+pad(VAULT)+pad(hexNum(q.bps))+pad(hexNum(q.listed))
+      +pad(hexNum(min))+pad(hexNum(vid));
+    const h3=await sendTx(ESCROW,data,BASE_HEX);
+    const rc3=await waitReceipt(h3,baseRead);
+    if(rc3.status==="0x1"){try{
+      if(typeof Notification!=="undefined"&&Notification.permission==="default")
+        Notification.requestPermission();
+    }catch(e){}}
+    say2(rc3.status==="0x1"
+      ?'<span class="ok">'+T("Live.")+'</span> '+T("Fills now deliver themselves; you can walk away. Keep this tab open to get a sale alert, or just check back - either way nothing depends on you.")
+      :'<span class="bad">'+T("Listing did not go through. Your deposit is safe in the vault - open My orders and use Withdraw (vault #")+vid+').</span>');
+    refreshBalances();
+    loadBook();
+    if(document.getElementById("v-mine").style.display!=="none") renderMine();
+  }catch(e){ say2('<span class="bad">'+esch(e&&e.message||e)+"</span>"); }
+  finally{ BUSY=false; sellQuote(); }
+}
+document.getElementById("b-post").onclick=doPost;
+
+// ---- my orders -------------------------------------------------------------
+async function decodeFill(id){
+  const r=await baseCall(ESCROW,SEL.fills+pad(hexNum(id)));
+  const f=(i)=>r.slice(2+64*i,2+64*(i+1));
+  return {id, offerId:Number(BigInt("0x"+f(0))), taker:"0x"+f(1).slice(24),
+          arcRecipient:"0x"+f(2).slice(24), amountArc:BigInt("0x"+f(3)),
+          proceeds:BigInt("0x"+f(4)), paid:BigInt("0x"+f(5)),
+          deadline:Number(BigInt("0x"+f(6))), status:Number(BigInt("0x"+f(7)))};
+}
+const STATUS=["-","delivering…","delivered · settled","refunded"];
+// Chain time, not the client clock: a fast local clock would show "refund
+// available" while the escrow still reverts TooEarly. Cached briefly.
+let CHAIN_NOW=0, CHAIN_NOW_AT=0;
+async function chainNow(){
+  if(Date.now()-CHAIN_NOW_AT<15000&&CHAIN_NOW) return CHAIN_NOW;
+  try{const b=await baseRead("eth_getBlockByNumber",["latest",false]);
+    CHAIN_NOW=Number(BigInt(b.timestamp)); CHAIN_NOW_AT=Date.now();}catch(e){}
+  return CHAIN_NOW||Math.floor(Date.now()/1000);
+}
+let MINE_GEN=0;
+async function renderMine(){
+  if(!ACCT||comingSoon()) return;
+  const gen=++MINE_GEN;                 // supersede any in-flight render
+  const live=()=>gen===MINE_GEN;
+  const me=ACCT.toLowerCase();
+  const fillsT=document.querySelector("#myFills tbody");
+  const offT=document.querySelector("#myOffers tbody");
+  try{
+    const now=await chainNow();
+    const offRows=[], seenVault=new Set();
+
+    // offers I posted (parallel chunks; sequential walks made this tab crawl)
+    const nOff=Number(numHex(await baseCall(ESCROW,SEL.nextOfferId)));
+    const oIds=[]; for(let i=nOff-1;i>=1&&oIds.length<200;i--) oIds.push(i);
+    for(let i=0;i<oIds.length;i+=10){
+      const chunk=await Promise.all(oIds.slice(i,i+10).map(decodeOffer));
+      if(!live()) return;
+      for(const o of chunk){
+        if(o.maker.toLowerCase()!==me) continue;
+        if(o.vaultId>0) seenVault.add(o.vaultId);
+        const vb=o.vaultId>0?await vaultBal(o.vaultId):null;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${o.id}</td><td>${(o.premiumBps/100).toFixed(2)}%</td>
+          <td>${vb===null?"-":usd(vb)}</td><td></td>`;
+        const cell=tr.lastElementChild;
+        if(vb!==null&&vb>0n) cell.appendChild(withdrawBtn(o.vaultId,vb));
+        if(o.remaining>0n){
+          const b=document.createElement("button");b.className="btn small ghost";b.textContent=T("Delist");
+          b.onclick=async()=>{try{
+            b.disabled=true;
+            const h=await sendTx(ESCROW,SEL.reduceOffer+pad(hexNum(o.id))+pad(hexNum(0)),BASE_HEX);
+            await waitReceipt(h,baseRead);renderMine();loadBook();
+          }catch(e){b.disabled=false;say3('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
+          cell.appendChild(b);
+        }
+        offRows.push(tr);
+      }
+    }
+    // Deposits recorded locally that have no escrow offer (listing failed or
+    // was never reached): show them so the money is always withdrawable.
+    for(const vid of myDepositIds()){
+      if(seenVault.has(vid)) continue;
+      let vb=null; try{vb=await vaultBal(vid)}catch(e){}
+      if(!(vb&&vb>0n)) continue;
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>#${vid}</td><td class="muted">${T("unlisted")}</td><td>${usd(vb)}</td><td></td>`;
+      tr.lastElementChild.appendChild(withdrawBtn(vid,vb));
+      offRows.push(tr);
+    }
+
+    // my purchases
+    const fillRows=[];
+    const n=Number(numHex(await baseCall(ESCROW,SEL.nextFillId)));
+    const fIds=[]; for(let i=n-1;i>=1&&fIds.length<200;i--) fIds.push(i);
+    for(let i=0;i<fIds.length;i+=10){
+      const chunk=await Promise.all(fIds.slice(i,i+10).map(decodeFill));
+      if(!live()) return;
+      for(const f of chunk){
+        if(f.taker.toLowerCase()!==me) continue;
+        const refundable=f.status===1&&now>=f.deadline;
+        const tr=document.createElement("tr");
+        const st=refundable?T("refund available"):T(STATUS[f.status]||"?");
+        tr.innerHTML=`<td>${f.id}</td><td>${usd(f.amountArc)}</td><td>${usd(f.paid)}</td><td>${st}</td><td></td>`;
+        if(refundable){
+          const b=document.createElement("button");b.className="btn small bad";b.textContent=T("Refund");
+          b.onclick=async()=>{try{
+            b.disabled=true; say(T("Refunding your payment…"));
+            const h=await sendTx(ESCROW,SEL.refund+pad(hexNum(f.id)),BASE_HEX);
+            const rc=await waitReceipt(h,baseRead);
+            if(rc.status!=="0x1"){b.disabled=false;
+              say('<span class="bad">'+T("Refund did not go through - it may have just been auto-refunded or delivered. Refreshing.")+'</span>');}
+            else say('<span class="ok">'+T("Refunded to your wallet.")+'</span>');
+            refreshBalances();renderMine();
+          }catch(e){b.disabled=false;say('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
+          tr.lastElementChild.appendChild(b);
+        }
+        fillRows.push(tr);
+      }
+    }
+    if(!live()) return;
+    fillsT.innerHTML=""; offT.innerHTML="";
+    offRows.forEach(r=>offT.appendChild(r));
+    fillRows.forEach(r=>fillsT.appendChild(r));
+    if(!fillsT.children.length) fillsT.innerHTML='<tr><td colspan="5" class="muted">'+T("None yet.")+'</td></tr>';
+    if(!offT.children.length) offT.innerHTML='<tr><td colspan="4" class="muted">'+T("None yet.")+'</td></tr>';
+  }catch(e){
+    if(live()) say3('<span class="bad">'+T("Could not load your orders (RPC). ")+esch(e&&e.message||e)+'</span>');
+  }
+}
+function withdrawBtn(vaultId,vb){
+  const bw=document.createElement("button");bw.className="btn small ghost";bw.textContent=T("Withdraw");
+  bw.onclick=async()=>{try{
+    bw.disabled=true; say3(T("Withdrawing from the vault on Arc…"));
+    const h=await sendTx(VAULT,SEL.vWithdraw+pad(hexNum(vaultId))+pad(hexNum(vb)),ARC_HEX,ARC_ADD);
+    const rc=await waitReceipt(h,arcRead);
+    say3(rc.status==="0x1"?'<span class="ok">'+T("Vault balance withdrawn to your wallet.")+'</span>'
+      :'<span class="bad">'+T("Withdraw reverted - the balance may have changed. Refreshing.")+'</span>');
+    refreshBalances();renderMine();loadBook();
+  }catch(e){bw.disabled=false;say3('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
+  return bw;
+}
+
+// ---- sale alerts -----------------------------------------------------------
+// No backend exists, so the page itself watches the chain while it is open:
+// a Filled event against one of my offers becomes a toast + a desktop
+// notification. Sellers do not need to ACT on it (delivery is automatic);
+// this is the "cha-ching", not a to-do. The cursor persists per wallet, so
+// sales that happened while the tab was closed greet the seller on return.
+async function myOfferIdSet(){
+  const me=ACCT.toLowerCase(); const ids=new Set();
+  const n=Number(numHex(await baseCall(ESCROW,SEL.nextOfferId)));
+  const oIds=[]; for(let i=n-1;i>=1&&oIds.length<200;i--) oIds.push(i);
+  for(let i=0;i<oIds.length;i+=10){
+    const chunk=await Promise.all(oIds.slice(i,i+10).map(decodeOffer));
+    for(const o of chunk) if(o.maker.toLowerCase()===me) ids.add(o.id);
+  }
+  return ids;
+}
+// Base RPCs cap eth_getLogs at a 10,000-block range, so any window wider than
+// that must be walked in chunks or it throws on every call. A single unchunked
+// query is why sale alerts silently died after a few hours away.
+const LOG_CHUNK=8999;
+async function getLogsChunked(address,topics,from,to){
+  const out=[];
+  for(let b=from;b<=to;b+=LOG_CHUNK+1){
+    const e=Math.min(b+LOG_CHUNK,to);
+    const logs=await baseRead("eth_getLogs",[{address,fromBlock:hexNum(b),toBlock:hexNum(e),topics}]);
+    out.push(...logs);
+  }
+  return out;
+}
+// A cursor that cannot be persisted (private mode) is kept in memory for the
+// session, so alerts still work while the tab stays open.
+const MEMCUR={};
+function getCur(key){
+  try{const v=localStorage.getItem(key); if(v!=null) return Number(v);}catch(e){}
+  return MEMCUR[key]!=null?MEMCUR[key]:null;
+}
+function setCur(key,v){ MEMCUR[key]=v; try{localStorage.setItem(key,String(v))}catch(e){} }
+async function watchSales(){
+  if(!ACCT||comingSoon()) return;
+  try{
+    const key="otc-sale-cursor-"+ACCT.toLowerCase();
+    const tip=Number(numHex(await baseRead("eth_blockNumber",[])));
+    let cur=getCur(key);
+    if(cur===null){ setCur(key,tip); return; }
+    if(tip<=cur) return;
+    const logs=await getLogsChunked(ESCROW,[TOPIC_FILLED],cur+1,tip);
+    setCur(key,tip);            // advance only after the whole range succeeded
+    if(!logs.length) return;
+    const mine=await myOfferIdSet();
+    let hit=false;
+    for(const L of logs){
+      const offerId=Number(BigInt(L.topics[2]));
+      if(!mine.has(offerId)) continue;
+      hit=true;
+      const amt=BigInt("0x"+L.data.slice(2+64,2+128));
+      // Filled fires at payment time; proceeds move to the seller only after
+      // delivery settles, so word it as pending, not received.
+      toast(`&#9889; Sold ${usd(amt)} Arc USDC. Payment lands after delivery settles.`);
+      try{
+        if(Notification.permission==="granted")
+          new Notification(T("Arc OTC - sold"),{body:`${usd(amt)} USDC sold; payment settles after delivery.`});
+      }catch(e){}
+    }
+    if(hit){ renderMine(); refreshBalances(); }
+  }catch(e){}
+}
+setInterval(watchSales,20000);
+
+// ---- tabs / boot -----------------------------------------------------------
+const tabs={buy:"v-buy",sell:"v-sell",mine:"v-mine"};
+for(const t of ["buy","sell","mine"]){
+  document.getElementById("t-"+t).onclick=()=>{
+    for(const k in tabs){document.getElementById(tabs[k]).style.display=k===t?"":"none";
+      const tb=document.getElementById("t-"+k);
+      tb.classList.toggle("on",k===t); tb.setAttribute("aria-pressed",String(k===t));}
+    if(t==="mine") renderMine();
+  };
+}
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape") return;
+  const box=document.getElementById("wpick");
+  if(box.style.display==="flex") document.getElementById("wpick-x").click();
+});
+document.getElementById("b-connect").onclick=connect;
+document.getElementById("build").textContent="["+OTC_BUILD+"]";
+quote(); sellQuote();          // set initial button states (incl. coming-soon lock)
+loadBook();
+computeStats();
+setInterval(loadBook,30000);
+</script>
+</body>
+</html>
