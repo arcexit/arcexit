@@ -42,13 +42,22 @@
     --rule:#2b343b; --rule2:#3c4750;
     --sig:#6fb4dc; --sig-dim:rgba(111,180,220,.14); --sig-ink:#0b1216;
     --sig-hover:#8cc6e8;
+    /* The other direction. A board colours its two sides apart
+       because they are different trades; money leaving Arc is warm. */
+    --out:#e0a94f; --out-dim:rgba(224,169,79,.15); --out-ink:#16100a;
+    --out-hover:#eebe70;
     --btn-hover:#f2f6f8;
     --bad:#e59a90; --warn:#d9a95f;
     --note-fg:#e0c58c; --note-strong:#f4e6c4;
     --scrim:rgba(6,9,11,.68); --tap:rgba(226,232,236,.14);
     --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%2398a3aa' stroke-width='1.5'/%3E%3C/svg%3E");
-    --mono:"Cascadia Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
-    --sans:"Helvetica Neue",Helvetica,Arial,"Noto Sans KR",sans-serif;
+    --mono:"Cascadia Mono","JetBrains Mono","IBM Plex Mono",ui-monospace,
+      "SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    /* Began at Helvetica Neue and fell through to Arial, which is what
+       almost everyone was actually being served. system-ui gets Windows to
+       Segoe UI, and Pretendard is what a Korean reader most likely has. */
+    --sans:"Inter","Pretendard Variable",Pretendard,system-ui,-apple-system,
+      "Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans KR","Noto Sans SC",sans-serif;
     --t1:11px; --t2:12px; --t3:14px; --t4:16px; --t5:22px; --t6:34px;
     --t7:44px;   /* the headline, and nothing else, so it cannot compete */
     color-scheme:dark;
@@ -60,6 +69,8 @@
       --rule:#c9cec9; --rule2:#a9b0aa;
       --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
       --sig-hover:#0b4b71;
+      --out:#8a5410; --out-dim:rgba(138,84,16,.10); --out-ink:#f7f8f6;
+      --out-hover:#6d420b;
       --btn-hover:#1d2220;
       --bad:#8f2a20; --warn:#7a5510;
       --note-fg:#5f4310; --note-strong:#432f08;
@@ -74,6 +85,8 @@
     --rule:#c9cec9; --rule2:#a9b0aa;
     --sig:#0e5c8a; --sig-dim:rgba(14,92,138,.10); --sig-ink:#f7f8f6;
     --sig-hover:#0b4b71;
+    --out:#8a5410; --out-dim:rgba(138,84,16,.10); --out-ink:#f7f8f6;
+    --out-hover:#6d420b;
     --btn-hover:#1d2220;
     --bad:#8f2a20; --warn:#7a5510;
     --note-fg:#5f4310; --note-strong:#432f08;
@@ -174,16 +187,22 @@
   .leg.get{background:var(--sig-dim)}
   .legtop{display:flex;align-items:center;justify-content:space-between;
     gap:10px;margin:0 0 8px}
-  .legl{font-size:var(--t1);font-weight:600;letter-spacing:.1em;
+  /* The labels give way to the figures. Contrast between the two is what
+     makes this read as a board rather than a form with big text in it. */
+  .legl{font-size:10px;font-weight:600;letter-spacing:.18em;
     text-transform:uppercase;color:var(--muted)}
-  .chip{font-family:var(--mono);font-size:var(--t1);font-weight:700;
-    letter-spacing:.09em;color:var(--ink);background:var(--sink);
-    border:1px solid var(--rule2);padding:3px 8px;border-radius:2px}
+  .chip{font-family:var(--mono);font-size:10px;font-weight:700;
+    letter-spacing:.14em;color:var(--ink);background:var(--sink);
+    border:1px solid var(--rule2);padding:4px 9px;border-radius:2px}
   .legnum{display:flex;align-items:baseline;gap:10px}
   .legnum .slot{flex:1;min-width:0}
+  /* Tabular figures so the two legs align digit under digit, and a slashed
+     zero because that is the ticker convention and money cannot afford the
+     0/O ambiguity. */
   .legnum b,.legnum input{display:block;width:100%;font-family:var(--mono);
-    font-size:38px;line-height:1.05;font-weight:600;letter-spacing:-.02em;
-    font-variant-numeric:tabular-nums;color:var(--ink)}
+    font-size:44px;line-height:1.02;font-weight:600;letter-spacing:-.035em;
+    font-variant-numeric:tabular-nums slashed-zero;
+    font-feature-settings:"tnum" 1,"zero" 1;color:var(--ink)}
   .legnum input{background:none;border:0;padding:0;outline:0;border-radius:0}
   .legnum input::placeholder{color:var(--faint)}
   .legnum input:focus{box-shadow:none}
@@ -203,10 +222,21 @@
   .flip svg{width:13px;height:13px;display:block;flex:none}
   .deskrate{font-family:var(--sans);font-size:var(--t2);color:var(--muted);
     margin:12px 0 0;min-height:1.3em;max-width:62ch}
-  .deskrate b{color:var(--ink);font-weight:600}
+  /* Selling is the other trade, so the desk changes temperature and not only
+     its wording. Four token overrides, scoped to the three elements that
+     carry the signal colour; the rest of the stylesheet never learns of it. */
+  .sellmode .desk,.sellmode #b-ask,.sellmode .deskrate{
+    --sig:var(--out); --sig-hover:var(--out-hover);
+    --sig-dim:var(--out-dim); --sig-ink:var(--out-ink)}
+  .sellmode .flip{border-color:var(--out)}
+  /* The multiple is a figure, so it is set as one and carries the direction's
+     colour rather than being bold prose. */
+  .deskrate b{font-family:var(--mono);font-size:var(--t3);font-weight:700;
+    letter-spacing:-.01em;color:var(--sig);
+    font-variant-numeric:tabular-nums slashed-zero}
   .askalt{font-family:var(--sans);font-size:var(--t2);color:var(--muted);margin:12px 0 0}
   @media(max-width:470px){
-    .legnum b,.legnum input{font-size:30px}
+    .legnum b,.legnum input{font-size:34px}
     .leg{padding:14px 14px 20px}
     .flip{left:14px}
   }
@@ -465,9 +495,8 @@
 
 <h1 class="lede" data-h="m_lede">USDC across the Arc border, <b>both ways</b>.</h1>
 
-<p class="what prose" data-h="m_what">Sellers set their own price. Pay on Base,
-  <b>receive on Arc in under a minute</b>. If it does not arrive, you are
-  refunded automatically.</p>
+<p class="what prose" data-h="m_what">Sellers set the price. If delivery
+  fails, <b>you are refunded automatically</b>.</p>
 
 <div class="desk">
   <div class="leg">
@@ -567,10 +596,6 @@
         <input id="buyRecv" name="arc-recipient" class="f mono" placeholder="0x&#8230;" autocomplete="off" spellcheck="false">
       </div>
       <div class="fee">
-        <h3 data-t="m_whatpay">What you pay</h3>
-        <p data-h="m_paytext">The board price is what you pay per Arc USDC.
-        The premium and the 2% fee are already in it. If delivery fails, you get
-        everything back.</p>
       </div>
     </div>
     <div>
@@ -583,9 +608,8 @@
 
   <div class="bidbox">
     <h3 data-t="m_orbid">Or name your own price</h3>
-    <p data-h="m_bidwhat">Lock your Base USDC against an amount you want. A
-    seller can fill it from their deposit at any time, and until one does you
-    can cancel and take every cent back.</p>
+    <p data-h="m_bidwhat">Your USDC stays locked until a seller fills it.
+    Cancel any time and take every cent back.</p>
     <div class="grid" style="margin-top:14px">
       <div>
         <div class="lrow" style="gap:12px">
@@ -619,9 +643,8 @@
       </div>
       <div class="fee">
         <h3 data-t="m_whopays">Who pays the 2%</h3>
-        <p data-h="m_feetext">The buyer pays it. We take it in Arc USDC, so your
-        listing shows slightly less than you deposited. Your payout does not
-        change.</p>
+        <p data-h="m_feetext">The buyer pays it, out of the delivery.
+        <b>Your payout does not change.</b></p>
         <div class="flow" data-h="m_flow">deposit <b>100.00</b> &rarr; lists <b>98.039215</b>
           &rarr; sold at 20% pays you <b>120.00</b> USDC</div>
         <p style="margin:12px 0 0" data-h="m_wait">Whatever has not sold can be
@@ -724,13 +747,13 @@ var M_I18N={
   m_recover:"중단된 출금 복구", m_bridgebtn:"브릿지",
   m_bridge:"브릿지", m_terms:"이용약관", m_risk:"위험 고지",
   m_privacy:"개인정보", m_source:"소스", m_choosewallet:"지갑 선택",
-  m_what:"판매자가 가격을 직접 정합니다. Base에서 결제하면 <b>1분 안에 Arc로 받습니다</b>. 안 오면 자동 환불됩니다.",
+  m_what:"판매자가 가격을 직접 정합니다. 인도가 실패하면 <b>자동으로 환불됩니다</b>.",
   m_paytext:"표에 뜬 값이 Arc USDC 1개당 내는 금액입니다. 프리미엄과 2% 수수료가 이미 들어 있습니다. 배달 실패 시 전액 환불됩니다.",
-  m_feetext:"구매자가 냅니다. Arc USDC로 받기 때문에 등록 수량이 예치한 양보다 조금 적게 표시됩니다. 받는 금액은 그대로입니다.",
+  m_feetext:"구매자가 인도분에서 냅니다. <b>받는 금액은 그대로입니다.</b>",
   m_bidbook:"삽니다", m_bidsub:"돈을 걸어 둔 구매자",
   m_theypay:"1개당 지불", m_wanted:"원하는 수량", m_youget:"받는 금액",
   m_orbid:"직접 가격을 정해 걸기", m_amtwant:"원하는 수량",
-  m_bidwhat:"원하는 수량만큼 Base USDC를 걸어 둡니다. 판매자가 예치분에서 언제든 채울 수 있고, 채워지기 전까지는 취소해서 전액 돌려받습니다.",
+  m_bidwhat:"판매자가 채울 때까지 내 USDC는 잠겨 있습니다. 언제든 취소하고 전액 돌려받습니다.",
   m_usewallet:"연결된 지갑 주소",
   m_thsize:"수량", m_thpaid:"결제액", m_thstatus:"상태",
   m_thprem:"프리미엄", m_thvault:"금고",
@@ -766,13 +789,13 @@ var M_I18N={
   m_recover:"恢复中断的提现", m_bridgebtn:"跨链桥",
   m_bridge:"跨链桥", m_terms:"条款", m_risk:"风险提示",
   m_privacy:"隐私", m_source:"源码", m_choosewallet:"选择钱包",
-  m_what:"卖家自行定价。在 Base 上付款，<b>一分钟内在 Arc 上收到</b>。没到账会自动退款。",
+  m_what:"卖家自行定价。若交付失败，<b>自动全额退款</b>。",
   m_paytext:"盘口价格就是每个 Arc USDC 你要付的钱，已含溢价和 2% 手续费。交付失败全额退回。",
-  m_feetext:"由买家承担。我们用 Arc USDC 收取，所以挂单数量比存入量略少。你拿到的金额不变。",
+  m_feetext:"由买家从交付中承担。<b>你拿到的金额不变。</b>",
   m_bidbook:"求购", m_bidsub:"已锁定资金的买家",
   m_theypay:"每个支付", m_wanted:"求购数量", m_youget:"你可得到",
   m_orbid:"自己出价", m_amtwant:"求购数量",
-  m_bidwhat:"按你想要的数量锁定 Base USDC。卖家随时可以用存入的库存来成交，在成交之前你可以取消并全额取回。",
+  m_bidwhat:"在卖家成交之前，你的 USDC 一直锁定。随时可以取消并全额取回。",
   m_usewallet:"使用已连接钱包",
   m_thsize:"数量", m_thpaid:"支付", m_thstatus:"状态",
   m_thprem:"溢价", m_thvault:"金库",
@@ -2409,6 +2432,7 @@ function deskPaint(){
   g("lbl2").textContent=buy?T("You get"):T("You receive");
   g("chip1").textContent=buy?"BASE":"ARC";
   g("chip2").textContent=buy?"ARC":"BASE";
+  document.documentElement.classList.toggle("sellmode",!buy);
   const flipTo=buy?T("Sell instead"):T("Buy instead");
   g("flipLbl").textContent=flipTo;
   g("b-flip").setAttribute("aria-label",flipTo);
