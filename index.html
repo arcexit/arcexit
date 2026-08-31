@@ -1535,8 +1535,9 @@ function renderBids(){
     tr.appendChild(td);
     tb.appendChild(tr);
   }
-  // The desk's sell leg is quoted off these bids, so it moves when they do.
-  try{ deskSeed(); askQuote(); }catch(e){}
+  // The desk's sell leg is quoted off these bids, so it moves when they do,
+  // and so does which direction it opens on.
+  try{ deskAuto(); deskSeed(); askQuote(); }catch(e){}
 }
 
 /* Filling a bid needs Arc USDC already deposited, because the venue fee is
@@ -1802,6 +1803,7 @@ function renderBook(){
                : T("Cannot reach the order book right now. This is not an empty market."))+'</td></tr>';
   else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
   quote();
+  deskAuto();      // and so does the opening direction
   deskSeed();      // the opening amount depends on what the book can fill
   askQuote();      // and so does the hero verb
 }
@@ -2493,7 +2495,21 @@ function deskSeed(){
   }
   if(inp.value!==v) inp.value=v;
 }
+// Once a person has chosen a direction, stop choosing one for them.
+let DESK_TOUCHED=false;
+// The opening direction follows the book, because opening on a side nobody
+// can act on greets every visitor with an apology. A funded bid with no
+// offers against it is a real trade waiting for the exact person this venue
+// is short of.
+function deskAuto(){
+  if(DESK_TOUCHED||!BOOK_READ||!BIDS_READ) return;
+  const want=(BOOK.length===0&&BIDS.length>0)?"sell":"buy";
+  if(want===DESKMODE) return;
+  DESKMODE=want;
+  deskPaint();
+}
 function deskFlip(){
+  DESK_TOUCHED=true;
   DESKMODE=DESKMODE==="buy"?"sell":"buy";
   deskPaint();
   document.getElementById("askAmt").focus();
