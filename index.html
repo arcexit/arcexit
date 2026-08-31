@@ -281,6 +281,12 @@
   @media(max-width:900px){.strip{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:470px){.strip{grid-template-columns:repeat(2,1fr)}}
   .strip div{background:var(--paper);padding:10px 13px 11px}
+  /* Bought and sold in one table need to be told apart at a glance, so the
+     side column carries the same temperature the desk uses. */
+  .side{font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    font-size:var(--t1)}
+  .side.in{color:var(--sig)}
+  .side.out{color:var(--out)}
   .strip span{display:block;font-size:var(--t1);font-weight:600;letter-spacing:.1em;
     text-transform:uppercase;color:var(--muted);margin:0 0 3px}
   .strip b{font-size:var(--t4);font-weight:600;color:var(--ink)}
@@ -683,9 +689,9 @@
 <div class="panel" id="v-mine" style="display:none">
   <div class="grid">
     <div>
-      <h2 class="colhead" data-t="m_purchases">Purchases</h2>
+      <h2 class="colhead" data-t="m_myhist">History</h2>
       <div class="wrap"><table id="myFills">
-        <thead><tr><th>#</th><th data-t="m_thsize">Size</th><th data-t="m_thpaid">Paid</th><th data-t="m_thstatus">Status</th><th></th></tr></thead>
+        <thead><tr><th data-t="m_thside">Side</th><th data-t="m_thsize">Size</th><th data-t="m_thpaid">Amount</th><th data-t="m_thstatus">Status</th><th></th></tr></thead>
         <tbody></tbody></table></div>
     </div>
     <div>
@@ -740,6 +746,10 @@
 var M_I18N={
  en:{},
  ko:{
+  m_myhist:"내 거래",
+  m_thside:"구분",
+  m_sold:"팔았음",
+  m_bought:"샀음",
   m_lede:"Arc 국경 너머로 USDC를, <b>양방향으로</b>.",
   m_guide:"Arc USDC란",
   m_asknewb:"Arc USDC란?",
@@ -781,6 +791,10 @@ var M_I18N={
   m_exit:"지금 바로 빼야 합니까? <b>브릿지를 쓰십시오.</b> 수수료 2%."
  },
  zh:{
+  m_myhist:"我的交易",
+  m_thside:"方向",
+  m_sold:"卖出",
+  m_bought:"买入",
   m_lede:"USDC 跨越 Arc 边境，<b>双向通行</b>。",
   m_guide:"什么是 Arc USDC",
   m_asknewb:"什么是 Arc USDC？",
@@ -900,6 +914,11 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "delivering":"인도 중",
+  "delivered":"완료",
+  "refunded":"환불됨",
+  "bought":"샀음",
+  "sold":"팔았음",
   "You pay":"내는 금액",
   "You get":"받는 금액",
   "Sell instead":"팔기로 전환",
@@ -1026,6 +1045,11 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "delivering":"交付中",
+  "delivered":"已完成",
+  "refunded":"已退款",
+  "bought":"买入",
+  "sold":"卖出",
   "You pay":"你支付",
   "You get":"你收到",
   "Sell instead":"切换为卖出",
@@ -2285,7 +2309,7 @@ async function renderMine(){
         for(const bd of chunk){
           if(bd.buyer.toLowerCase()!==me||!bd.open||bd.wantArc===0n) continue;
           const tr=document.createElement("tr");
-          tr.innerHTML=`<td>${T("bid")} ${bd.id}</td><td>${usd(bd.wantArc)}</td>`+
+          tr.innerHTML=`<td><span class="side in">${T("bid")}</span></td><td>${usd(bd.wantArc)}</td>`+
             `<td>${usd(bd.escrowed)}</td><td>${T("waiting for a seller")}</td><td></td>`;
           const cb=document.createElement("button");
           cb.className="btn small"; cb.textContent=T("Cancel");
@@ -2296,17 +2320,37 @@ async function renderMine(){
       }
     }catch(e){ /* the escrow purchases below still render */ }
 
+    // A fill names its taker; the offer it filled names its maker. Matching on
+    // taker alone made every sale invisible to the person who made it.
+    const MINE_OFFERS=new Set();
+    for(let i=0;i<oIds.length;i+=10){
+      const chunk=await Promise.all(oIds.slice(i,i+10).map(decodeOffer));
+      if(!live()) return;
+      for(const o of chunk) if(o.maker.toLowerCase()===me) MINE_OFFERS.add(o.id);
+    }
     const n=Number(numHex(await baseCall(ESCROW,SEL.nextFillId)));
     const fIds=[]; for(let i=n-1;i>=1&&fIds.length<200;i--) fIds.push(i);
     for(let i=0;i<fIds.length;i+=10){
       const chunk=await Promise.all(fIds.slice(i,i+10).map(decodeFill));
       if(!live()) return;
       for(const f of chunk){
-        if(f.taker.toLowerCase()!==me) continue;
-        const refundable=f.status===1&&now>=f.deadline;
+        const bought=f.taker.toLowerCase()===me;
+        const sold=MINE_OFFERS.has(f.offerId);
+        if(!bought&&!sold) continue;
+        // Only a buyer can be owed a refund, so a sale never offers one.
+        const refundable=bought&&f.status===1&&now>=f.deadline;
         const tr=document.createElement("tr");
-        const st=refundable?T("refund available"):T(STATUS[f.status]||"?");
-        tr.innerHTML=`<td>${f.id}</td><td>${usd(f.amountArc)}</td><td>${usd(f.paid)}</td><td>${st}</td><td></td>`;
+        // Spelled out rather than indexed, because T() must always receive a
+        // literal or the translation check cannot see the string at all.
+        const st=refundable?T("refund available")
+          :f.status===1?T("delivering")
+          :f.status===2?T("delivered")
+          :f.status===3?T("refunded"):"-";
+        // Under feeOnArc the maker is paid the taker's whole payment, so both
+        // sides of a fill show the same figure and it is correct for both.
+        tr.innerHTML=`<td><span class="side ${bought?"in":"out"}">`+
+          `${bought?T("bought"):T("sold")}</span></td>`+
+          `<td>${usd(f.amountArc)}</td><td>${usd(f.paid)}</td><td>${st}</td><td></td>`;
         if(refundable){
           const b=document.createElement("button");b.className="btn small bad";b.textContent=T("Refund");
           b.onclick=async()=>{try{
