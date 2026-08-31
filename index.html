@@ -220,12 +220,20 @@
     text-transform:uppercase}
   .flip:hover{border-color:var(--ink)}
   .flip svg{width:13px;height:13px;display:block;flex:none}
-  .deskrate{font-family:var(--sans);font-size:var(--t2);color:var(--muted);
-    margin:12px 0 0;min-height:1.3em;max-width:62ch}
+  /* A board puts its rate on the line between the two sides, as a figure.
+     This used to be a sentence under the desk restating the number the desk
+     had just printed, with an argument attached. */
+  .deskx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    z-index:1;font-family:var(--mono);font-size:var(--t3);font-weight:700;
+    letter-spacing:-.01em;color:var(--sig);background:var(--paper);
+    border:1px solid var(--rule2);border-radius:3px;padding:5px 10px;
+    font-variant-numeric:tabular-nums slashed-zero;white-space:nowrap}
+  .deskx:empty{display:none}
+  @media(max-width:470px){.deskx{font-size:var(--t2);padding:4px 8px}}
   /* Selling is the other trade, so the desk changes temperature and not only
      its wording. Four token overrides, scoped to the three elements that
      carry the signal colour; the rest of the stylesheet never learns of it. */
-  .sellmode .desk,.sellmode #b-ask,.sellmode .deskrate{
+  .sellmode .desk,.sellmode #b-ask{
     --sig:var(--out); --sig-hover:var(--out-hover);
     --sig-dim:var(--out-dim); --sig-ink:var(--out-ink)}
   .sellmode .flip{border-color:var(--out)}
@@ -245,11 +253,6 @@
   /* Where the rule is cheapest to learn. */
   #t-buy.on{box-shadow:inset 0 2px 0 var(--sig)}
   #t-sell.on{box-shadow:inset 0 2px 0 var(--out)}
-  /* The multiple is a figure, so it is set as one and carries the direction's
-     colour rather than being bold prose. */
-  .deskrate b{font-family:var(--mono);font-size:var(--t3);font-weight:700;
-    letter-spacing:-.01em;color:var(--sig);
-    font-variant-numeric:tabular-nums slashed-zero}
   .askalt{font-family:var(--sans);font-size:var(--t2);color:var(--muted);margin:12px 0 0}
   @media(max-width:470px){
     .legnum b,.legnum input{font-size:34px}
@@ -526,18 +529,18 @@
       <span class="chip" id="chip2">ARC</span></div>
     <div class="legnum"><span class="slot" id="slot2"><input id="askAmt" name="ask-amount"
       inputmode="decimal" placeholder="100" autocomplete="off" spellcheck="false"
-      aria-describedby="deskRate"></span><span class="cur">USDC</span></div>
+      ></span><span class="cur">USDC</span></div>
   </div>
+  <b class="deskx" id="deskRate"></b>
   <button type="button" class="flip" id="b-flip">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
       stroke-linecap="square" aria-hidden="true"><path d="M8 4v13M8 17l-4-4M16 20V7M16 7l4 4"/></svg>
     <span id="flipLbl">Sell instead</span>
   </button>
 </div>
-<p class="deskrate" id="deskRate" role="status" aria-live="polite"></p>
 <button class="btn wide" id="b-ask" disabled>Enter an amount</button>
-<p class="askalt" style="margin-top:11px"><span data-t="m_asknew">First time here?</span>
-  <a class="linkish" href="/arc-usdc" data-t="m_asknewb">What Arc USDC costs, and how to get in and out</a></p>
+<p class="askalt" style="margin-top:11px"><a class="linkish" href="/arc-usdc"
+  data-t="m_asknewb">What is Arc USDC?</a></p>
 
 <div class="note" id="keeperNote" style="display:none"></div>
 
@@ -551,7 +554,7 @@
 </div>
 
 <div class="bhead">
-  <h2><span data-t="m_orderbook">Order book</span><span class="sub" data-t="m_backed">every line is backed by deposited inventory</span></h2>
+  <h2><span data-t="m_orderbook">Order book</span></h2>
   <div class="filters">
     <select id="fSize" aria-label="Minimum size">
       <option value="" data-t="m_anysize">any size</option><option value="10">10+</option>
@@ -578,7 +581,7 @@
 </table></div>
 
 <div class="bhead" style="margin-top:26px">
-  <h2><span data-t="m_bidbook">Bids</span><span class="sub" data-t="m_bidsub">buyers waiting, money already locked</span></h2>
+  <h2><span data-t="m_bidbook">Bids</span></h2>
 </div>
 
 <div class="wrap"><table id="bids">
@@ -658,14 +661,8 @@
         <input id="sellAmt" name="deposit-amount" class="f big" inputmode="decimal" placeholder="0" autocomplete="off">
       </div>
       <div class="fee">
-        <h3 data-t="m_whopays">Who pays the 2%</h3>
-        <p data-h="m_feetext">The buyer pays it, out of the delivery.
-        <b>Your payout does not change.</b></p>
         <div class="flow" data-h="m_flow">deposit <b>100.00</b> &rarr; lists <b>98.039215</b>
           &rarr; sold at 20% pays you <b>120.00</b> USDC</div>
-        <p style="margin:12px 0 0" data-h="m_wait">Whatever has not sold can be
-        withdrawn any time. To get out immediately, use
-        <a href="/bridge">the bridge</a>.</p>
       </div>
     </div>
     <div>
@@ -739,8 +736,7 @@ var M_I18N={
  ko:{
   m_lede:"Arc 국경 너머로 USDC를, <b>양방향으로</b>.",
   m_guide:"Arc USDC란",
-  m_asknew:"처음 오셨나요?",
-  m_asknewb:"Arc USDC가 얼마이고 어떻게 들어가고 나오는지",
+  m_asknewb:"Arc USDC란?",
   m_askq:"Arc USDC 얼마나 필요하세요?",
   m_askhold:"이미 Arc USDC를 갖고 계신가요?",
   m_asksell:"여기서 파세요",
@@ -781,8 +777,7 @@ var M_I18N={
  zh:{
   m_lede:"USDC 跨越 Arc 边境，<b>双向通行</b>。",
   m_guide:"什么是 Arc USDC",
-  m_asknew:"第一次来?",
-  m_asknewb:"Arc USDC 价格几何，如何进出",
+  m_asknewb:"什么是 Arc USDC？",
   m_askq:"你需要多少 Arc USDC？",
   m_askhold:"已经持有 Arc USDC？",
   m_asksell:"在这里出售",
@@ -2496,44 +2491,38 @@ function askQuote(){
   if(!out||!btn||!rate) return;
   const amt=askAmt();
   const show=(txt,dim)=>{ out.textContent=txt; out.classList.toggle("dim",!!dim); };
-  const idle=(msg)=>{ show("0.00",true); rate.textContent=msg||"";
+  const idle=()=>{ show("0.00",true); rate.textContent="";
     btn.disabled=true; btn.onclick=null; btn.textContent=T("Enter an amount"); };
-  if(!amt) return idle("");
+  if(!amt) return idle();
   if(DESKMODE==="buy"){
-    if(!BOOK_READ) return idle(T("Reading the order book"));
+    if(!BOOK_READ) return idle();
     const o=askBest(amt);
     if(!o){
       // Never a dead end. The same answer becomes a funded bid, which is the
       // one thing on this page that gives a seller a reason to arrive.
       show("0.00",true);
-      rate.textContent=BOOK.length
-        ? T("No single offer is that big right now. Set your price and the first seller who can fill it does.")
-        : T("Nobody is selling right now. Set your price and your money waits on chain until a seller takes it.");
+      rate.textContent="";
       btn.disabled=false; btn.textContent=T("Set my price"); btn.onclick=()=>askGoBid();
       return;
     }
     const proceeds=amt*(10000n+BigInt(o.premiumBps))/10000n;
     const paid=proceeds+(proceeds*FEE_BPS+9999n)/10000n;
     show(usd(paid),false);
-    rate.innerHTML=T("<b>{0}x</b> all in, fee included. Lands on Arc in under a minute.",
-                     (Number(paid)/Number(amt)).toFixed(3));
+    rate.textContent=(Number(paid)/Number(amt)).toFixed(3)+"\u00d7";
     btn.disabled=false; btn.textContent=T("Buy now"); btn.onclick=()=>askGoBuy(o);
     return;
   }
-  if(!BIDS_READ) return idle(T("Reading the bids"));
+  if(!BIDS_READ) return idle();
   const bd=askBestBid(amt);
   if(!bd){
     show("0.00",true);
-    rate.textContent=T("No bid that size right now. Name your price and buyers come to you.");
+    rate.textContent="";
     btn.disabled=false; btn.textContent=T("List it for sale"); btn.onclick=()=>askGoSell(null);
     return;
   }
   const pay=bd.escrowed*amt/bd.wantArc;
   show(usd(pay),false);
-  // The whole argument of this business, as two numbers rather than an essay:
-  // a bridge returns exactly what you put in, a buyer pays more than that.
-  rate.innerHTML=T("Best live bid pays <b>{0}x</b>. Bridging out pays 1.000x.",
-                   (Number(pay)/Number(amt)).toFixed(3));
+  rate.textContent=(Number(pay)/Number(amt)).toFixed(3)+"\u00d7";
   btn.disabled=false; btn.textContent=T("Sell into this bid"); btn.onclick=()=>askGoSell(bd);
 }
 // Selling means depositing first, so the desk hands over to the sell panel
