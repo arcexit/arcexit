@@ -229,6 +229,22 @@
     --sig:var(--out); --sig-hover:var(--out-hover);
     --sig-dim:var(--out-dim); --sig-ink:var(--out-ink)}
   .sellmode .flip{border-color:var(--out)}
+
+  /* Amber is not an accent, it is a claim: value is leaving Arc. It has to
+     hold wherever that happens or it teaches a reader to ignore it. The same
+     four token overrides, so every rule already written in terms of the
+     signal colour follows without being touched. */
+  #v-sell,#b-post{
+    --sig:var(--out); --sig-hover:var(--out-hover);
+    --sig-dim:var(--out-dim); --sig-ink:var(--out-ink)}
+  /* The bid table's button is SELL on someone else's bid and CANCEL on your
+     own. Only the first sends anything across the border, and the script says
+     which is which rather than the stylesheet guessing from position. */
+  #bids .btn.out{background:none;border-color:var(--out);color:var(--out)}
+  #bids .btn.out:hover:not(:disabled){background:var(--out);color:var(--out-ink)}
+  /* Where the rule is cheapest to learn. */
+  #t-buy.on{box-shadow:inset 0 2px 0 var(--sig)}
+  #t-sell.on{box-shadow:inset 0 2px 0 var(--out)}
   /* The multiple is a figure, so it is set as one and carries the direction's
      colour rather than being bold prose. */
   .deskrate b{font-family:var(--mono);font-size:var(--t3);font-weight:700;
@@ -1507,6 +1523,9 @@ function renderBids(){
     const btn=document.createElement("button");
     btn.className="btn ghost sm";
     btn.textContent=mine?T("Cancel"):T("Sell");
+    // Selling into someone's bid sends Arc across the border; cancelling your
+    // own returns your own money and crosses nothing. Only the first is amber.
+    btn.classList.toggle("out",!mine);
     btn.onclick=mine?()=>cancelMyBid(b,btn):()=>sellIntoBid(b,btn);
     td.appendChild(btn);
     tr.appendChild(td);
