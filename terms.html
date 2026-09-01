@@ -155,7 +155,7 @@
 <p class='sub'>2026-08-31 applies to arcexit.com</p>
 <div class='lead'><p>This site is software. You move your own USDC with your own wallet through public smart contracts, and we never hold your funds. If you are selling, read section 4: the fee changes what your deposit lists for. Before trading, read the <a href='/risk'>Risk Disclosure</a>. If you do not agree with these terms, do not use the site.</p></div>
 <h2>1. What this is</h2>
-<p>arcexit.com (the "interface") is a web front end to public, non-custodial smart contracts: Circle's CCTP v2 deployments and the open-source helper contracts published by this site, every one of them listed at <a href='/.well-known/security.txt'>/.well-known/security.txt</a>. Arc caps a CCTP message at 1 USDC, which is why the bridge helpers exist at all: they fold the resulting hundreds of transactions into one signature each. Every transaction is composed in your browser and signed in your own wallet.</p>
+<p>arcexit.com (the "interface") is a web front end to public, non-custodial smart contracts: Circle's CCTP v2 deployments and the open-source helper contracts published by this site, every one of them listed at <a href='/.well-known/security.txt'>/.well-known/security.txt</a>. Arc caps what a single CCTP message may carry; the cap has changed over time and is read live from the contract. The bridge helpers fold a transfer above it into one signature. Every transaction is composed in your browser and signed in your own wallet.</p>
 <h2>2. What the interface does, and what it does not</h2>
 <p>The interface holds no funds outside the disclosed contracts, takes no deposit into any account of ours, quotes no price of its own, and never chooses a counterparty for you.</p>
 <p>On the <a href='/bridge'>bridge</a>, you move your own assets to an address you choose. Nobody is on the other side of that transfer.</p>
@@ -200,7 +200,7 @@
 <p class='sub'>2026-08-31 arcexit.com에 적용됩니다</p>
 <div class='lead'><p>이 사이트는 소프트웨어입니다. 본인 지갑으로 본인 USDC를 공개 스마트 컨트랙트를 통해 옮기며, 저희는 자금을 보관하지 않습니다. 파는 쪽이라면 4항을 읽으십시오. 수수료 때문에 예치한 금액과 등록되는 금액이 다릅니다. 거래 전에 <a href='/risk'>위험 고지</a>를 읽으십시오. 이 약관에 동의하지 않으면 사이트를 이용하지 마십시오.</p></div>
 <h2>1. 이 서비스는 무엇인가</h2>
-<p>arcexit.com(이하 "인터페이스")은 공개된 비수탁 스마트 컨트랙트의 웹 프론트엔드입니다. Circle의 CCTP v2 배포분과 이 사이트가 공개한 오픈소스 보조 컨트랙트를 쓰며, 전부 <a href='/.well-known/security.txt'>/.well-known/security.txt</a>에 적혀 있습니다. Arc는 CCTP 메시지 하나를 1 USDC로 제한합니다. 브릿지 보조 컨트랙트가 존재하는 이유가 이것이며, 그 때문에 생기는 수백 건의 트랜잭션을 각각 서명 한 번으로 묶습니다. 모든 트랜잭션은 브라우저에서 만들어져 본인 지갑에서 서명됩니다.</p>
+<p>arcexit.com(이하 "인터페이스")은 공개된 비수탁 스마트 컨트랙트의 웹 프론트엔드입니다. Circle의 CCTP v2 배포분과 이 사이트가 공개한 오픈소스 보조 컨트랙트를 쓰며, 전부 <a href='/.well-known/security.txt'>/.well-known/security.txt</a>에 적혀 있습니다. Arc는 CCTP 메시지 하나가 실을 수 있는 금액에 상한을 둡니다. 상한은 바뀌어 왔고 컨트랙트에서 실시간으로 읽습니다. 브릿지 보조 컨트랙트는 상한을 넘는 전송을 서명 한 번으로 묶습니다. 모든 트랜잭션은 브라우저에서 만들어져 본인 지갑에서 서명됩니다.</p>
 <h2>2. 인터페이스가 하는 일과 하지 않는 일</h2>
 <p>인터페이스는 공개된 컨트랙트 밖에서 자금을 보관하지 않고, 저희 계정으로 예치를 받지 않으며, 자체 가격을 제시하지 않고, 거래 상대를 대신 고르지 않습니다.</p>
 <p><a href='/bridge'>브릿지</a>에서는 본인 자산을 본인이 지정한 주소로 옮깁니다. 그 전송에는 상대방이 없습니다.</p>
@@ -245,7 +245,7 @@
 <p class='sub'>2026-08-31 适用于 arcexit.com</p>
 <div class='lead'><p>本站是软件。你用自己的钱包、通过公开的智能合约转移自己的 USDC，我们不保管你的资金。如果你是卖方，请阅读第 4 节，手续费会让你存入的数量和挂出的数量不同。交易前请阅读<a href='/risk'>风险披露</a>。如果你不同意本条款，请不要使用本站。</p></div>
 <h2>1. 这项服务是什么</h2>
-<p>arcexit.com（下称"界面"）是公开的非托管智能合约的网页前端，使用 Circle 的 CCTP v2 部署以及本站发布的开源辅助合约，全部列在<a href='/.well-known/security.txt'>/.well-known/security.txt</a>。Arc 把单条 CCTP 消息限制为 1 USDC，桥的辅助合约正是因此存在，把由此产生的数百笔交易各自合并为一次签名。每一笔交易都在你的浏览器中构造，并在你自己的钱包中签名。</p>
+<p>arcexit.com（下称"界面"）是公开的非托管智能合约的网页前端，使用 Circle 的 CCTP v2 部署以及本站发布的开源辅助合约，全部列在<a href='/.well-known/security.txt'>/.well-known/security.txt</a>。Arc 对单条 CCTP 消息可携带的金额设有上限，上限曾多次变动，并从合约实时读取。桥的辅助合约把超过上限的转账合并为一次签名。每一笔交易都在你的浏览器中构造，并在你自己的钱包中签名。</p>
 <h2>2. 界面做什么，不做什么</h2>
 <p>界面不在已披露的合约之外保管资金，不接受存入我们任何账户的款项，不给出自己的报价，也从不替你挑选交易对手。</p>
 <p>在<a href='/bridge'>跨链桥</a>上，你把自己的资产转到自己选定的地址，这笔转账没有对手方。</p>

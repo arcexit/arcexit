@@ -110,11 +110,11 @@
   .statuspill.shut{color:var(--bad);border-color:var(--bad-line)}
   .statuspill.unknown .dot{background:var(--warn)}
   .lang{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
-  .lang button{background:transparent;border:0;color:var(--dim2);padding:6px 11px;font-size:12px;
+  .lang button{background:transparent;border:0;color:var(--dim2);padding:6px 11px;font-size:13px;
     cursor:pointer;font-weight:600}
   .lang button.on{background:var(--box);color:var(--text)}
   .wbtn{display:flex;align-items:center;gap:8px;background:var(--box);border:1px solid var(--line);
-    color:var(--text);border-radius:3px;padding:8px 15px;font:inherit;font-size:13.5px;font-weight:600;
+    color:var(--text);border-radius:3px;padding:8px 15px;font:inherit;font-size:14.5px;font-weight:600;
     cursor:pointer}
   .wbtn:hover{border-color:var(--line2)}
   .wbtn .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
@@ -332,12 +332,17 @@
     /* Two tidy rows: identity + connect on top, status + language beneath.
        Letting all three controls share one wrapped row made the header taller,
        not shorter. */
+    /* Three named cells on the second row. The theme toggle had no area of
+       its own, so with the wrapper set to display:contents it auto-placed
+       into the status cell and painted "Light" over the status pill. */
     header{padding:12px 14px 6px;display:grid;
-      grid-template-columns:1fr auto;grid-template-areas:"brand wallet" "status lang";
-      gap:8px 10px;align-items:center}
+      grid-template-columns:1fr auto auto;
+      grid-template-areas:"brand brand wallet" "status theme lang";
+      gap:8px 8px;align-items:center}
     .brand{grid-area:brand;font-size:16px}
     .hright{display:contents}
-    .statuspill{grid-area:status;justify-self:start;padding:8px 12px}
+    .statuspill{grid-area:status;justify-self:start;padding:8px 12px;font-size:13px}
+    #theme-toggle{grid-area:theme;justify-self:end;padding:8px 11px}
     .lang{grid-area:lang;justify-self:end}
     .lang button{padding:9px 13px;font-size:12.5px}
     #h-wallet{grid-area:wallet;justify-self:end;padding:10px 15px}
@@ -348,7 +353,16 @@
     input.tx{font-size:16px}
     /* Padding rather than height, so the row keeps its shape while the tap
        area grows to something a thumb can hit. */
-    .maxb{padding:8px 11px;font-size:11.5px;margin-left:8px}
+    .maxb{padding:8px 11px;font-size:12.5px;margin-left:8px}
+    /* Below 24px a thumb misses. Padding with a cancelling margin grows the
+       target without moving the text around it. */
+    .linkbtn{font-size:13px;padding:6px 4px;margin:-6px -4px}
+    .accept{font-size:12.5px}
+    .accept a{display:inline-block;padding:5px 0}   /* 14px links were the last targets under 24 */
+    .verify{font-size:13px;gap:8px 16px}
+    .verify a{display:inline-block;padding:6px 0}
+    .krow{font-size:13.5px}
+    footer{font-size:13px}
     .iconbtn{padding:10px}
     #dirswap{width:40px;height:40px}
     .links{gap:8px}

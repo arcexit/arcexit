@@ -424,8 +424,11 @@
   input.f.big{font-size:var(--t5);padding:11px 12px;font-weight:600}
   input[aria-invalid="true"]{border-color:var(--bad)}
   button.tiny{background:none;border:1px solid var(--rule2);border-radius:3px;
-    padding:3px 7px;font-size:var(--t1);color:var(--muted);cursor:pointer;
+    padding:5px 8px;font-size:var(--t1);color:var(--muted);cursor:pointer;
     font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  /* The sell-balance control has no text until a wallet is connected, and an
+     empty bordered box 8px tall is a smudge, not a control. */
+  button.tiny:empty{display:none}
   button.tiny:hover{border-color:var(--ink);color:var(--ink)}
 
   /* controls are square, like everything a form prints on */
