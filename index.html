@@ -535,7 +535,9 @@
   <div class="leg">
     <div class="legtop"><span class="legl" id="lbl1">You pay</span>
       <span class="chip" id="chip1">BASE</span></div>
-    <div class="legnum"><span class="slot" id="slot1"><b id="deskOut" class="dim">0.00</b></span>
+    <div class="legnum"><span class="slot" id="slot1"><b id="deskOut" class="dim">0.00</b><input id="deskPay"
+      name="bid-pay" inputmode="decimal" placeholder="0.00" autocomplete="off"
+      spellcheck="false" hidden></span>
       <span class="cur">USDC</span></div>
   </div>
   <div class="leg get">
@@ -914,6 +916,7 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Min {0}":"최소 {0}",
   "delivering":"인도 중",
   "delivered":"완료",
   "refunded":"환불됨",
@@ -1045,6 +1048,7 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Min {0}":"最少 {0}",
   "delivering":"交付中",
   "delivered":"已完成",
   "refunded":"已退款",
@@ -1561,7 +1565,7 @@ function renderBids(){
   }
   // The desk's sell leg is quoted off these bids, so it moves when they do,
   // and so does which direction it opens on.
-  try{ deskAuto(); deskSeed(); askQuote(); }catch(e){}
+  try{ deskSeed(); askQuote(); }catch(e){}
 }
 
 /* Filling a bid needs Arc USDC already deposited, because the venue fee is
@@ -1656,7 +1660,10 @@ function bidQuote(){
 async function doBid(){
   if(!ACCT){connect();return}
   if(BUSY) return;                 // one signature at a time, like doBuy
-  const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;};
+  // The desk can post a bid from the top of the page, so every step and every
+  // refusal is also toasted where that button is, not only under the form.
+  const sayb=(h)=>{const e=document.getElementById("saybid"); if(e) e.innerHTML=h;
+    try{ toast(h); }catch(err){}};
   const q=bidQuote(); if(!q) return;
   const recip=document.getElementById("buyRecv").value.trim();
   if(!/^0x[0-9a-fA-F]{40}$/.test(recip)){
@@ -1827,7 +1834,6 @@ function renderBook(){
                : T("Cannot reach the order book right now. This is not an empty market."))+'</td></tr>';
   else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
   quote();
-  deskAuto();      // and so does the opening direction
   deskSeed();      // the opening amount depends on what the book can fill
   askQuote();      // and so does the hero verb
 }
@@ -2509,9 +2515,9 @@ function deskPaint(){
   const flipTo=buy?T("Sell instead"):T("Buy instead");
   g("flipLbl").textContent=flipTo;
   g("b-flip").setAttribute("aria-label",flipTo);
-  const inp=g("askAmt"), out=g("deskOut"), s1=g("slot1"), s2=g("slot2");
+  const inp=g("askAmt"), out=g("deskOut"), pay=g("deskPay"), s1=g("slot1"), s2=g("slot2");
   const wantIn=buy?s2:s1, wantOut=buy?s1:s2;
-  if(inp.parentNode!==wantIn){ wantIn.appendChild(inp); wantOut.appendChild(out); }
+  if(inp.parentNode!==wantIn){ wantIn.appendChild(inp); wantOut.appendChild(out); wantOut.appendChild(pay); }
   inp.setAttribute("placeholder","100");
   deskSeed();
   askQuote();
@@ -2539,45 +2545,71 @@ function deskSeed(){
   }
   if(inp.value!==v) inp.value=v;
 }
-// Once a person has chosen a direction, stop choosing one for them.
-let DESK_TOUCHED=false;
-// The opening direction follows the book, because opening on a side nobody
-// can act on greets every visitor with an apology. A funded bid with no
-// offers against it is a real trade waiting for the exact person this venue
-// is short of.
-function deskAuto(){
-  if(DESK_TOUCHED||!BOOK_READ||!BIDS_READ) return;
-  const want=(BOOK.length===0&&BIDS.length>0)?"sell":"buy";
-  if(want===DESKMODE) return;
-  DESKMODE=want;
-  deskPaint();
-}
+// The desk opens on buy, always. An auto-sell rule briefly optimised for the
+// scarce side; the abundant side is buyers, and a buyer's funded bid is what
+// gives a seller a reason to arrive. Sellers get the flip.
 function deskFlip(){
-  DESK_TOUCHED=true;
   DESKMODE=DESKMODE==="buy"?"sell":"buy";
   deskPaint();
   document.getElementById("askAmt").focus();
+}
+// The pay leg has two faces: a figure when an offer prices it, an input when
+// nothing on the book can fill the amount and the visitor is naming a price.
+function deskBidUI(on){
+  const out=document.getElementById("deskOut"), pay=document.getElementById("deskPay");
+  if(!out||!pay) return;
+  out.hidden=!!on; pay.hidden=!on;
+}
+// pay = want x (1+prem) x (1+fee), solved for prem and floored so the lock
+// bidQuote() derives from it never exceeds what was typed.
+function deskBidPrem(payAmt,want){
+  const perArc=Number(payAmt)/Number(want);
+  return Math.floor((perArc/(1+Number(FEE_BPS)/10000)-1)*10000);
+}
+let DESK_LOCK=null;
+// Empty book: the desk is the bid form. The two figures a visitor already
+// understands are the whole of it; the premium field below is derived and the
+// audited doBid() path posts exactly what bidQuote() priced.
+function deskBid(amt){
+  const rate=document.getElementById("deskRate"), btn=document.getElementById("b-ask"),
+        pay=document.getElementById("deskPay");
+  deskBidUI(true);
+  DESK_LOCK=null;
+  // Arrive priced: the best live bid's rate applied to this amount, once.
+  if(!pay.value&&!pay.dataset.touched&&BIDS_READ&&BIDS.length){
+    const best=BIDS.slice().sort((a,b)=>Number(b.escrowed)/Number(b.wantArc)
+      -Number(a.escrowed)/Number(a.wantArc))[0];
+    pay.value=plainAmt(best.escrowed*amt/best.wantArc);
+  }
+  const off=(label)=>{ rate.textContent=""; btn.disabled=true; btn.onclick=null; btn.textContent=label; };
+  const p=parseAmt(pay.value);
+  if(!p||p<=0n) return off(T("Enter an amount"));
+  if(amt<MIN_HIT) return off(T("Min {0}",usd(MIN_HIT)));
+  const prem=deskBidPrem(p,amt);
+  if(prem<0) return off(T("Enter an amount"));     // under 1:1 after the fee is not a bid
+  document.getElementById("bidAmt").value=plainAmt(amt);
+  document.getElementById("bidPrem").value=(prem/100).toFixed(2);
+  const q=bidQuote();
+  if(!q) return off(T("Enter an amount"));
+  DESK_LOCK=q.lock;
+  rate.textContent=(Number(q.lock)/Number(amt)).toFixed(3)+"\u00d7";
+  btn.disabled=false;
+  btn.textContent=ACCT?T("Post bid"):T("Connect wallet");
+  btn.onclick=ACCT?()=>doBid():()=>connect();
 }
 function askQuote(){
   const out=document.getElementById("deskOut"), rate=document.getElementById("deskRate"),
         btn=document.getElementById("b-ask");
   if(!out||!btn||!rate) return;
   const amt=askAmt();
-  const show=(txt,dim)=>{ out.textContent=txt; out.classList.toggle("dim",!!dim); };
+  const show=(txt,dim)=>{ deskBidUI(false); out.textContent=txt; out.classList.toggle("dim",!!dim); };
   const idle=()=>{ show("0.00",true); rate.textContent="";
     btn.disabled=true; btn.onclick=null; btn.textContent=T("Enter an amount"); };
   if(!amt) return idle();
   if(DESKMODE==="buy"){
     if(!BOOK_READ) return idle();
     const o=askBest(amt);
-    if(!o){
-      // Never a dead end. The same answer becomes a funded bid, which is the
-      // one thing on this page that gives a seller a reason to arrive.
-      show("0.00",true);
-      rate.textContent="";
-      btn.disabled=false; btn.textContent=T("Set my price"); btn.onclick=()=>askGoBid();
-      return;
-    }
+    if(!o) return deskBid(amt);   // never a dead end: the answer becomes a funded bid
     const proceeds=amt*(10000n+BigInt(o.premiumBps))/10000n;
     const paid=proceeds+(proceeds*FEE_BPS+9999n)/10000n;
     show(usd(paid),false);
@@ -2639,6 +2671,19 @@ document.getElementById("askAmt").addEventListener("keydown",e=>{
   if(e.key==="Enter"){ const b=document.getElementById("b-ask"); if(!b.disabled) b.click(); }
 });
 document.getElementById("b-flip").onclick=deskFlip;
+(function(){
+  const pay=document.getElementById("deskPay");
+  if(!pay) return;
+  pay.addEventListener("input",function(){ this.dataset.touched="1"; askQuote(); });
+  pay.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){ const b=document.getElementById("b-ask"); if(!b.disabled) b.click(); }
+  });
+  // What was typed and what gets locked can differ by a cent of rounding.
+  // On leaving the field, show the figure that will actually lock.
+  pay.addEventListener("blur",function(){
+    if(DESK_LOCK!==null&&!this.hidden) this.value=plainAmt(DESK_LOCK);
+  });
+})();
 // The number fills its row, so the row is what a thumb aims at, not the 32px
 // input inside it. Clicking anywhere on the editable leg focuses the field.
 for(const id of ["slot1","slot2"]){
@@ -2646,8 +2691,8 @@ for(const id of ["slot1","slot2"]){
   if(!el||!el.parentElement) continue;
   el.parentElement.parentElement.addEventListener("click",e=>{
     if(e.target.closest("button")) return;      // the flip sits on this leg too
-    const inp=document.getElementById("askAmt");
-    if(inp&&el.contains(inp)) inp.focus();
+    const inp=[...el.querySelectorAll("input")].find(i=>!i.hidden);
+    if(inp) inp.focus();
   });
 }
 
