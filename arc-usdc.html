@@ -164,7 +164,7 @@
 <p>It changes hands above a dollar anyway. The reason is not the asset, it is the queue. More people want to be holding USDC on Arc than are willing to carry theirs over and hand it to someone else, and the premium is the price of that willingness. It is a fee for immediacy, paid to whoever already did the slow part.</p>
 <p>One thing the premium is <b>not</b> is a transfer limit. Moving USDC into Arc has never been capped. Moving it out is capped at <b>100,000 USDC per CCTP message</b>, a ceiling almost nobody reaches. This is worth stating plainly because the widely repeated figure is 1 USDC per message, which was true early on and is no longer true; the current value is readable at any time from the batch contract's <span class='mono'>perMessageLimit()</span>.</p>
 <h2>3. Two ways in</h2>
-<p><b>Bridge it yourself.</b> You need USDC on Base or another CCTP chain. You burn on that side, Circle attests, and it mints to your address on Arc. You pay no premium at all, because nobody is selling you anything. What you spend is time and a fee.</p>
+<p><b>Bridge it yourself.</b> You need USDC on Base or another CCTP chain. You burn on that side, Circle attests, and it mints to your address on Arc. You pay no premium at all, because nobody is selling you anything. What you spend is time and a fee. This site does not offer the inbound leg; use Circle's own bridge for it.</p>
 <p><b>Buy it from someone who already has it.</b> Instant, and you pay whatever they ask. On this site the seller sets the price and their inventory is already deposited, so the delivery is not a promise: it is a balance sitting in a contract before you pay anything.</p>
 <p>Which of the two is cheaper depends entirely on the premium, which is the figure at the top of this page. There is no general answer, only today's.</p>
 <h2>4. Two ways out, and where people lose money</h2>
@@ -173,7 +173,7 @@
 <p><b>Selling</b> collects that premium instead. You deposit into a contract, name your price, and keep the ability to withdraw anything that has not sold. The trade is that you wait for a buyer, where the bridge waits for nobody.</p>
 <p>The honest summary: bridge out when you need the money now and the premium is thin, sell when the premium is not thin. Check the number above before you decide, because it is the only input that matters.</p>
 <h2>5. What each route costs</h2>
-<div class='wrap'><table class='cmp'><thead><tr><th>Route</th><th>Premium</th><th>Fee</th><th>Waits for</th></tr></thead><tbody><tr><td>Bridge in</td><td>none</td><td>2%</td><td>Circle's attestation</td></tr><tr><td>Buy here</td><td>you pay it</td><td>2%</td><td>nobody, inventory is deposited</td></tr><tr><td>Bridge out</td><td>none, and you forgo it</td><td>2%</td><td>Circle's attestation</td></tr><tr><td>Sell here</td><td>you collect it</td><td>2%</td><td>a buyer</td></tr></tbody></table></div>
+<div class='wrap'><table class='cmp'><thead><tr><th>Route</th><th>Premium</th><th>Fee</th><th>Waits for</th></tr></thead><tbody><tr><td>Bridge in (Circle, not here)</td><td>none</td><td>0</td><td>Circle's attestation</td></tr><tr><td>Buy here</td><td>you pay it</td><td>2%</td><td>nobody, inventory is deposited</td></tr><tr><td>Bridge out</td><td>none, and you forgo it</td><td>2%</td><td>Circle's attestation</td></tr><tr><td>Sell here</td><td>you collect it</td><td>2%</td><td>a buyer</td></tr></tbody></table></div>
 <p>The 2% is this service's fee and it is capped in the contracts at 5%, a constant no key can raise. Circle charges nothing for CCTP itself; the chain charges the gas quoted in section 1.</p>
 <h2>6. Where these numbers come from</h2>
 <p>Everything above is a chain read, not a claim, and the build refuses to publish this page if any of it stops matching.</p>
@@ -196,7 +196,7 @@
 <p>그런데도 1달러보다 비싸게 손바뀜합니다. 이유는 자산이 아니라 줄입니다. Arc에서 USDC를 들고 있으려는 사람이, 자기 USDC를 옮겨와서 남에게 넘겨줄 의향이 있는 사람보다 많습니다. 프리미엄은 그 의향의 값입니다. 느린 과정을 이미 통과해 둔 사람에게 지불하는 즉시성의 대가입니다.</p>
 <p>프리미엄이 전송 한도 때문이라는 설명은 <b>사실이 아닙니다</b>. Arc로 들어오는 쪽에는 한도가 있었던 적이 없습니다. 나가는 쪽은 <b>CCTP 메시지당 100,000 USDC</b>가 상한이고, 이 천장에 닿는 사람은 거의 없습니다. 굳이 짚는 이유는 널리 퍼진 숫자가 메시지당 1 USDC이기 때문입니다. 초기에는 맞는 값이었고 지금은 아닙니다. 현재 값은 배치 컨트랙트의 <span class='mono'>perMessageLimit()</span>으로 아무 때나 확인할 수 있습니다.</p>
 <h2>3. 들어가는 두 가지 길</h2>
-<p><b>직접 브릿지</b>. Base나 다른 CCTP 체인에 USDC가 있어야 합니다. 그쪽에서 태우면 Circle이 증명하고 Arc의 내 주소로 발행됩니다. 프리미엄은 한 푼도 내지 않습니다. 파는 사람이 없으니까요. 대신 시간과 수수료를 씁니다.</p>
+<p><b>직접 브릿지</b>. Base나 다른 CCTP 체인에 USDC가 있어야 합니다. 그쪽에서 태우면 Circle이 증명하고 Arc의 내 주소로 발행됩니다. 프리미엄은 한 푼도 내지 않습니다. 파는 사람이 없으니까요. 대신 시간과 수수료를 씁니다. 이 사이트는 들어오는 방향은 제공하지 않습니다. Circle 브릿지를 직접 쓰십시오.</p>
 <p><b>이미 갖고 있는 사람에게서 구매</b>. 즉시 되고, 그 사람이 부르는 값을 냅니다. 이 사이트에서는 판매자가 가격을 직접 정하고 물량은 이미 예치되어 있습니다. 그래서 인도가 약속이 아닙니다. 내가 돈을 내기 전에 이미 컨트랙트 안에 들어와 있는 잔액입니다.</p>
 <p>둘 중 어느 쪽이 싼지는 전적으로 프리미엄에 달렸고, 그 숫자가 이 페이지 맨 위에 있습니다. 일반해는 없고 오늘의 답만 있습니다.</p>
 <h2>4. 나오는 두 가지 길, 그리고 돈이 새는 자리</h2>
@@ -205,7 +205,7 @@
 <p><b>파는 쪽</b>은 그 프리미엄을 챙깁니다. 컨트랙트에 예치하고 가격을 부르고, 안 팔린 물량은 언제든 다시 뺄 수 있습니다. 대신 구매자를 기다려야 합니다. 브릿지는 아무도 기다리지 않습니다.</p>
 <p>정직하게 요약하면 이렇습니다. 지금 당장 돈이 필요하고 프리미엄이 얇으면 브릿지, 프리미엄이 얇지 않으면 판매. 결정 전에 위의 숫자를 보십시오. 유일하게 중요한 입력값입니다.</p>
 <h2>5. 길마다 얼마인가</h2>
-<div class='wrap'><table class='cmp'><thead><tr><th>경로</th><th>프리미엄</th><th>수수료</th><th>기다리는 대상</th></tr></thead><tbody><tr><td>브릿지로 진입</td><td>없음</td><td>2%</td><td>Circle의 증명</td></tr><tr><td>여기서 구매</td><td>내가 지불</td><td>2%</td><td>없음, 물량이 이미 예치됨</td></tr><tr><td>브릿지로 이탈</td><td>없음, 그리고 포기함</td><td>2%</td><td>Circle의 증명</td></tr><tr><td>여기서 판매</td><td>내가 수취</td><td>2%</td><td>구매자</td></tr></tbody></table></div>
+<div class='wrap'><table class='cmp'><thead><tr><th>경로</th><th>프리미엄</th><th>수수료</th><th>기다리는 대상</th></tr></thead><tbody><tr><td>브릿지로 진입 (Circle 직접, 이 사이트 아님)</td><td>없음</td><td>0</td><td>Circle의 증명</td></tr><tr><td>여기서 구매</td><td>내가 지불</td><td>2%</td><td>없음, 물량이 이미 예치됨</td></tr><tr><td>브릿지로 이탈</td><td>없음, 그리고 포기함</td><td>2%</td><td>Circle의 증명</td></tr><tr><td>여기서 판매</td><td>내가 수취</td><td>2%</td><td>구매자</td></tr></tbody></table></div>
 <p>2%는 이 서비스의 수수료이고 컨트랙트 안에서 5%로 상한이 박혀 있습니다. 어떤 키로도 그 위로 올릴 수 없는 상수입니다. CCTP 자체에 대해 Circle이 받는 돈은 없고, 체인은 1번 항목에 적은 가스를 받습니다.</p>
 <h2>6. 이 숫자들의 출처</h2>
 <p>위의 모든 값은 주장이 아니라 체인 조회 결과이고, 하나라도 어긋나면 빌드가 이 페이지를 발행하지 않습니다.</p>
@@ -228,7 +228,7 @@
 <p>但它仍然以高于一美元的价格易手。原因不在资产，而在排队：想在 Arc 上持有 USDC 的人，多于愿意把自己的 USDC 搬过来并交给别人的人。溢价就是这份意愿的价格，是为即时性支付的费用，付给那些已经走完慢流程的人。</p>
 <p>溢价<b>并非</b>源于转账上限。转入 Arc 从未设过上限。转出的上限是<b>每条 CCTP 消息 100,000 USDC</b>，几乎没人会触到这个天花板。之所以要点明，是因为广为流传的数字是每条消息 1 USDC，那在早期是对的，现在已经不对；当前值随时可以通过批量合约的 <span class='mono'>perMessageLimit()</span> 查询。</p>
 <h2>3. 进入的两条路</h2>
-<p><b>自己走桥。</b>你需要在 Base 或其他 CCTP 链上持有 USDC。你在那边销毁，Circle 出具证明，然后在 Arc 上铸造到你的地址。你完全不付溢价，因为没有人在卖给你东西，你付出的是时间和手续费。</p>
+<p><b>自己走桥。</b>你需要在 Base 或其他 CCTP 链上持有 USDC。你在那边销毁，Circle 出具证明，然后在 Arc 上铸造到你的地址。你完全不付溢价，因为没有人在卖给你东西，你付出的是时间和手续费。本站不提供进入方向，请直接使用 Circle 的桥。</p>
 <p><b>从已经持有的人手里买。</b>即时，价格由对方开。在本站，卖家自行定价，且其库存已经预先存入，因此交付不是一句承诺，而是在你付款之前就已经躺在合约里的余额。</p>
 <p>两者哪个更便宜，完全取决于溢价，也就是本页顶部的那个数字。没有通用答案，只有今天的答案。</p>
 <h2>4. 退出的两条路，以及钱漏掉的地方</h2>
@@ -237,7 +237,7 @@
 <p><b>卖出</b>则把这份溢价收进来。你存入合约，标出价格，没卖掉的部分随时可以取回。代价是你要等买家，而桥不等任何人。</p>
 <p>老实说就是：急着用钱且溢价很薄时走桥，溢价不薄时卖出。做决定前先看上面那个数字，它是唯一重要的输入。</p>
 <h2>5. 每条路的成本</h2>
-<div class='wrap'><table class='cmp'><thead><tr><th>路径</th><th>溢价</th><th>手续费</th><th>等待对象</th></tr></thead><tbody><tr><td>走桥进入</td><td>无</td><td>2%</td><td>Circle 的证明</td></tr><tr><td>在此购买</td><td>由你支付</td><td>2%</td><td>无，库存已预存</td></tr><tr><td>走桥退出</td><td>无，且被你放弃</td><td>2%</td><td>Circle 的证明</td></tr><tr><td>在此卖出</td><td>由你收取</td><td>2%</td><td>买家</td></tr></tbody></table></div>
+<div class='wrap'><table class='cmp'><thead><tr><th>路径</th><th>溢价</th><th>手续费</th><th>等待对象</th></tr></thead><tbody><tr><td>走桥进入（Circle 直接，非本站）</td><td>无</td><td>0</td><td>Circle 的证明</td></tr><tr><td>在此购买</td><td>由你支付</td><td>2%</td><td>无，库存已预存</td></tr><tr><td>走桥退出</td><td>无，且被你放弃</td><td>2%</td><td>Circle 的证明</td></tr><tr><td>在此卖出</td><td>由你收取</td><td>2%</td><td>买家</td></tr></tbody></table></div>
 <p>2% 是本服务的手续费，并在合约中被硬性限制为不超过 5%，这是任何私钥都无法提高的常量。Circle 对 CCTP 本身不收费；链收取第 1 节所列的燃料费。</p>
 <h2>6. 这些数字从哪里来</h2>
 <p>以上全部是链上读数而非声明，其中任何一项不再吻合，构建都会拒绝发布本页。</p>
