@@ -124,8 +124,11 @@
     letter-spacing:0;font-size:var(--t3)}
   .hgroup{display:flex;align-items:center;gap:8px}
   .lang{display:flex;border:1px solid var(--rule2);border-radius:3px;overflow:hidden}
+  /* Language names are words in their own scripts, not data: in the mono
+     face the CJK glyphs are double width and the switcher alone measured
+     290px on a phone. */
   .lang button{background:none;border:0;color:var(--muted);padding:7px 11px;
-    font-size:var(--t2);font-weight:700;cursor:pointer;font-family:var(--mono)}
+    font-size:var(--t2);font-weight:700;cursor:pointer;font-family:var(--sans)}
   .lang button:hover{color:var(--ink)}
   .lang button.on{background:var(--sink);color:var(--ink)}
   @media(max-width:640px){.lang button{padding:5px 7px;font-size:var(--t1)}}
@@ -233,7 +236,19 @@
     border:1px solid var(--rule2);border-radius:3px;padding:5px 10px;
     font-variant-numeric:tabular-nums slashed-zero;white-space:nowrap}
   .deskx:empty{display:none}
-  @media(max-width:470px){.deskx{font-size:var(--t2);padding:4px 8px}}
+  @media(max-width:470px){
+    /* The flip carries its label and reaches x=168 at this width; a chip
+       centred on the divider starts at 153. Right edge instead. */
+    .deskx{left:auto;right:14px;transform:translateY(-50%);
+      font-size:var(--t2);padding:4px 8px}
+    /* The masthead's second row: switcher, theme, connect. Everything must be
+       allowed to shrink and nothing may wrap inside its own box. */
+    .hgroup>*{min-width:0}
+    .lang button{padding:5px 8px}
+    header .btn{padding:9px 11px;font-size:var(--t1);letter-spacing:.04em}
+    #toasts{left:14px;right:14px}
+    .toast{max-width:none}
+  }
   /* Selling is the other trade, so the desk changes temperature and not only
      its wording. Four token overrides, scoped to the three elements that
      carry the signal colour; the rest of the stylesheet never learns of it. */
@@ -324,12 +339,26 @@
   #book th:nth-child(4){width:34%}
   #bids th:nth-child(4){width:22%}
   #bids th:nth-child(5){width:12%}
+  /* On a phone the fixed 22% columns are 77px and a tracked uppercase heading
+     painted over its neighbour. Content-sized and scrolling inside .wrap, like
+     the bids table already did. This block sits AFTER the width rules above
+     on purpose: at equal specificity the later rule wins, and a first draft
+     of it placed earlier in the sheet changed nothing. */
+  @media(max-width:470px){
+    #book,#bids{table-layout:auto}
+    #book th:nth-child(1),#bids th:nth-child(1),
+    #book th:nth-child(2),#bids th:nth-child(2),
+    #book th:nth-child(3),#bids th:nth-child(3),
+    #book th:nth-child(4),#bids th:nth-child(4),#bids th:nth-child(5){width:auto}
+    #book td,#bids td{white-space:nowrap}
+  }
   /* The label is two words and the row should not grow to hold it. */
   #bids td:last-child{text-align:right;white-space:nowrap}
   #bids td:last-child .btn{white-space:nowrap}
   th{text-align:left;color:var(--muted);font-weight:600;font-size:var(--t1);
     letter-spacing:.12em;text-transform:uppercase;padding:9px 16px 8px;
     border-bottom:1px solid var(--ink);white-space:nowrap;background:var(--sink)}
+  @media(max-width:470px){th{padding:9px 12px 8px;letter-spacing:.06em;font-size:12px}}
   th.sort{cursor:pointer;user-select:none}
   th.sort:hover{color:var(--ink)}
   td{padding:10px 16px;border-bottom:1px solid var(--rule);color:var(--muted)}
