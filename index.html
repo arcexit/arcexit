@@ -948,6 +948,7 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Could not read the current approval. Approving anyway.":"현재 승인 잔량을 읽지 못했습니다. 승인부터 진행합니다.",
   "Arc's RPC is not answering right now. Nothing was sent and your funds did not move. Try again in a minute.":"Arc RPC가 지금 응답하지 않습니다. 아무것도 전송되지 않았고 자금은 그대로입니다. 1분 뒤 다시 시도하십시오.",
   "Arc's RPC stopped answering after your transaction was signed. It is on chain. Open My orders in a minute; an unlisted deposit can be withdrawn there.":"서명 뒤에 Arc RPC가 응답을 멈췄습니다. 트랜잭션은 체인에 올라가 있습니다. 1분 뒤 내 주문을 여십시오. 등록되지 않은 예치금은 거기서 회수할 수 있습니다.",
   "Min {0}":"최소 {0}",
@@ -1082,6 +1083,7 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Could not read the current approval. Approving anyway.":"无法读取当前授权额度，将直接先授权。",
   "Arc's RPC is not answering right now. Nothing was sent and your funds did not move. Try again in a minute.":"Arc 的 RPC 暂时没有响应。没有发送任何交易，资金未动。请一分钟后再试。",
   "Arc's RPC stopped answering after your transaction was signed. It is on chain. Open My orders in a minute; an unlisted deposit can be withdrawn there.":"签名后 Arc 的 RPC 停止了响应。交易已在链上。一分钟后打开我的订单，未挂牌的存款可在那里取回。",
   "Min {0}":"最少 {0}",
@@ -2269,8 +2271,21 @@ async function doPost(){
   const btn=document.getElementById("b-post");
   BUSY=true; btn.disabled=true;
   try{
-    const cur=numHex(await arcRead("eth_call",[{to:USDC_ARC,
-      data:SEL.allowance+pad(ACCT)+pad(VAULT)},"latest"]));
+    // The allowance read is the one call in this flow that needs eth_call, and
+    // eth_call is exactly what Arc's only public endpoint drops first under
+    // load (every other method kept answering while it returned 502 for an
+    // hour on 2026-09-02). If it cannot be read, approve anyway: a redundant
+    // approval costs a fraction of a cent of gas, a dead listing cost 1,100
+    // USDC of supply.
+    let cur;
+    try{
+      cur=numHex(await arcRead("eth_call",[{to:USDC_ARC,
+        data:SEL.allowance+pad(ACCT)+pad(VAULT)},"latest"]));
+    }catch(e){
+      if(!transientErr(e)) throw e;
+      say2(T("Could not read the current approval. Approving anyway."));
+      cur=0n;
+    }
     if(cur<q.amt){
       say2(T("1/3 approve the vault on Arc…"));
       const h1=await sendTx(USDC_ARC,SEL.approve+pad(VAULT)+pad(hexNum(q.amt)),ARC_HEX,ARC_ADD);
