@@ -1288,10 +1288,13 @@ function transientErr(e){
   const m=String((e&&e.message)||e||"");
   return /^HTTP (429|5\d\d)$/.test(m)||TRANSIENT.test(m)||(e&&e.name==="TypeError");
 }
-async function rpcVia(urls,method,params){
+async function rpcVia(urls,method,params,maxAttempts){
   let last;
   const delays=[700,1400,2800,5600];          // ~10.5s of patience in total
-  for(let attempt=0;attempt<=delays.length;attempt++){
+  // Display reads that have another source pass a small count; a transaction
+  // flow with no alternative keeps the whole budget.
+  const tries=maxAttempts?Math.min(maxAttempts,delays.length+1):delays.length+1;
+  for(let attempt=0;attempt<tries;attempt++){
     // An endpoint that just refused goes to the back of the queue rather than
     // being asked again first. With hundreds of reads in a book scan, retrying
     // a limited host first every time is what turns one 429 into hundreds.
@@ -1321,7 +1324,7 @@ async function rpcVia(urls,method,params){
         last=e;
       }
     }
-    if(attempt<delays.length&&transientErr(last))
+    if(attempt<tries-1&&transientErr(last))
       await new Promise(s=>setTimeout(s,delays[attempt]));
     else break;
   }
@@ -1329,6 +1332,7 @@ async function rpcVia(urls,method,params){
 }
 const baseRead=(m,p)=>rpcVia(BASE_RPCS,m,p);
 const arcRead=(m,p)=>rpcVia(ARC_RPCS,m,p);
+const arcReadQuick=(m,p)=>rpcVia(ARC_RPCS,m,p,2);   // one try and one quick retry
 const baseCall=(to,data)=>baseRead("eth_call",[{to,data},"latest"]);
 
 // ---- wallet (lean EIP-6963 with a picker only when it matters) -------------
@@ -1786,10 +1790,19 @@ async function decodeOffer(id){
 // each burning the full retry budget: with the endpoint down for hours, sixty
 // offers would otherwise take eleven minutes to render.
 let ARC_CALL_DOWN_UNTIL=0;
-async function arcCall(to,data){
+// The timer survives a reload: without this every fresh page load paid the
+// failing attempts again before it could show the book (measured: 21 s).
+try{ ARC_CALL_DOWN_UNTIL=Number(sessionStorage.getItem("arcCallDownUntil"))||0; }catch(e){}
+function arcCallDown(){
+  ARC_CALL_DOWN_UNTIL=Date.now()+60000;
+  try{ sessionStorage.setItem("arcCallDownUntil",String(ARC_CALL_DOWN_UNTIL)); }catch(e){}
+}
+// quick=true: a display read that has the vault's events as a second source,
+// so it asks twice and moves on. Flows with no alternative keep the full budget.
+async function arcCall(to,data,quick){
   if(Date.now()<ARC_CALL_DOWN_UNTIL) throw Object.assign(new Error("Upstream RPC failed: eth_call circuit open"),{transient:true});
-  try{ return await arcRead("eth_call",[{to,data},"latest"]); }
-  catch(e){ if(transientErr(e)) ARC_CALL_DOWN_UNTIL=Date.now()+60000; throw e; }
+  try{ return await (quick?arcReadQuick:arcRead)("eth_call",[{to,data},"latest"]); }
+  catch(e){ if(transientErr(e)) arcCallDown(); throw e; }
 }
 const VTOP={dep:"0xee6b87136d2ce2885b4a10d9e1882eab0e4167f758605e6be14600aa1c163bde",wdr:"0x6f2e7e547e1d63db7c2c643e44a4a3113da92ed181d2040cda5cc823a0577a0e",rel:"0x243c2ac36063372bff57dd624157b3e1b7f72ae95f58ed6d3489272509b32099",fee:"0x886b1c30fe63a1e4ac1ed5070ad64cf7af39d46f5c0f58337e5e1e3b5192fc03"};
 const VAULT_LOG_CHUNK=9000, VAULT_LOG_MAX_CHUNKS=70;   // ~4.5 days at 0.62s blocks
@@ -1822,7 +1835,7 @@ async function vaultBalanceFromLogs(vid){
 }
 async function vaultBal(vid){
   try{
-    const r=await arcCall(VAULT,SEL.voffers+pad(hexNum(vid)));
+    const r=await arcCall(VAULT,SEL.voffers+pad(hexNum(vid)),true);
     return BigInt("0x"+r.slice(2+64,2+128));
   }catch(e){
     if(!transientErr(e)) return null;
@@ -1836,7 +1849,7 @@ async function vaultBal(vid){
 // seller's withdraw off this one would strand the fee-sized remainder.
 async function vaultAvail(vid){
   try{
-    const r=await arcCall(VAULT,SEL.vAvail+pad(hexNum(vid)));
+    const r=await arcCall(VAULT,SEL.vAvail+pad(hexNum(vid)),true);
     return BigInt(r);
   }catch(e){
     if(!transientErr(e)) return null;
@@ -1880,14 +1893,19 @@ async function loadBook(){
     // does not deserve 400 calls every refresh.
     const live=offers.filter(o=>o.vaultId>0&&o.remaining>0n).slice(0,60);
     let vaultFails=0;
-    for(const o of live){
-      const vb=await vaultAvail(o.vaultId);
+    // Three lanes: one after another made a 60-offer book a minute of waiting,
+    // and more than three at once is the burst the endpoint refuses.
+    const avail=new Array(live.length); let next=0;
+    async function lane(){ while(next<live.length){ const k=next++; avail[k]=await vaultAvail(live[k].vaultId); } }
+    await Promise.all([lane(),lane(),lane()]);
+    live.forEach((o,k)=>{
+      const vb=avail[k];
       if(vb===null) vaultFails++;
       // null = Arc read failed (unknown), not zero backing. Only a real zero
       // balance removes an offer; a failed read leaves eff undefined so the
       // offer is not falsely shown as sold out.
       o.eff=(vb===null)?null:(o.remaining<vb?o.remaining:vb);
-    }
+    });
     // If every vault read failed, the delivery-side chain is unreachable. Keep
     // the last good book instead of flashing an empty "no offers" venue.
     if(live.length&&vaultFails===live.length){
