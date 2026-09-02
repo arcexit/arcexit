@@ -1284,6 +1284,7 @@ const RPC_COOLDOWN={};          // url -> timestamp it may be tried again
 // including a revert, still comes back or throws on the first attempt.
 const TRANSIENT=/upstream|throttl|timeout|timed out|rate limit|fetch failed|failed to fetch|network|502|503|504|429/i;
 function transientErr(e){
+  if(e&&e.transient) return true;
   const m=String((e&&e.message)||e||"");
   return /^HTTP (429|5\d\d)$/.test(m)||TRANSIENT.test(m)||(e&&e.name==="TypeError");
 }
@@ -1777,11 +1778,56 @@ async function decodeOffer(id){
           premiumBps:Number(BigInt("0x"+f(2))), remaining:BigInt("0x"+f(3)),
           minFill:BigInt("0x"+f(4)), vaultId:Number(BigInt("0x"+f(5)))};
 }
+// The vault's own events, for when eth_call is the one method the endpoint
+// has dropped. Deposited and Withdrawn carry the absolute balance after the
+// change; Released and FeeTaken carry what left after it.
+// Circuit breaker for Arc eth_call. Once it has failed transiently, every
+// caller for the next minute goes straight to the event fallback instead of
+// each burning the full retry budget: with the endpoint down for hours, sixty
+// offers would otherwise take eleven minutes to render.
+let ARC_CALL_DOWN_UNTIL=0;
+async function arcCall(to,data){
+  if(Date.now()<ARC_CALL_DOWN_UNTIL) throw Object.assign(new Error("Upstream RPC failed: eth_call circuit open"),{transient:true});
+  try{ return await arcRead("eth_call",[{to,data},"latest"]); }
+  catch(e){ if(transientErr(e)) ARC_CALL_DOWN_UNTIL=Date.now()+60000; throw e; }
+}
+const VTOP={dep:"0xee6b87136d2ce2885b4a10d9e1882eab0e4167f758605e6be14600aa1c163bde",wdr:"0x6f2e7e547e1d63db7c2c643e44a4a3113da92ed181d2040cda5cc823a0577a0e",rel:"0x243c2ac36063372bff57dd624157b3e1b7f72ae95f58ed6d3489272509b32099",fee:"0x886b1c30fe63a1e4ac1ed5070ad64cf7af39d46f5c0f58337e5e1e3b5192fc03"};
+const VAULT_LOG_CHUNK=9000, VAULT_LOG_MAX_CHUNKS=70;   // ~4.5 days at 0.62s blocks
+const _vaultLogCache={};                                // vid -> {at, balance}
+async function vaultBalanceFromLogs(vid){
+  const c=_vaultLogCache[vid];
+  if(c&&Date.now()-c.at<30000) return c.balance;
+  const head=Number(numHex(await arcRead("eth_blockNumber",[])));
+  const vtopic=pad(hexNum(vid));
+  let anchor=null, later=[];
+  for(let k=0;k<VAULT_LOG_MAX_CHUNKS&&anchor===null;k++){
+    const hi=head-k*(VAULT_LOG_CHUNK+1), lo=Math.max(0,hi-VAULT_LOG_CHUNK);
+    if(hi<0) break;
+    const logs=await arcRead("eth_getLogs",[{address:VAULT,fromBlock:hexNum(lo),toBlock:hexNum(hi),
+      topics:[[VTOP.dep,VTOP.wdr,VTOP.rel,VTOP.fee],vtopic]}]);
+    // newest first inside the chunk, so the first absolute balance we meet is the latest
+    const sorted=logs.slice().sort((a,b)=>(Number(b.blockNumber)-Number(a.blockNumber))||(Number(b.logIndex)-Number(a.logIndex)));
+    for(const l of sorted){
+      const t=l.topics[0], w=(i)=>BigInt("0x"+l.data.slice(2+64*i,2+64*(i+1)));
+      if(t===VTOP.dep||t===VTOP.wdr){ anchor=w(1); break; }   // balance is the 2nd data word
+      if(t===VTOP.rel) later.push(w(1));                       // recipient, amount
+      else if(t===VTOP.fee) later.push(w(0));                  // fee
+    }
+    if(lo===0) break;
+  }
+  if(anchor===null) return null;
+  let bal=anchor; for(const x of later) bal-=x; if(bal<0n) bal=0n;
+  _vaultLogCache[vid]={at:Date.now(),balance:bal};
+  return bal;
+}
 async function vaultBal(vid){
   try{
-    const r=await arcRead("eth_call",[{to:VAULT,data:SEL.voffers+pad(hexNum(vid))},"latest"]);
+    const r=await arcCall(VAULT,SEL.voffers+pad(hexNum(vid)));
     return BigInt("0x"+r.slice(2+64,2+128));
-  }catch(e){ return null; }
+  }catch(e){
+    if(!transientErr(e)) return null;
+    try{ return await vaultBalanceFromLogs(vid); }catch(e2){ return null; }
+  }
 }
 // What a vault offer can still DELIVER, which is its balance minus the venue
 // fee the same delivery pays. Withdraw is unaffected and still returns the raw
@@ -1790,9 +1836,18 @@ async function vaultBal(vid){
 // seller's withdraw off this one would strand the fee-sized remainder.
 async function vaultAvail(vid){
   try{
-    const r=await arcRead("eth_call",[{to:VAULT,data:SEL.vAvail+pad(hexNum(vid))},"latest"]);
+    const r=await arcCall(VAULT,SEL.vAvail+pad(hexNum(vid)));
     return BigInt(r);
-  }catch(e){ return null; }
+  }catch(e){
+    if(!transientErr(e)) return null;
+    // Same arithmetic as the contract's available(): balance / (1 + fee). The
+    // vault's fee is kept in step with the escrow's by the keeper's route
+    // check, so FEE_BPS stands in for it here.
+    try{
+      const bal=await vaultBalanceFromLogs(vid);
+      return bal===null?null:(bal*10000n)/(10000n+FEE_BPS);
+    }catch(e2){ return null; }
+  }
 }
 // A fill can take min(remaining, vault balance); taking the WHOLE remaining
 // additionally bypasses minFill (the contract's rump rule). Keep this the
@@ -2279,8 +2334,7 @@ async function doPost(){
     // USDC of supply.
     let cur;
     try{
-      cur=numHex(await arcRead("eth_call",[{to:USDC_ARC,
-        data:SEL.allowance+pad(ACCT)+pad(VAULT)},"latest"]));
+      cur=numHex(await arcCall(USDC_ARC,SEL.allowance+pad(ACCT)+pad(VAULT)));
     }catch(e){
       if(!transientErr(e)) throw e;
       say2(T("Could not read the current approval. Approving anyway."));
