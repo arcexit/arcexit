@@ -1927,7 +1927,26 @@ const VAULT_BLOCK=18237680;            // the vault's own deploy block: the floo
 // single chunk answers for every vault at once, and it stops as soon as every
 // vault asked about has an anchor.
 const t2=(l)=>l.topics[0];
-const _vaultBalCache={};          // vid -> {at, bal}   (bal may be null)
+// vid -> {at, bal}. Kept for 90 s across reloads too: the walk that finds an
+// anchor near the vault's deploy block is the expensive case, and a reader who
+// refreshes should not pay it twice.
+const VBAL_KEY="otc-vault-bal-v1", VBAL_TTL=90000;
+const _vaultBalCache=(function(){
+  try{
+    const j=JSON.parse(sessionStorage.getItem(VBAL_KEY)||"null");
+    if(j&&j.vault===VAULT&&Date.now()-j.at<VBAL_TTL){
+      const out={}; for(const k in j.v) out[k]={at:j.at,bal:j.v[k]===null?null:BigInt(j.v[k])};
+      return out;
+    }
+  }catch(e){}
+  return {};
+})();
+function vbalSave(){
+  try{
+    const v={}; for(const k in _vaultBalCache) v[k]=_vaultBalCache[k].bal===null?null:_vaultBalCache[k].bal.toString();
+    sessionStorage.setItem(VBAL_KEY,JSON.stringify({vault:VAULT,at:Date.now(),v}));
+  }catch(e){}
+}
 let _scanRun=null;
 async function vaultScan(vids){
   const want=vids.filter(v=>{ const c=_vaultBalCache[v]; return !(c&&Date.now()-c.at<60000); });
@@ -1937,19 +1956,28 @@ async function vaultScan(vids){
     const head=Number(numHex(await arcRead("eth_blockNumber",[])));
     const need=new Set(want);
     const anchor={}, later={};
-    // This runs only while eth_call is refused, so it is a stand-in, not the
-    // record. Eighteen hours back covers anything a seller is likely to be
-    // looking at; walking the whole history for a vault that has been empty
-    // for weeks cost thirty-six seconds and told nobody anything.
-    const CHUNKS=12;
-    let hi=head;
-    for(let k=0;k<CHUNKS&&hi>=VAULT_BLOCK&&need.size;k++){
-      const lo=Math.max(VAULT_BLOCK,hi-VAULT_LOG_CHUNK+1);
-      let logs;
+    // The floor is the vault's own deploy block, not a fixed number of chunks:
+    // a vault's newest Deposited sits at a fixed height while the head keeps
+    // rising, so any fixed budget expires. Four chunks at a time keeps the
+    // worst case (the whole history) at seconds; the walk still stops the
+    // moment every vault asked about has an anchor.
+    const LANES=4;
+    let hi=head, stop=false;
+    while(!stop&&hi>=VAULT_BLOCK&&need.size){
+      const spans=[];
+      for(let j=0;j<LANES&&hi>=VAULT_BLOCK;j++){
+        const lo=Math.max(VAULT_BLOCK,hi-VAULT_LOG_CHUNK+1);
+        spans.push([lo,hi]);
+        if(lo===VAULT_BLOCK){ stop=true; break; }
+        hi=lo-1;
+      }
+      let round;
       try{
-        logs=await arcRead("eth_getLogs",[{address:VAULT,fromBlock:hexNum(lo),toBlock:hexNum(hi),
-          topics:[[VTOP.dep,VTOP.wdr,VTOP.rel,VTOP.fee]]}]);
+        round=await Promise.all(spans.map(([lo,h])=>arcRead("eth_getLogs",
+          [{address:VAULT,fromBlock:hexNum(lo),toBlock:hexNum(h),
+            topics:[[VTOP.dep,VTOP.wdr,VTOP.rel,VTOP.fee]]}])));
       }catch(e){ break; }          // keep whatever is already resolved
+      const logs=[].concat.apply([],round);
       try{
         logs.slice().sort((a,b)=>(Number(b.blockNumber)-Number(a.blockNumber))||(Number(b.logIndex)-Number(a.logIndex)))
           .forEach(l=>{
@@ -1965,8 +1993,6 @@ async function vaultScan(vids){
             else if(t2(l)===VTOP.fee){ const f=w(0); if(f!==null) later[vid]=(later[vid]||0n)+f; }
           });
       }catch(e){ break; }   // a malformed log must not lose the vaults already resolved
-      if(lo===VAULT_BLOCK) break;
-      hi=lo-1;
     }
     const now=Date.now();
     for(const v of want){
@@ -1980,6 +2006,7 @@ async function vaultScan(vids){
       // `need` still holding it after a clean walk tells us.
       _vaultBalCache[v]={at:bal===null?now+240000:now,bal:bal};
     }
+    vbalSave();
   })().finally(()=>{ _scanRun=null; });
   await _scanRun;
 }
@@ -1988,7 +2015,17 @@ async function vaultBalanceFromLogs(vid){
   if(c&&Date.now()-c.at<60000) return c.bal;
   await vaultScan([vid]);
   const c2=_vaultBalCache[vid];
-  return c2?c2.bal:null;
+  if(c2&&c2.bal!==null) return c2.bal;
+  // The events told us nothing. A breaker tripped a minute ago is not a reason
+  // to show a buyer an unbuyable market, so ask the endpoint once more.
+  try{
+    const r=await arcReadQuick("eth_call",[{to:VAULT,data:SEL.voffers+pad(hexNum(vid))},"latest"]);
+    const b=BigInt("0x"+r.slice(2+64,2+128));
+    _vaultBalCache[vid]={at:Date.now(),bal:b}; vbalSave();
+    ARC_CALL_DOWN_UNTIL=0;
+    try{ sessionStorage.removeItem("arcCallDownUntil"); }catch(e){}
+    return b;
+  }catch(e){ return null; }
 }
 // eth_call is the exact read; the vault's events are the same truth the slow
 // way. Rather than waiting out one before starting the other, give eth_call a
@@ -2009,7 +2046,15 @@ function raceCall(callFn,logsFn){
     },CALL_HEADSTART);
   });
 }
+function vaultCached(vid){
+  const c=_vaultBalCache[vid];
+  return (c&&c.bal!==null&&Date.now()-c.at<60000)?c.bal:null;
+}
 async function vaultBal(vid){
+  // A cached answer beats racing for it: the book refreshes every thirty
+  // seconds and each race spends the eth_call head start before it can use
+  // what it already has.
+  const c=vaultCached(vid); if(c!==null) return c;
   return raceCall(
     async()=>BigInt("0x"+(await arcCall(VAULT,SEL.voffers+pad(hexNum(vid)),true)).slice(2+64,2+128)),
     ()=>vaultBalanceFromLogs(vid));
@@ -2020,6 +2065,7 @@ async function vaultBal(vid){
 // the raw balance would offer a size the vault reverts on, and quoting a
 // seller's withdraw off this one would strand the fee-sized remainder.
 async function vaultAvail(vid){
+  const c=vaultCached(vid); if(c!==null) return (c*10000n)/(10000n+FEE_BPS);
   // Same arithmetic as the contract's available() on the fallback side:
   // balance / (1 + fee). The vault's fee is kept in step with the escrow's by
   // the keeper's route check, so FEE_BPS stands in for it here.
