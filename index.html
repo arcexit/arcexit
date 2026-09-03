@@ -948,6 +948,8 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "reading…":"읽는 중…",
+  "Arc unreachable":"Arc 연결 안 됨",
   "Could not read the current approval. Approving anyway.":"현재 승인 잔량을 읽지 못했습니다. 승인부터 진행합니다.",
   "Arc's RPC is not answering right now. Nothing was sent and your funds did not move. Try again in a minute.":"Arc RPC가 지금 응답하지 않습니다. 아무것도 전송되지 않았고 자금은 그대로입니다. 1분 뒤 다시 시도하십시오.",
   "Arc's RPC stopped answering after your transaction was signed. It is on chain. Open My orders in a minute; an unlisted deposit can be withdrawn there.":"서명 뒤에 Arc RPC가 응답을 멈췄습니다. 트랜잭션은 체인에 올라가 있습니다. 1분 뒤 내 주문을 여십시오. 등록되지 않은 예치금은 거기서 회수할 수 있습니다.",
@@ -1083,6 +1085,8 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "reading…":"读取中…",
+  "Arc unreachable":"无法连接 Arc",
   "Could not read the current approval. Approving anyway.":"无法读取当前授权额度，将直接先授权。",
   "Arc's RPC is not answering right now. Nothing was sent and your funds did not move. Try again in a minute.":"Arc 的 RPC 暂时没有响应。没有发送任何交易，资金未动。请一分钟后再试。",
   "Arc's RPC stopped answering after your transaction was signed. It is on chain. Open My orders in a minute; an unlisted deposit can be withdrawn there.":"签名后 Arc 的 RPC 停止了响应。交易已在链上。一分钟后打开我的订单，未挂牌的存款可在那里取回。",
@@ -1805,33 +1809,73 @@ async function arcCall(to,data,quick){
   catch(e){ if(transientErr(e)) arcCallDown(); throw e; }
 }
 const VTOP={dep:"0xee6b87136d2ce2885b4a10d9e1882eab0e4167f758605e6be14600aa1c163bde",wdr:"0x6f2e7e547e1d63db7c2c643e44a4a3113da92ed181d2040cda5cc823a0577a0e",rel:"0x243c2ac36063372bff57dd624157b3e1b7f72ae95f58ed6d3489272509b32099",fee:"0x886b1c30fe63a1e4ac1ed5070ad64cf7af39d46f5c0f58337e5e1e3b5192fc03"};
-const VAULT_LOG_CHUNK=9000, VAULT_LOG_MAX_CHUNKS=70;   // ~4.5 days at 0.62s blocks
-const _vaultLogCache={};                                // vid -> {at, balance}
-async function vaultBalanceFromLogs(vid){
-  const c=_vaultLogCache[vid];
-  if(c&&Date.now()-c.at<30000) return c.balance;
-  const head=Number(numHex(await arcRead("eth_blockNumber",[])));
-  const vtopic=pad(hexNum(vid));
-  let anchor=null, later=[];
-  for(let k=0;k<VAULT_LOG_MAX_CHUNKS&&anchor===null;k++){
-    const hi=head-k*(VAULT_LOG_CHUNK+1), lo=Math.max(0,hi-VAULT_LOG_CHUNK);
-    if(hi<0) break;
-    const logs=await arcRead("eth_getLogs",[{address:VAULT,fromBlock:hexNum(lo),toBlock:hexNum(hi),
-      topics:[[VTOP.dep,VTOP.wdr,VTOP.rel,VTOP.fee],vtopic]}]);
-    // newest first inside the chunk, so the first absolute balance we meet is the latest
-    const sorted=logs.slice().sort((a,b)=>(Number(b.blockNumber)-Number(a.blockNumber))||(Number(b.logIndex)-Number(a.logIndex)));
-    for(const l of sorted){
-      const t=l.topics[0], w=(i)=>BigInt("0x"+l.data.slice(2+64*i,2+64*(i+1)));
-      if(t===VTOP.dep||t===VTOP.wdr){ anchor=w(1); break; }   // balance is the 2nd data word
-      if(t===VTOP.rel) later.push(w(1));                       // recipient, amount
-      else if(t===VTOP.fee) later.push(w(0));                  // fee
+const VAULT_LOG_CHUNK=9000;
+const VAULT_BLOCK=18237680;            // the vault's own deploy block: the floor
+                                       // for every scan. Below it there is
+                                       // nothing to find, and walking there is
+                                       // how one missing vault cost 70 requests.
+// One scan of the vault's log, shared by every caller. Backward from the head
+// so a live vault is found in the first chunk or two, no vaultId filter so a
+// single chunk answers for every vault at once, and it stops as soon as every
+// vault asked about has an anchor.
+const _vaultBalCache={};          // vid -> {at, bal}   (bal may be null)
+let _scanRun=null;
+async function vaultScan(vids){
+  const want=vids.filter(v=>{ const c=_vaultBalCache[v]; return !(c&&Date.now()-c.at<60000); });
+  if(!want.length) return;
+  if(_scanRun){ await _scanRun; return vaultScan(vids); }
+  _scanRun=(async()=>{
+    const head=Number(numHex(await arcRead("eth_blockNumber",[])));
+    const need=new Set(want);
+    const anchor={}, later={};
+    // This runs only while eth_call is refused, so it is a stand-in, not the
+    // record. Eighteen hours back covers anything a seller is likely to be
+    // looking at; walking the whole history for a vault that has been empty
+    // for weeks cost thirty-six seconds and told nobody anything.
+    const CHUNKS=12;
+    let hi=head;
+    for(let k=0;k<CHUNKS&&hi>=VAULT_BLOCK&&need.size;k++){
+      const lo=Math.max(VAULT_BLOCK,hi-VAULT_LOG_CHUNK+1);
+      let logs;
+      try{
+        logs=await arcRead("eth_getLogs",[{address:VAULT,fromBlock:hexNum(lo),toBlock:hexNum(hi),
+          topics:[[VTOP.dep,VTOP.wdr,VTOP.rel,VTOP.fee]]}]);
+      }catch(e){ break; }          // keep whatever is already resolved
+      try{
+        logs.slice().sort((a,b)=>(Number(b.blockNumber)-Number(a.blockNumber))||(Number(b.logIndex)-Number(a.logIndex)))
+          .forEach(l=>{
+            const vid=Number(BigInt(l.topics[1]));
+            if(anchor[vid]!==undefined) return;             // already settled
+            const t=l.topics[0], w=(i)=>BigInt("0x"+l.data.slice(2+64*i,2+64*(i+1)));
+            if(t===VTOP.dep||t===VTOP.wdr){ anchor[vid]=w(1); need.delete(vid); }
+            else if(t===VTOP.rel) later[vid]=(later[vid]||0n)+w(1);
+            else if(t===VTOP.fee) later[vid]=(later[vid]||0n)+w(0);
+          });
+      }catch(e){ break; }   // a malformed log must not lose the vaults already resolved
+      if(lo===VAULT_BLOCK) break;
+      hi=lo-1;
     }
-    if(lo===0) break;
-  }
-  if(anchor===null) return null;
-  let bal=anchor; for(const x of later) bal-=x; if(bal<0n) bal=0n;
-  _vaultLogCache[vid]={at:Date.now(),balance:bal};
-  return bal;
+    const now=Date.now();
+    for(const v of want){
+      let bal=null;
+      if(anchor[v]!==undefined){ bal=anchor[v]-(later[v]||0n); if(bal<0n) bal=0n; }
+      // Unresolved stays unresolved for five minutes rather than thirty
+      // seconds: nothing was found in eighteen hours of blocks, and asking
+      // again immediately walks the same twelve chunks for the same answer.
+      // A vault the whole history had nothing for is empty, not unknown; that
+      // is only true when the scan actually reached the deploy block, which
+      // `need` still holding it after a clean walk tells us.
+      _vaultBalCache[v]={at:bal===null?now+240000:now,bal:bal};
+    }
+  })().finally(()=>{ _scanRun=null; });
+  await _scanRun;
+}
+async function vaultBalanceFromLogs(vid){
+  const c=_vaultBalCache[vid];
+  if(c&&Date.now()-c.at<60000) return c.bal;
+  await vaultScan([vid]);
+  const c2=_vaultBalCache[vid];
+  return c2?c2.bal:null;
 }
 async function vaultBal(vid){
   try{
@@ -2312,20 +2356,25 @@ async function myVaultIds(){
   const out=new Set(myDepositIds());
   if(!ACCT) return [...out];
   try{
-    const n=Number(numHex(await arcRead("eth_call",
-      [{to:VAULT,data:SEL.nextVaultId},"latest"])));
+    const n=Number(numHex(await arcCall(VAULT,SEL.nextVaultId,true)));
     const ids=[]; for(let i=n-1;i>=1&&ids.length<300;i--) ids.push(i);
     for(let i=0;i<ids.length;i+=10){
       const chunk=await Promise.all(ids.slice(i,i+10).map(async vid=>{
         try{
-          const r=await arcRead("eth_call",
-            [{to:VAULT,data:SEL.voffers+pad(hexNum(vid))},"latest"]);
+          const r=await arcCall(VAULT,SEL.voffers+pad(hexNum(vid)),true);
           return ("0x"+r.slice(26,66)).toLowerCase()===ACCT.toLowerCase()?vid:null;
         }catch(e){ return null; }
       }));
       chunk.forEach(v=>{ if(v!==null){ out.add(v); rememberDeposit(v); } });
     }
-  }catch(e){ /* keep whatever the local list gave us */ }
+  }catch(e){
+    // eth_call is refused. The vault's own Deposited events name the seller,
+    // so the index finds every vault this wallet owns anyway - including ones
+    // opened on another device, which the local list never knew about.
+    /* eth_call is refused; the local list is what we have. Every vault that
+       ever held this wallet's money is in it, because the page records a
+       deposit id the moment it is created. */
+  }
   return [...out];
 }
 function myDepositIds(){
@@ -2426,7 +2475,7 @@ async function renderMine(){
   const offT=document.querySelector("#myOffers tbody");
   try{
     const now=await chainNow();
-    const offRows=[], seenVault=new Set();
+    const offRows=[], seenVault=new Set(), pending=[];
 
     // offers I posted (parallel chunks; sequential walks made this tab crawl)
     const nOff=Number(numHex(await baseCall(ESCROW,SEL.nextOfferId)));
@@ -2437,12 +2486,14 @@ async function renderMine(){
       for(const o of chunk){
         if(o.maker.toLowerCase()!==me) continue;
         if(o.vaultId>0) seenVault.add(o.vaultId);
-        const vb=o.vaultId>0?await vaultBal(o.vaultId):null;
         const tr=document.createElement("tr");
+        // The balance and the Withdraw button need Arc; the row and Delist do
+        // not. Waiting for Arc to draw ANY of it is what left a seller staring
+        // at an empty tab, unable to cancel, while Base was answering fine.
         tr.innerHTML=`<td>${o.id}</td><td>${(o.premiumBps/100).toFixed(2)}%</td>
-          <td>${vb===null?"-":usd(vb)}</td><td></td>`;
+          <td class="muted">${o.vaultId>0?T("reading…"):"-"}</td><td></td>`;
         const cell=tr.lastElementChild;
-        if(vb!==null&&vb>0n) cell.appendChild(withdrawBtn(o.vaultId,vb));
+        if(o.vaultId>0) pending.push({tr,vaultId:o.vaultId});
         if(o.remaining>0n){
           const b=document.createElement("button");b.className="btn small ghost";b.textContent=T("Delist");
           b.onclick=async()=>{try{
@@ -2455,17 +2506,8 @@ async function renderMine(){
         offRows.push(tr);
       }
     }
-    // Deposits recorded locally that have no escrow offer (listing failed or
-    // was never reached): show them so the money is always withdrawable.
-    for(const vid of await myVaultIds()){
-      if(seenVault.has(vid)) continue;
-      let vb=null; try{vb=await vaultBal(vid)}catch(e){}
-      if(!(vb&&vb>0n)) continue;
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>#${vid}</td><td class="muted">${T("unlisted")}</td><td>${usd(vb)}</td><td></td>`;
-      tr.lastElementChild.appendChild(withdrawBtn(vid,vb));
-      offRows.push(tr);
-    }
+    // Deposits with no escrow offer (listing failed or was never reached) are
+    // resolved after the table is on screen, together with the balances above.
 
     // my bids: locked money with no fill yet, which Orders never mentioned.
     const fillRows=[];
@@ -2542,6 +2584,40 @@ async function renderMine(){
     fillRows.forEach(r=>fillsT.appendChild(r));
     if(!fillsT.children.length) fillsT.innerHTML='<tr><td colspan="5" class="muted">'+T("None yet.")+'</td></tr>';
     if(!offT.children.length) offT.innerHTML='<tr><td colspan="4" class="muted">'+T("None yet.")+'</td></tr>';
+    // Now that the seller can act, go and get the Arc-side balances. Each row
+    // fills itself in; a vault that cannot be read says so in its own cell
+    // rather than holding up the table.
+    (async()=>{
+      // With Arc eth_call refused, every balance below comes from events. Build
+      // the shared index once, first: three rows each starting their own scan
+      // is the burst that made all three fail.
+      // One scan for every row, rather than one per row racing the others.
+      try{ await vaultScan(pending.map(p=>p.vaultId)); }catch(e){}
+      if(!live()) return;
+      let next=0;
+      const lane=async()=>{ while(next<pending.length){
+        const p=pending[next++];
+        let vb=null; try{ vb=await vaultBal(p.vaultId); }catch(e){}
+        if(!live()) return;
+        const cell=p.tr.children[2];
+        cell.className=""; cell.textContent=vb===null?T("Arc unreachable"):usd(vb);
+        if(vb!==null&&vb>0n) p.tr.lastElementChild.insertBefore(withdrawBtn(p.vaultId,vb),p.tr.lastElementChild.firstChild);
+      }};
+      await Promise.all([lane(),lane(),lane()]);
+      // Deposits this wallet owns that never became an offer.
+      let vids=[]; try{ vids=await myVaultIds(); }catch(e){}
+      for(const vid of vids){
+        if(seenVault.has(vid)||!live()) continue;
+        let vb=null; try{ vb=await vaultBal(vid); }catch(e){}
+        if(!(vb&&vb>0n)||!live()) continue;
+        seenVault.add(vid);
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>#${vid}</td><td class="muted">${T("unlisted")}</td><td>${usd(vb)}</td><td></td>`;
+        tr.lastElementChild.appendChild(withdrawBtn(vid,vb));
+        if(offT.querySelector("td.muted")&&offT.children.length===1) offT.innerHTML="";
+        offT.appendChild(tr);
+      }
+    })();
   }catch(e){
     if(live()) sayb('<span class="bad">'+T("Could not load your orders (RPC). ")+esch(e&&e.message||e)+'</span>');
   }
