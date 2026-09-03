@@ -979,6 +979,9 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Arc is not answering, so these sizes are unconfirmed and buying is off. The offers are real and still on chain.":"Arc가 응답하지 않아 수량을 확인하지 못했고 구매는 잠깁니다. 매물 자체는 체인에 그대로 있습니다.",
+  "Loading offers…":"매물을 불러오는 중…",
+  "Checking each seller's deposit on Arc. Sizes and the Buy button appear once it is confirmed.":"판매자별 Arc 예치금을 확인하는 중입니다. 확인되면 수량과 구매 버튼이 나타납니다.",
   "Already in vault #{0}":"금고 #{0}에 이미 있는 수량",
   "List on Base":"Base에 등록",
   "Selling the {0} USDC already in vault #{1}. No deposit, no Arc transaction: one signature on Base.":"금고 #{1}에 이미 있는 {0} USDC를 팝니다. 예치도 Arc 거래도 없고 Base에서 한 번만 서명합니다.",
@@ -1132,6 +1135,9 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Arc is not answering, so these sizes are unconfirmed and buying is off. The offers are real and still on chain.":"Arc 没有响应，数量未经核对，买入暂时关闭。挂单本身仍在链上。",
+  "Loading offers…":"正在加载挂单…",
+  "Checking each seller's deposit on Arc. Sizes and the Buy button appear once it is confirmed.":"正在核对每位卖家在 Arc 上的存入。核对完成后会显示数量和买入按钮。",
   "Already in vault #{0}":"金库 #{0} 中已有的数量",
   "List on Base":"在 Base 上挂单",
   "Selling the {0} USDC already in vault #{1}. No deposit, no Arc transaction: one signature on Base.":"出售金库 #{1} 中已有的 {0} USDC。无需存入，无需 Arc 交易，只在 Base 上签一次。",
@@ -1355,8 +1361,13 @@ function transientErr(e){
   const m=String((e&&e.message)||e||"");
   return /^HTTP (429|5\d\d)$/.test(m)||TRANSIENT.test(m)||(e&&e.name==="TypeError");
 }
+// A request that never answers is worse than one that fails: the page waits
+// out the whole socket timeout with nothing on screen. Reads that have a
+// fallback give up quickly; a transaction flow, which has none, waits.
+const RPC_TIMEOUT=20000, RPC_TIMEOUT_QUICK=3500;
 async function rpcVia(urls,method,params,maxAttempts){
   let last;
+  const deadline=maxAttempts?RPC_TIMEOUT_QUICK:RPC_TIMEOUT;
   const delays=[700,1400,2800,5600];          // ~10.5s of patience in total
   // Display reads that have another source pass a small count; a transaction
   // flow with no alternative keeps the whole budget.
@@ -1370,8 +1381,13 @@ async function rpcVia(urls,method,params,maxAttempts){
       ((RPC_COOLDOWN[x]||0)>now?1:0)-((RPC_COOLDOWN[y]||0)>now?1:0));
     for(const u of order){
       try{
-        const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});
+        const ac=("AbortController" in window)?new AbortController():null;
+        const timer=ac?setTimeout(()=>ac.abort(),deadline):0;
+        let r;
+        try{
+          r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({jsonrpc:"2.0",id:1,method,params}),signal:ac?ac.signal:undefined});
+        }finally{ if(timer) clearTimeout(timer); }
         if(!r.ok){
           // 429 and friends. The body is not necessarily JSON, and reading one
           // as a result would hand the page a value the chain never gave it.
@@ -1399,7 +1415,9 @@ async function rpcVia(urls,method,params,maxAttempts){
 }
 const baseRead=(m,p)=>rpcVia(BASE_RPCS,m,p);
 const arcRead=(m,p)=>rpcVia(ARC_RPCS,m,p);
-const arcReadQuick=(m,p)=>rpcVia(ARC_RPCS,m,p,2);   // one try and one quick retry
+// One attempt, then the vault's events. A second attempt costs as much as the
+// fallback does and answers no more often.
+const arcReadQuick=(m,p)=>rpcVia(ARC_RPCS,m,p,1);
 const baseCall=(to,data)=>baseRead("eth_call",[{to,data},"latest"]);
 
 // ---- wallet (lean EIP-6963 with a picker only when it matters) -------------
@@ -1607,6 +1625,17 @@ let FEE_BPS=200n, BOOK=[], SELECTED=null, PINNED=false, ACCEPTING=true;
    as "no offers" tells a buyer the market is empty when the truth is that
    we could not reach it. */
 let BOOK_READ=false;
+// Offers the escrow has told us about but whose Arc backing is not confirmed
+// yet. They are shown, muted and unbuyable, so the first thing a visitor sees
+// is that someone is selling rather than an empty table.
+let PROVISIONAL=[];
+// Whether a book read has actually failed. Before the first attempt finishes,
+// the table said "cannot reach the order book", which is what it says when a
+// read has failed. Nothing had been tried yet.
+let BOOK_TRIED=false;
+// Set when the backing check ran and could not reach Arc at all. The offers
+// stay on screen; only the line under them changes.
+let PROV_STALLED=false;
 let SORT={key:"prem",dir:1};
 const FILTER={size:0n,prem:null,seller:""};
 // One predicate for every place the dashboard filters the book, so the row
@@ -1961,14 +1990,29 @@ async function vaultBalanceFromLogs(vid){
   const c2=_vaultBalCache[vid];
   return c2?c2.bal:null;
 }
+// eth_call is the exact read; the vault's events are the same truth the slow
+// way. Rather than waiting out one before starting the other, give eth_call a
+// head start and then run both: a healthy endpoint answers inside the head
+// start and the scan never begins, a dead one costs the head start instead of
+// the whole timeout.
+const CALL_HEADSTART=700;
+function raceCall(callFn,logsFn){
+  return new Promise((resolve)=>{
+    let done=false, callErr=null, logsErr=null;
+    const finish=(v)=>{ if(!done){ done=true; resolve(v); } };
+    const bothFailed=()=>{ if(callErr&&logsErr) finish(null); };
+    callFn().then(v=>finish(v),e=>{ callErr=e||true; if(!transientErr(e)) finish(null); else bothFailed(); });
+    setTimeout(()=>{
+      if(done) return;
+      logsFn().then(v=>{ if(v===null){ logsErr=true; bothFailed(); } else finish(v); },
+                    e=>{ logsErr=e||true; bothFailed(); });
+    },CALL_HEADSTART);
+  });
+}
 async function vaultBal(vid){
-  try{
-    const r=await arcCall(VAULT,SEL.voffers+pad(hexNum(vid)),true);
-    return BigInt("0x"+r.slice(2+64,2+128));
-  }catch(e){
-    if(!transientErr(e)) return null;
-    try{ return await vaultBalanceFromLogs(vid); }catch(e2){ return null; }
-  }
+  return raceCall(
+    async()=>BigInt("0x"+(await arcCall(VAULT,SEL.voffers+pad(hexNum(vid)),true)).slice(2+64,2+128)),
+    ()=>vaultBalanceFromLogs(vid));
 }
 // What a vault offer can still DELIVER, which is its balance minus the venue
 // fee the same delivery pays. Withdraw is unaffected and still returns the raw
@@ -1976,19 +2020,13 @@ async function vaultBal(vid){
 // the raw balance would offer a size the vault reverts on, and quoting a
 // seller's withdraw off this one would strand the fee-sized remainder.
 async function vaultAvail(vid){
-  try{
-    const r=await arcCall(VAULT,SEL.vAvail+pad(hexNum(vid)),true);
-    return BigInt(r);
-  }catch(e){
-    if(!transientErr(e)) return null;
-    // Same arithmetic as the contract's available(): balance / (1 + fee). The
-    // vault's fee is kept in step with the escrow's by the keeper's route
-    // check, so FEE_BPS stands in for it here.
-    try{
-      const bal=await vaultBalanceFromLogs(vid);
-      return bal===null?null:(bal*10000n)/(10000n+FEE_BPS);
-    }catch(e2){ return null; }
-  }
+  // Same arithmetic as the contract's available() on the fallback side:
+  // balance / (1 + fee). The vault's fee is kept in step with the escrow's by
+  // the keeper's route check, so FEE_BPS stands in for it here.
+  return raceCall(
+    async()=>BigInt(await arcCall(VAULT,SEL.vAvail+pad(hexNum(vid)),true)),
+    async()=>{ const bal=await vaultBalanceFromLogs(vid);
+      return bal===null?null:(bal*10000n)/(10000n+FEE_BPS); });
 }
 // A fill can take min(remaining, vault balance); taking the WHOLE remaining
 // additionally bypasses minFill (the contract's rump rule). Keep this the
@@ -2020,6 +2058,10 @@ async function loadBook(){
     // mode, still has size) - the Arc RPC is a single public endpoint and
     // does not deserve 400 calls every refresh.
     const live=offers.filter(o=>o.vaultId>0&&o.remaining>0n).slice(0,60);
+    // Everything above came from Base in about 200ms. Put it on screen now:
+    // confirming the Arc side took twelve seconds during the outage, and for
+    // all of it the market looked empty.
+    if(!BOOK_READ&&live.length){ PROVISIONAL=live; PROV_STALLED=false; renderBook(); }
     let vaultFails=0;
     // Three lanes: one after another made a 60-offer book a minute of waiting,
     // and more than three at once is the burst the endpoint refuses.
@@ -2037,16 +2079,19 @@ async function loadBook(){
     // If every vault read failed, the delivery-side chain is unreachable. Keep
     // the last good book instead of flashing an empty "no offers" venue.
     if(live.length&&vaultFails===live.length){
+      BOOK_TRIED=true; PROV_STALLED=true;
+      if(!BOOK_READ) PROVISIONAL=live;
       setBookAge("Arc RPC unreachable");
       renderBook();
       return;
     }
+    PROVISIONAL=[];
     BOOK=live.filter(o=>o.eff!==null&&o.eff>0n).sort((a,b)=>a.premiumBps-b.premiumBps);
     BOOK_READ=true;
     renderBook();
     setBookAge("live");
     keeperLiveness();
-  }catch(e){ setBookAge("RPC unreachable"); }
+  }catch(e){ BOOK_TRIED=true; setBookAge("RPC unreachable"); renderBook(); }
 }
 function renderBook(){
   const amt=parseAmt(document.getElementById("buyAmt").value)||0n;
@@ -2076,7 +2121,8 @@ function renderBook(){
   try{ document.getElementById("filters").hidden = BOOK.length < 4; }catch(e){}
   // The Cheapest tile is gone: the desk prints that same figure on its
   // divider a few pixels higher up.
-  document.getElementById("stOffers").textContent=BOOK_READ?(String(BOOK.length)):"-";
+  document.getElementById("stOffers").textContent=
+    BOOK_READ?String(BOOK.length):(PROVISIONAL.length?String(PROVISIONAL.length):"-");
   document.getElementById("stAvail").textContent=
     BOOK.length?usd(BOOK.reduce((t,o)=>t+o.eff,0n)):"0";
   const tb=document.querySelector("#book tbody");
@@ -2105,9 +2151,31 @@ function renderBook(){
     const again=[...tb.children].find(r=>r.__oid===focusedId);
     if(again) again.focus();
   }
-  if(!BOOK.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+
+  if(!BOOK.length&&PROVISIONAL.length){
+    // Real offers, unconfirmed size. Muted, not clickable, not quotable: this
+    // says "there is a market here" without pricing anything off a number the
+    // delivery side has not agreed to yet.
+    tb.innerHTML="";
+    for(const o of PROVISIONAL.slice().sort((a,b)=>a.premiumBps-b.premiumBps)){
+      const allin=(10000+o.premiumBps)/10000*(1+Number(FEE_BPS)/10000);
+      const tr=document.createElement("tr");
+      tr.className="off";
+      tr.innerHTML=`<td>${(o.premiumBps/100).toFixed(2)}%</td>
+        <td>${allin.toFixed(3)}×</td>
+        <td class="muted">${usd(o.remaining)}</td>
+        <td class="mono tiny">${esch(short(o.maker))}</td>`;
+      tb.appendChild(tr);
+    }
+    const note=document.createElement("tr");
+    note.innerHTML='<td colspan="4" class="muted">'+(PROV_STALLED
+      ? T("Arc is not answering, so these sizes are unconfirmed and buying is off. The offers are real and still on chain.")
+      : T("Checking each seller's deposit on Arc. Sizes and the Buy button appear once it is confirmed."))+'</td>';
+    tb.appendChild(note);
+  }
+  else if(!BOOK.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+
     (BOOK_READ ? T("No open offers. Be the first to post on the Sell tab.")
-               : T("Cannot reach the order book right now. This is not an empty market."))+'</td></tr>';
+     : BOOK_TRIED ? T("Cannot reach the order book right now. This is not an empty market.")
+                  : T("Loading offers…"))+'</td></tr>';
   else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
   quote();
   deskSeed();      // the opening amount depends on what the book can fill
