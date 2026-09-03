@@ -353,6 +353,32 @@
     #book td,#bids td{white-space:nowrap}
   }
   /* The label is two words and the row should not grow to hold it. */
+  /* The two Orders tables scroll inside .wrap rather than wrapping their
+     text: a status folded over three lines reads as broken, and the row's
+     button belongs on one line at the end of it. */
+  /* The Orders tab stacks instead of sitting in two columns. Side by side each
+     table had 487px for content that wants 655, so the row's button was pushed
+     out of sight behind a horizontal scrollbar - on the one screen whose whole
+     job is the buttons. Stacked, both tables fit their content outright. */
+  #v-mine>.grid{grid-template-columns:minmax(0,1fr);gap:22px}
+  #myFills td,#myOffers td,#myFills th,#myOffers th{white-space:nowrap}
+  #myFills td:last-child,#myOffers td:last-child{text-align:right}
+  /* On a phone nowrap puts the row's button off the right edge, behind a
+     sideways scroll nobody thinks to try. There the text wraps instead: a
+     taller row is a smaller price than a button you cannot find. */
+  @media(max-width:560px){
+    #myFills td,#myOffers td,#myFills th,#myOffers th{white-space:normal}
+    /* Five columns of monospace figures plus a button do not fit a phone at any
+       wrapping, so the table still scrolls sideways - but the button column is
+       pinned to the right edge, where it is always in reach. A control behind a
+       sideways scroll nobody thinks to try is a control that does not exist. */
+    #myFills td:last-child,#myOffers td:last-child,
+    #myFills th:last-child,#myOffers th:last-child{
+      white-space:nowrap;position:sticky;right:0;background:var(--sheet);
+      box-shadow:-8px 0 8px -8px rgba(0,0,0,.55)}
+    #myFills th:last-child,#myOffers th:last-child{background:var(--sink)}
+  }
+  #myFills td:last-child .btn,#myOffers td:last-child .btn{margin-left:6px}
   #bids td:last-child{text-align:right;white-space:nowrap}
   #bids td:last-child .btn{white-space:nowrap}
   th{text-align:left;color:var(--muted);font-weight:600;font-size:var(--t1);
@@ -403,7 +429,11 @@
   html[lang="ko"] .price b, html[lang="zh-CN"] .price b,
   html[lang="zh-Hans"] .price b{letter-spacing:-.02em}
   html[lang="ko"]{word-break:keep-all}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  /* minmax(0,1fr), not 1fr: a `1fr` track is `minmax(auto,1fr)` and a table
+     wider than half the panel pushes its own track open, shoving the other
+     column off the screen. The Orders tab did exactly that, with the status
+     text wrapped over three lines in a column that had taken the space. */
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px}
   #v-buy>.grid>div:last-child,#v-sell>.grid>div:last-child{
     display:flex;flex-direction:column;justify-content:flex-end}
   .bidbox{border-top:1px solid var(--rule);margin-top:22px;padding-top:18px}
@@ -948,6 +978,14 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Cancelling…":"취소하는 중…",
+  "1/2 removing the listing…":"1/2 매물을 내리는 중…",
+  "2/2 returning your USDC on Arc…":"2/2 Arc에서 USDC를 돌려받는 중…",
+  "Cancelled. Your USDC is back in your wallet.":"취소했습니다. USDC가 지갑으로 돌아왔습니다.",
+  "The listing was not removed. Nothing moved. Try again.":"매물이 내려가지 않았습니다. 아무것도 움직이지 않았습니다. 다시 시도하십시오.",
+  "The listing is removed and your USDC is safe in the vault. Use Withdraw on this row to take it out.":"매물은 내려갔고 USDC는 금고에 그대로 있습니다. 이 줄의 출금을 눌러 가져가십시오.",
+  "Listing removed. If USDC is still in the vault, use Withdraw on this row.":"매물을 내렸습니다. 금고에 USDC가 남아 있으면 이 줄의 출금을 누르십시오.",
+  "Listing removed.":"매물을 내렸습니다.",
   "reading…":"읽는 중…",
   "Arc unreachable":"Arc 연결 안 됨",
   "Could not read the current approval. Approving anyway.":"현재 승인 잔량을 읽지 못했습니다. 승인부터 진행합니다.",
@@ -1069,7 +1107,6 @@ const TS={
   "Live.":"등록됐습니다.",
   "Fills now deliver themselves; you can walk away. Keep this tab open to get a sale alert, or just check back - either way nothing depends on you.":"이제 체결은 알아서 배달됩니다. 자리를 비우셔도 됩니다. 이 탭을 열어 두면 판매 알림을 받고, 아니면 나중에 확인하셔도 됩니다. 어느 쪽이든 사람 손이 필요 없습니다.",
   "Listing did not go through. Your deposit is safe in the vault - open My orders and use Withdraw (vault #":"등록이 되지 않았습니다. 예치금은 금고에 안전합니다. 내 주문에서 출금하십시오 (금고 #",
-  "Delist":"내리기",
   "unlisted":"미등록",
   "Refund":"환불",
   "refund available":"환불 가능",
@@ -1085,6 +1122,14 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Cancelling…":"正在取消…",
+  "1/2 removing the listing…":"1/2 正在撤下挂单…",
+  "2/2 returning your USDC on Arc…":"2/2 正在从 Arc 取回 USDC…",
+  "Cancelled. Your USDC is back in your wallet.":"已取消。USDC 已回到你的钱包。",
+  "The listing was not removed. Nothing moved. Try again.":"挂单没有撤下，资金未动。请再试一次。",
+  "The listing is removed and your USDC is safe in the vault. Use Withdraw on this row to take it out.":"挂单已撤下，USDC 仍安全地留在金库里。请点这一行的提取取回。",
+  "Listing removed. If USDC is still in the vault, use Withdraw on this row.":"挂单已撤下。如果金库里还有 USDC，请点这一行的提取。",
+  "Listing removed.":"挂单已撤下。",
   "reading…":"读取中…",
   "Arc unreachable":"无法连接 Arc",
   "Could not read the current approval. Approving anyway.":"无法读取当前授权额度，将直接先授权。",
@@ -1206,7 +1251,6 @@ const TS={
   "Live.":"已挂单。",
   "Fills now deliver themselves; you can walk away. Keep this tab open to get a sale alert, or just check back - either way nothing depends on you.":"成交现在会自动交付，你可以离开。保持此标签页打开可以收到成交提醒，或稍后再来查看，两种方式都不需要你守着。",
   "Listing did not go through. Your deposit is safe in the vault - open My orders and use Withdraw (vault #":"挂单没有成功。你的存款安全地留在金库里，请在我的订单中提取（金库 #",
-  "Delist":"撤单",
   "unlisted":"未挂单",
   "Refund":"退款",
   "refund available":"可退款",
@@ -2495,12 +2539,37 @@ async function renderMine(){
         const cell=tr.lastElementChild;
         if(o.vaultId>0) pending.push({tr,vaultId:o.vaultId});
         if(o.remaining>0n){
-          const b=document.createElement("button");b.className="btn small ghost";b.textContent=T("Delist");
+          const b=document.createElement("button");b.className="btn small ghost";b.textContent=T("Cancel");
+          // Cancel is one intention and takes two signatures on two chains: the
+          // listing lives on Base, the money on Arc. Asking the seller to find a
+          // second button on the other side of the tab is how "cancel" turned
+          // into "why is my money still gone".
           b.onclick=async()=>{try{
-            b.disabled=true;
+            b.disabled=true; b.textContent=T("Cancelling…");
+            say3(T("1/2 removing the listing…"));
             const h=await sendTx(ESCROW,SEL.reduceOffer+pad(hexNum(o.id))+pad(hexNum(0)),BASE_HEX);
-            await waitReceipt(h,baseRead);renderMine();loadBook();
-          }catch(e){b.disabled=false;sayb('<span class="bad">'+esch(e&&e.message||e)+'</span>')}};
+            const rc=await waitReceipt(h,baseRead);
+            if(rc.status!=="0x1"){ b.disabled=false; b.textContent=T("Cancel");
+              say3('<span class="bad">'+T("The listing was not removed. Nothing moved. Try again.")+'</span>');
+              renderMine(); return; }
+            let vb=null; if(o.vaultId>0){ try{ vb=await vaultBal(o.vaultId); }catch(e){} }
+            if(vb!==null&&vb>0n){
+              say3(T("2/2 returning your USDC on Arc…"));
+              const h2=await sendTx(VAULT,SEL.vWithdraw+pad(hexNum(o.vaultId))+pad(hexNum(vb)),ARC_HEX,ARC_ADD);
+              const rc2=await waitReceipt(h2,arcRead);
+              say3(rc2.status==="0x1"
+                ? '<span class="ok">'+T("Cancelled. Your USDC is back in your wallet.")+'</span>'
+                : '<span class="bad">'+T("The listing is removed and your USDC is safe in the vault. Use Withdraw on this row to take it out.")+'</span>');
+            }else if(o.vaultId>0){
+              // The balance could not be read, or is zero. The listing is gone
+              // either way, and Withdraw on this row covers whatever is left.
+              say3('<span class="ok">'+T("Listing removed. If USDC is still in the vault, use Withdraw on this row.")+'</span>');
+            }else{
+              say3('<span class="ok">'+T("Listing removed.")+'</span>');
+            }
+            refreshBalances();renderMine();loadBook();
+          }catch(e){b.disabled=false;b.textContent=T("Cancel");
+            say3('<span class="bad">'+esch(flowError(e))+'</span>')}};
           cell.appendChild(b);
         }
         offRows.push(tr);
