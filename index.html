@@ -735,6 +735,7 @@
           <button type="button" class="tiny" id="sellBal"
             aria-label="Use your full Arc USDC balance"></button></div>
         <input id="sellAmt" name="deposit-amount" class="f big" inputmode="decimal" placeholder="0" autocomplete="off">
+        <div class="note" id="relistNote" hidden></div>
       </div>
       <div class="fee">
         <div class="flow" data-h="m_flow">deposit <b>100.00</b> &rarr; lists <b>98.039215</b>
@@ -978,6 +979,15 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Already in vault #{0}":"금고 #{0}에 이미 있는 수량",
+  "List on Base":"Base에 등록",
+  "Selling the {0} USDC already in vault #{1}. No deposit, no Arc transaction: one signature on Base.":"금고 #{1}에 이미 있는 {0} USDC를 팝니다. 예치도 Arc 거래도 없고 Base에서 한 번만 서명합니다.",
+  "use my wallet instead":"지갑에서 새로 예치하기",
+  "VAULT #":"금고 #",
+  "Listing on Base…":"Base에 등록하는 중…",
+  "The listing did not go through. Your USDC is untouched in the vault.":"등록이 되지 않았습니다. USDC는 금고에 그대로 있습니다.",
+  "Sell again":"다시 팔기",
+  "Nothing open. Post one on the Sell tab.":"열려 있는 주문이 없습니다. 판매 탭에서 등록하십시오.",
   "Cancelling…":"취소하는 중…",
   "1/2 removing the listing…":"1/2 매물을 내리는 중…",
   "2/2 returning your USDC on Arc…":"2/2 Arc에서 USDC를 돌려받는 중…",
@@ -1122,6 +1132,15 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Already in vault #{0}":"金库 #{0} 中已有的数量",
+  "List on Base":"在 Base 上挂单",
+  "Selling the {0} USDC already in vault #{1}. No deposit, no Arc transaction: one signature on Base.":"出售金库 #{1} 中已有的 {0} USDC。无需存入，无需 Arc 交易，只在 Base 上签一次。",
+  "use my wallet instead":"改用钱包里的余额",
+  "VAULT #":"金库 #",
+  "Listing on Base…":"正在 Base 上挂单…",
+  "The listing did not go through. Your USDC is untouched in the vault.":"挂单没有成功。USDC 仍原样留在金库里。",
+  "Sell again":"再次出售",
+  "Nothing open. Post one on the Sell tab.":"没有进行中的挂单。可在出售页发布。",
   "Cancelling…":"正在取消…",
   "1/2 removing the listing…":"1/2 正在撤下挂单…",
   "2/2 returning your USDC on Arc…":"2/2 正在从 Arc 取回 USDC…",
@@ -1507,15 +1526,31 @@ async function refreshBalances(){
     document.getElementById("buyBal").textContent=T("Base balance ")+usd(b);
   }catch(e){}
   try{
-    const a=numHex(await arcRead("eth_call",[{to:USDC_ARC,data:SEL.balanceOf+pad(ACCT)},"latest"]));
+    let a;
+    try{
+      a=numHex(await arcCall(USDC_ARC,SEL.balanceOf+pad(ACCT),true));
+    }catch(e){
+      if(!transientErr(e)) throw e;
+      // On Arc the gas token IS the USDC, so the wallet's balance is readable
+      // with eth_getBalance, in 18 decimals, when eth_call is refused. Without
+      // this the MAX button sat blank and dead for the whole outage.
+      a=numHex(await arcRead("eth_getBalance",[ACCT,"latest"]))/1000000000000n;
+    }
     ARC_BAL=a;
     document.getElementById("sellBal").textContent=T("MAX ")+usd(a);
   }catch(e){}
 }
 // Read ARC_BAL live at click time, not a stale closure captured at render.
+// Gas on Arc is paid in the same USDC being sold, so offering the entire
+// balance offers to spend the money that pays for the transaction. A tenth of
+// a USDC is hundreds of transactions' worth of gas and invisible next to any
+// real listing.
+const GAS_KEEP=100000n;      // 0.1 USDC
 document.getElementById("sellBal").onclick=()=>{
   if(ARC_BAL===null) return;
-  document.getElementById("sellAmt").value=(Number(ARC_BAL)/1e6).toString(); sellQuote();
+  if(RELIST){ document.getElementById("sellAmt").value=(Number(RELIST.bal)/1e6).toString(); sellQuote(); return; }
+  const usable=ARC_BAL>GAS_KEEP?ARC_BAL-GAS_KEEP:0n;
+  document.getElementById("sellAmt").value=(Number(usable)/1e6).toString(); sellQuote();
 };
 async function ensureChain(idHex,addParams){
   const cur=await PROV.request({method:"eth_chainId"});
@@ -1862,6 +1897,7 @@ const VAULT_BLOCK=18237680;            // the vault's own deploy block: the floo
 // so a live vault is found in the first chunk or two, no vaultId filter so a
 // single chunk answers for every vault at once, and it stops as soon as every
 // vault asked about has an anchor.
+const t2=(l)=>l.topics[0];
 const _vaultBalCache={};          // vid -> {at, bal}   (bal may be null)
 let _scanRun=null;
 async function vaultScan(vids){
@@ -1890,10 +1926,14 @@ async function vaultScan(vids){
           .forEach(l=>{
             const vid=Number(BigInt(l.topics[1]));
             if(anchor[vid]!==undefined) return;             // already settled
-            const t=l.topics[0], w=(i)=>BigInt("0x"+l.data.slice(2+64*i,2+64*(i+1)));
-            if(t===VTOP.dep||t===VTOP.wdr){ anchor[vid]=w(1); need.delete(vid); }
-            else if(t===VTOP.rel) later[vid]=(later[vid]||0n)+w(1);
-            else if(t===VTOP.fee) later[vid]=(later[vid]||0n)+w(0);
+            // Released indexes its recipient, so its amount is data word 0.
+            // Reading word 1 there sliced past the end of a real log and threw,
+            // which took the whole scan down with it.
+            const words=Math.floor((l.data.length-2)/64);
+            const w=(i)=>i<words?BigInt("0x"+l.data.slice(2+64*i,2+64*(i+1))):null;
+            if(t2(l)===VTOP.dep||t2(l)===VTOP.wdr){ const b=w(1); if(b!==null){ anchor[vid]=b; need.delete(vid); } }
+            else if(t2(l)===VTOP.rel){ const a=w(0); if(a!==null) later[vid]=(later[vid]||0n)+a; }
+            else if(t2(l)===VTOP.fee){ const f=w(0); if(f!==null) later[vid]=(later[vid]||0n)+f; }
           });
       }catch(e){ break; }   // a malformed log must not lose the vaults already resolved
       if(lo===VAULT_BLOCK) break;
@@ -2338,6 +2378,30 @@ async function doBuy(){
 document.getElementById("b-buy").onclick=doBuy;
 
 // ---- sell flow (deposit once) ----------------------------------------------
+// A vault that still holds money can be listed again without moving it: the
+// escrow's postOffer takes the vaultId. RELIST holds that vault while the Sell
+// tab is pointed at it, and doPost skips straight to the Base listing.
+let RELIST=null;
+function setRelist(r){
+  RELIST=r;
+  const box=document.getElementById("relistNote");
+  const amt=document.getElementById("sellAmt");
+  const bal=document.getElementById("sellBal");
+  if(r){
+    box.hidden=false;
+    box.innerHTML=T("Selling the {0} USDC already in vault #{1}. No deposit, no Arc transaction: one signature on Base.",usd(r.bal),String(r.vid))+
+      ' <button type="button" class="tiny" id="relistOff">'+T("use my wallet instead")+'</button>';
+    document.getElementById("relistOff").onclick=()=>{ setRelist(null); };
+    amt.value=(Number(r.bal)/1e6).toString();
+    amt.readOnly=true;
+    bal.textContent=T("VAULT #")+r.vid;
+  }else{
+    box.hidden=true; box.innerHTML="";
+    amt.readOnly=false; amt.value="";
+    if(ARC_BAL!==null) bal.textContent=T("MAX ")+usd(ARC_BAL);
+  }
+  sellQuote();
+}
 function sellQuote(){
   const q=document.getElementById("sellQuote");
   const btn=document.getElementById("b-post");
@@ -2373,11 +2437,14 @@ function sellQuote(){
   // pays, and a quote that disagrees with the settlement is a support ticket.
   const payout=proceeds+(proceeds*FEE_BPS+9999n)/10000n;
   q.style.display="";
-  q.innerHTML=`<div><span>${T("You deposit (Arc USDC)")}</span><b>${usd(amt)}</b></div>
+  // In relist mode nothing is deposited: the money is already in the vault, and
+  // saying "you deposit" over a form that will not move it is a lie the seller
+  // has to disprove by signing.
+  q.innerHTML=`<div><span>${RELIST?T("Already in vault #{0}",String(RELIST.vid)):T("You deposit (Arc USDC)")}</span><b>${usd(amt)}</b></div>
     <div><span>${T("Listed for sale, after the {0}% fee",Number(FEE_BPS)/100)}</span><b>${usd(listed)}</b></div>
     <div><span>${T("If fully sold you receive on Base")}</span><b>${usd(payout)} USDC</b></div>`;
   btn.disabled=!ACCT;
-  btn.textContent=ACCT?T("Deposit & list"):T("Connect wallet");
+  btn.textContent=ACCT?(RELIST?T("List on Base"):T("Deposit & list")):T("Connect wallet");
   return {amt,bps,listed};
 }
 document.getElementById("sellAmt").addEventListener("input",sellQuote);
@@ -2443,6 +2510,24 @@ async function doPost(){
     // hour on 2026-09-02). If it cannot be read, approve anyway: a redundant
     // approval costs a fraction of a cent of gas, a dead listing cost 1,100
     // USDC of supply.
+    // Listing a vault that already holds the money needs neither approval nor
+    // deposit: the escrow is told which vault backs the offer and the Arc side
+    // is untouched.
+    if(RELIST){
+      const vid=BigInt(RELIST.vid);
+      say2(T("Listing on Base…"));
+      const dataR=SEL.postOffer+pad(VAULT)+pad(hexNum(q.bps))+pad(hexNum(q.listed))
+        +pad(hexNum(min))+pad(hexNum(vid));
+      const hR=await sendTx(ESCROW,dataR,BASE_HEX);
+      const rcR=await waitReceipt(hR,baseRead);
+      say2(rcR.status==="0x1"
+        ?'<span class="ok">'+T("Live.")+'</span> '+T("Fills now deliver themselves; you can walk away. Keep this tab open to get a sale alert, or just check back - either way nothing depends on you.")
+        :'<span class="bad">'+T("The listing did not go through. Your USDC is untouched in the vault.")+'</span>');
+      if(rcR.status==="0x1") setRelist(null);
+      loadBook();
+      if(document.getElementById("v-mine").style.display!=="none") renderMine();
+      return;
+    }
     let cur;
     try{
       cur=numHex(await arcCall(USDC_ARC,SEL.allowance+pad(ACCT)+pad(VAULT)));
@@ -2537,7 +2622,11 @@ async function renderMine(){
         tr.innerHTML=`<td>${o.id}</td><td>${(o.premiumBps/100).toFixed(2)}%</td>
           <td class="muted">${o.vaultId>0?T("reading…"):"-"}</td><td></td>`;
         const cell=tr.lastElementChild;
-        if(o.vaultId>0) pending.push({tr,vaultId:o.vaultId});
+        // Finished rows are history, not orders. A row stays only while it can
+        // still be acted on, and the after-pass below removes it once the vault
+        // it names is confirmed empty. An unreadable vault always stays: money
+        // must never be hidden behind a balance we could not fetch.
+        if(o.vaultId>0) pending.push({tr,vaultId:o.vaultId,live:o.remaining>0n,prem:o.premiumBps});
         if(o.remaining>0n){
           const b=document.createElement("button");b.className="btn small ghost";b.textContent=T("Cancel");
           // Cancel is one intention and takes two signatures on two chains: the
@@ -2652,7 +2741,7 @@ async function renderMine(){
     offRows.forEach(r=>offT.appendChild(r));
     fillRows.forEach(r=>fillsT.appendChild(r));
     if(!fillsT.children.length) fillsT.innerHTML='<tr><td colspan="5" class="muted">'+T("None yet.")+'</td></tr>';
-    if(!offT.children.length) offT.innerHTML='<tr><td colspan="4" class="muted">'+T("None yet.")+'</td></tr>';
+    if(!offT.children.length) offT.innerHTML='<tr><td colspan="4" class="muted">'+T("Nothing open. Post one on the Sell tab.")+'</td></tr>';
     // Now that the seller can act, go and get the Arc-side balances. Each row
     // fills itself in; a vault that cannot be read says so in its own cell
     // rather than holding up the table.
@@ -2668,13 +2757,38 @@ async function renderMine(){
         const p=pending[next++];
         let vb=null; try{ vb=await vaultBal(p.vaultId); }catch(e){}
         if(!live()) return;
+        // A cancelled offer over an empty vault is done with; leaving it on
+        // screen is what buried the one row that still needed a decision.
+        if(!p.live&&vb!==null&&vb===0n){ p.tr.remove(); continue; }
         const cell=p.tr.children[2];
         cell.className=""; cell.textContent=vb===null?T("Arc unreachable"):usd(vb);
-        if(vb!==null&&vb>0n) p.tr.lastElementChild.insertBefore(withdrawBtn(p.vaultId,vb),p.tr.lastElementChild.firstChild);
+        if(vb!==null&&vb>0n){
+          const act=p.tr.lastElementChild;
+          act.insertBefore(withdrawBtn(p.vaultId,vb),act.firstChild);
+          if(!p.live){
+            // Money with no listing over it. Putting it back on the market is
+            // one Base signature, so say so where the money is.
+            const s=document.createElement("button");
+            s.className="btn small"; s.textContent=T("Sell again");
+            s.onclick=()=>{
+              // Premium first: setRelist quotes, and quoting before the price is
+              // in leaves the button reading "enter premium and amount" over a
+              // form that is already filled in.
+              document.getElementById("sellPrem").value=(p.prem/100).toString();
+              setRelist({vid:p.vaultId,bal:vb});
+              showTab("sell");
+              document.getElementById("sellPrem").focus();
+              document.getElementById("sellPrem").select(); };
+            act.insertBefore(s,act.firstChild);
+          }
+        }
       }};
       await Promise.all([lane(),lane(),lane()]);
       // Deposits this wallet owns that never became an offer.
       let vids=[]; try{ vids=await myVaultIds(); }catch(e){}
+      // Once the after-pass has pruned finished rows, an empty table should say
+      // so rather than keep the heading over nothing.
+      if(!offT.children.length) offT.innerHTML='<tr><td colspan="4" class="muted">'+T("Nothing open. Post one on the Sell tab.")+'</td></tr>';
       for(const vid of vids){
         if(seenVault.has(vid)||!live()) continue;
         let vb=null; try{ vb=await vaultBal(vid); }catch(e){}
