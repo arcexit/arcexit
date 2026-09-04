@@ -531,6 +531,46 @@
     gap:7px;z-index:50}
   .toast{background:var(--sheet);border:1px solid var(--ink);padding:11px 13px;
     font-size:var(--t2);max-width:320px}
+  /* One card per offer. The figures stay monospace and the corners stay square:
+     the shape is borrowed, the handwriting is not. */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+    gap:12px;margin:9px 0 0}
+  .ocard{background:var(--sheet);border:1px solid var(--rule);padding:16px 16px 0;
+    display:flex;flex-direction:column}
+  .ocard .plabel{font-size:var(--t1);font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted)}
+  .ocard .pnum{font-family:var(--mono);font-size:var(--t6);line-height:1.05;
+    font-variant-numeric:tabular-nums slashed-zero;margin:2px 0 8px;
+    display:flex;align-items:baseline;gap:8px}
+  .ocard .psay{font-size:var(--t2);color:var(--muted);margin:0 0 14px;
+    font-family:var(--sans)}
+  .ocard .psay b{font-family:var(--mono);color:var(--ink);font-weight:600}
+  /* margin-top:auto pushes the facts and the button to the foot of the card, so
+     a grid row of cards of different text lengths still lines its buttons up. */
+  .ocard dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;
+    margin:auto 0 0;padding:12px 0;border-top:1px solid var(--rule);
+    font-size:var(--t2)}
+  .ocard dt{color:var(--muted)}
+  .ocard dd{margin:0;text-align:right;font-family:var(--mono);
+    font-variant-numeric:tabular-nums slashed-zero}
+  .ocard .act{margin:0 -16px;border-top:1px solid var(--rule)}
+  .ocard .act .btn{width:100%;border:0;border-radius:0;padding:14px;
+    font-size:var(--t3)}
+  .ocard.mine{border-color:var(--sig)}
+  .ocard.off{opacity:.5}
+  .ocard.off .act .btn{pointer-events:none}
+  .cardnote{grid-column:1/-1;color:var(--muted);font-size:var(--t2);
+    background:var(--sheet);border:1px solid var(--rule);padding:14px 16px}
+  .bsort{display:flex;gap:8px;margin:9px 0 0}
+  .bsort .sort{background:var(--sheet);border:1px solid var(--rule);color:var(--muted);
+    font-family:var(--mono);font-size:var(--t1);letter-spacing:.08em;
+    text-transform:uppercase;padding:7px 12px;cursor:pointer}
+  .bsort .sort.on{color:var(--ink);border-color:var(--ink)}
+  #fill{position:fixed;inset:0;overscroll-behavior:contain;background:var(--scrim);
+    display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+  #fill .sheet{background:var(--sheet);border:1px solid var(--ink);padding:18px;
+    width:min(420px,100%);max-height:92vh;overflow:auto}
+  #fill .fillfrom{font-size:var(--t1);color:var(--muted);margin:0 0 16px}
   #wpick{position:fixed;inset:0;overscroll-behavior:contain;background:var(--scrim);
     display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
   #wpick .sheet{background:var(--sheet);border:1px solid var(--ink);padding:18px;
@@ -646,15 +686,11 @@
   </div>
 </div>
 
-<div class="wrap"><table id="book">
-  <thead><tr>
-    <th class="sort" id="th-prem">Premium &#8593;</th>
-    <th data-t="m_youpay">You pay per 1</th>
-    <th class="sort" id="th-avail">Available</th>
-    <th data-t="m_seller">Seller</th>
-  </tr></thead>
-  <tbody><tr><td colspan="4" class="muted">Loading&#8230;</td></tr></tbody>
-</table></div>
+<div class="bsort">
+  <button class="sort on" id="th-prem" data-t="m_bprem">Premium &#8593;</button>
+  <button class="sort" id="th-avail" data-t="m_avail">Available</button>
+</div>
+<div id="book" class="cards"></div>
 
 <div class="bhead" style="margin-top:26px">
   <h2><span data-t="m_bidbook">Bids</span></h2>
@@ -677,29 +713,28 @@
   <button id="t-mine" aria-pressed="false" data-t="m_orders" hidden>Orders</button>
 </div>
 
-<div class="panel" id="v-buy">
-  <div class="grid">
-    <div>
-      <div class="field">
-        <div class="lrow"><label for="buyAmt" data-t="m_amtbuy">Amount to buy</label>
-          <span class="mono" id="buyBal" style="font-size:var(--t1);color:var(--muted)"></span></div>
-        <input id="buyAmt" name="buy-amount" class="f big" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
-      </div>
-      <div class="field">
-        <div class="lrow"><label for="buyRecv" data-t="m_recv">Arc address to receive</label>
-          <button type="button" class="tiny" id="useWallet" data-t="m_usewallet">use connected wallet</button></div>
-        <input id="buyRecv" name="arc-recipient" class="f mono" placeholder="0x&#8230;" autocomplete="off" spellcheck="false">
-      </div>
-      <div class="fee">
-      </div>
-    </div>
-    <div>
-      <div class="quote" id="buyQuote" style="display:none"></div>
-      <button class="btn wide" id="b-buy" disabled>Connect wallet</button>
-      <p class="accept" data-h="m_accept">By continuing you accept the <a href="/terms">Terms</a> and the <a href="/risk">Risk Disclosure</a>.</p>
-      <div class="msg" id="say" role="status" aria-live="polite"></div>
-    </div>
+<div id="fill" role="dialog" aria-modal="true" aria-labelledby="fill-h"><div class="sheet">
+  <div class="lrow" style="margin-bottom:4px">
+    <b id="fill-h" data-t="m_fillh">Buy from this offer</b>
+    <button class="btn sm ghost" id="fill-x" aria-label="Close">&#215;</button></div>
+  <p class="fillfrom mono" id="fillFrom"></p>
+  <div class="field">
+    <div class="lrow"><label for="buyAmt" data-t="m_amtbuy">Amount to buy</label>
+      <span class="mono" id="buyBal" style="font-size:var(--t1);color:var(--muted)"></span></div>
+    <input id="buyAmt" name="buy-amount" class="f big" inputmode="decimal" placeholder="0" autocomplete="off" spellcheck="false">
   </div>
+  <div class="field">
+    <div class="lrow"><label for="buyRecv" data-t="m_recv">Arc address to receive</label>
+      <button type="button" class="tiny" id="useWallet" data-t="m_usewallet">use connected wallet</button></div>
+    <input id="buyRecv" name="arc-recipient" class="f mono" placeholder="0x&#8230;" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="quote" id="buyQuote" style="display:none"></div>
+  <button class="btn wide" id="b-buy" disabled>Connect wallet</button>
+  <p class="accept" data-h="m_accept">By continuing you accept the <a href="/terms">Terms</a> and the <a href="/risk">Risk Disclosure</a>.</p>
+  <div class="msg" id="say" role="status" aria-live="polite"></div>
+</div></div>
+
+<div class="panel" id="v-buy">
 
   <div class="bidbox">
     <h3 data-t="m_orbid">Or name your own price</h3>
@@ -811,6 +846,9 @@
 var M_I18N={
  en:{},
  ko:{
+  m_fillh:"이 매물에서 사기",
+  m_bprem:"프리미엄",
+  m_avail:"남은 수량",
   m_myhist:"내 거래",
   m_thside:"구분",
   m_sold:"팔았음",
@@ -856,6 +894,9 @@ var M_I18N={
   m_exit:"지금 바로 빼야 합니까? <b>브릿지를 쓰십시오.</b> 수수료 2%."
  },
  zh:{
+  m_fillh:"从这个挂单买入",
+  m_bprem:"溢价",
+  m_avail:"可买数量",
   m_myhist:"我的交易",
   m_thside:"方向",
   m_sold:"卖出",
@@ -979,6 +1020,11 @@ let SLANG="en";
 try{ const _l=localStorage.getItem("arcExitLang"); if(_l==="ko"||_l==="zh") SLANG=_l; }catch(e){}
 const TS={
  ko:{
+  "Seller":"판매자",
+  "<b>{0}×</b> all-in: you pay {0} USDC for 1 USDC on Arc, premium plus the {1}% fee. Nothing else.":"<b>{0}배</b> 총액: Arc USDC 1개당 {0} USDC를 냅니다. 프리미엄에 수수료 {1}%까지 포함이고 그 외에는 없습니다.",
+  "Buy from this offer":"이 매물에서 사기",
+  "Checking…":"확인 중…",
+  "{0}% premium · {1} available · seller {2}":"프리미엄 {0}% · 남은 수량 {1} · 판매자 {2}",
   "Arc is not answering, so these sizes are unconfirmed and buying is off. The offers are real and still on chain.":"Arc가 응답하지 않아 수량을 확인하지 못했고 구매는 잠깁니다. 매물 자체는 체인에 그대로 있습니다.",
   "Loading offers…":"매물을 불러오는 중…",
   "Checking each seller's deposit on Arc. Sizes and the Buy button appear once it is confirmed.":"판매자별 Arc 예치금을 확인하는 중입니다. 확인되면 수량과 구매 버튼이 나타납니다.",
@@ -1135,6 +1181,11 @@ const TS={
   "Arc OTC - sold":"Arc OTC 판매 완료"
  },
  zh:{
+  "Seller":"卖家",
+  "<b>{0}×</b> all-in: you pay {0} USDC for 1 USDC on Arc, premium plus the {1}% fee. Nothing else.":"<b>{0}倍</b> 总价：每换 1 个 Arc USDC 支付 {0} USDC，已含溢价和 {1}% 手续费，没有其他费用。",
+  "Buy from this offer":"从这个挂单买入",
+  "Checking…":"核对中…",
+  "{0}% premium · {1} available · seller {2}":"溢价 {0}% · 可买 {1} · 卖家 {2}",
   "Arc is not answering, so these sizes are unconfirmed and buying is off. The offers are real and still on chain.":"Arc 没有响应，数量未经核对，买入暂时关闭。挂单本身仍在链上。",
   "Loading offers…":"正在加载挂单…",
   "Checking each seller's deposit on Arc. Sizes and the Buy button appear once it is confirmed.":"正在核对每位卖家在 Arc 上的存入。核对完成后会显示数量和买入按钮。",
@@ -2139,6 +2190,48 @@ async function loadBook(){
     keeperLiveness();
   }catch(e){ BOOK_TRIED=true; setBookAge("RPC unreachable"); renderBook(); }
 }
+// One offer, one card, one button. `state` is "" for a live offer, "off" for
+// one the typed amount cannot fill, "prov" for one whose Arc backing has not
+// been confirmed yet (shown, never buyable).
+function offerCard(o,state,best,size){
+  const allin=(10000+o.premiumBps)/10000*(1+Number(FEE_BPS)/10000);
+  const el=document.createElement("div");
+  el.__oid=o.id;
+  el.className="ocard"+(state==="off"||state==="prov"?" off":"")
+    +(state!=="prov"&&SELECTED&&SELECTED.id===o.id?" mine":"");
+  el.innerHTML=`<div class="plabel">${T("Premium")}</div>
+    <div class="pnum">${(o.premiumBps/100).toFixed(2)}%${best?'<span class="pill">BEST</span>':''}</div>
+    <p class="psay">${T("<b>{0}×</b> all-in: you pay {0} USDC for 1 USDC on Arc, premium plus the {1}% fee. Nothing else.",allin.toFixed(3),String(Number(FEE_BPS)/100))}</p>
+    <dl><dt>${T("Available")}</dt><dd${state==="prov"?' class="muted"':''}>${usd(size)}</dd>
+        <dt>${T("Seller")}</dt><dd class="tiny">${esch(short(o.maker))}</dd></dl>
+    <div class="act"></div>`;
+  const b=document.createElement("button");
+  b.className="btn"+(state===""?"":" ghost");
+  b.textContent=state==="prov"?T("Checking…"):T("Buy from this offer");
+  b.disabled=(state==="prov");
+  b.onclick=()=>openFill(o);
+  el.querySelector(".act").appendChild(b);
+  return el;
+}
+// The fill form as a sheet over the page. It pins the offer for the whole
+// flow, which is what doBuy already relies on, and names it at the top so the
+// amount and the address below are visibly about THIS offer.
+function openFill(o){
+  SELECTED=o; PINNED=true;
+  document.getElementById("fillFrom").textContent=
+    T("{0}% premium · {1} available · seller {2}",
+      (o.premiumBps/100).toFixed(2), usd(o.eff!=null?o.eff:o.remaining), short(o.maker));
+  const r=document.getElementById("buyRecv");
+  if(!r.value&&ACCT) r.value=ACCT;
+  document.getElementById("fill").style.display="flex";
+  quote();
+  const f=document.getElementById("buyAmt");
+  f.focus(); f.select();
+}
+function closeFill(){
+  document.getElementById("fill").style.display="none";
+  PINNED=false;
+}
 function renderBook(){
   const amt=parseAmt(document.getElementById("buyAmt").value)||0n;
   // Auto-pick the cheapest offer that can fill the typed amount, unless the
@@ -2171,58 +2264,32 @@ function renderBook(){
     BOOK_READ?String(BOOK.length):(PROVISIONAL.length?String(PROVISIONAL.length):"-");
   document.getElementById("stAvail").textContent=
     BOOK.length?usd(BOOK.reduce((t,o)=>t+o.eff,0n)):"0";
-  const tb=document.querySelector("#book tbody");
-  // Remember which offer the keyboard was on, so a 30s rebuild does not dump
-  // focus to <body>; restore it to the same offer's new row after rebuild.
-  const active=document.activeElement;
-  const focusedId=(active&&active.closest&&active.closest("#book tr"))?active.__oid:null;
+  const tb=document.getElementById("book");
   tb.innerHTML="";
-  for(const o of rows){
-    const allin=(10000+o.premiumBps)/10000*(1+Number(FEE_BPS)/10000);
-    const eligible=amt===0n||canFill(o,amt);
-    const tr=document.createElement("tr");
-    tr.__oid=o.id;
-    tr.className=(eligible?"click":"click off")+(SELECTED&&SELECTED.id===o.id?" sel":"");
-    const best=SELECTED&&SELECTED.id===o.id&&!PINNED&&amt>0n;
-    tr.innerHTML=`<td>${(o.premiumBps/100).toFixed(2)}%${best?'<span class="pill">BEST</span>':''}</td>
-      <td>${allin.toFixed(3)}×</td>
-      <td>${usd(o.eff)}</td>
-      <td class="mono tiny">${esch(short(o.maker))}</td>`;
-    tr.onclick=()=>{SELECTED=o;PINNED=true;renderBook();};
-    tr.tabIndex=0;
-    tr.onkeydown=(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tr.onclick();}};
-    tb.appendChild(tr);
-  }
-  if(focusedId!=null){
-    const again=[...tb.children].find(r=>r.__oid===focusedId);
-    if(again) again.focus();
-  }
-  if(!BOOK.length&&PROVISIONAL.length){
-    // Real offers, unconfirmed size. Muted, not clickable, not quotable: this
-    // says "there is a market here" without pricing anything off a number the
-    // delivery side has not agreed to yet.
-    tb.innerHTML="";
-    for(const o of PROVISIONAL.slice().sort((a,b)=>a.premiumBps-b.premiumBps)){
-      const allin=(10000+o.premiumBps)/10000*(1+Number(FEE_BPS)/10000);
-      const tr=document.createElement("tr");
-      tr.className="off";
-      tr.innerHTML=`<td>${(o.premiumBps/100).toFixed(2)}%</td>
-        <td>${allin.toFixed(3)}×</td>
-        <td class="muted">${usd(o.remaining)}</td>
-        <td class="mono tiny">${esch(short(o.maker))}</td>`;
-      tb.appendChild(tr);
+  const note=(txt)=>{ const d=document.createElement("div");
+    d.className="cardnote"; d.textContent=txt; tb.appendChild(d); };
+  if(rows.length){
+    for(const o of rows){
+      const eligible=amt===0n||canFill(o,amt);
+      const best=SELECTED&&SELECTED.id===o.id&&!PINNED&&amt>0n;
+      tb.appendChild(offerCard(o,eligible?"":"off",best,o.eff));
     }
-    const note=document.createElement("tr");
-    note.innerHTML='<td colspan="4" class="muted">'+(PROV_STALLED
-      ? T("Arc is not answering, so these sizes are unconfirmed and buying is off. The offers are real and still on chain.")
-      : T("Checking each seller's deposit on Arc. Sizes and the Buy button appear once it is confirmed."))+'</td>';
-    tb.appendChild(note);
   }
-  else if(!BOOK.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+
-    (BOOK_READ ? T("No open offers. Be the first to post on the Sell tab.")
-     : BOOK_TRIED ? T("Cannot reach the order book right now. This is not an empty market.")
-                  : T("Loading offers…"))+'</td></tr>';
-  else if(!rows.length) tb.innerHTML='<tr><td colspan="4" class="muted">'+T("No offers match the filters.")+'</td></tr>';
+  else if(!BOOK.length&&PROVISIONAL.length){
+    // Real offers, size not yet confirmed. Shown as the same cards with the
+    // button off: the market looks like a market while its backing is checked,
+    // and nothing is priced off a number the delivery side has not agreed to.
+    for(const o of PROVISIONAL.slice().sort((a,b)=>a.premiumBps-b.premiumBps))
+      tb.appendChild(offerCard(o,"prov",false,o.remaining));
+    note(PROV_STALLED
+      ? T("Arc is not answering, so these sizes are unconfirmed and buying is off. The offers are real and still on chain.")
+      : T("Checking each seller's deposit on Arc. Sizes and the Buy button appear once it is confirmed."));
+  }
+  else if(!BOOK.length) note(
+    BOOK_READ ? T("No open offers. Be the first to post on the Sell tab.")
+    : BOOK_TRIED ? T("Cannot reach the order book right now. This is not an empty market.")
+                 : T("Loading offers…"));
+  else note(T("No offers match the filters."));
   quote();
   deskSeed();      // the opening amount depends on what the book can fill
   askQuote();      // and so does the hero verb
@@ -2309,6 +2376,8 @@ function paintSortHeaders(){
     SORT.key==="prem"?(SORT.dir===1?"ascending":"descending"):"none");
   document.getElementById("th-avail").setAttribute("aria-sort",
     SORT.key==="avail"?(SORT.dir===1?"ascending":"descending"):"none");
+  document.getElementById("th-prem").classList.toggle("on",SORT.key==="prem");
+  document.getElementById("th-avail").classList.toggle("on",SORT.key==="avail");
   renderBook();
 }
 
@@ -2338,6 +2407,13 @@ window.__setTradingLang=function(l){
    sort headers and the connect button back in English. */
 try{ window.__setTradingLang(SLANG); }catch(e){}
 
+document.getElementById("fill-x").onclick=closeFill;
+document.getElementById("fill").addEventListener("click",(e)=>{
+  if(e.target.id==="fill") closeFill();          // the scrim, not the sheet
+});
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Escape"&&document.getElementById("fill").style.display==="flex") closeFill();
+});
 for(const id of ["th-prem","th-avail"]){
   const th=document.getElementById(id);
   th.onclick=()=>setSort(id==="th-prem"?"prem":"avail");
@@ -3182,13 +3258,10 @@ function askGoSell(bd){
   askScroll(document.getElementById("v-sell"));
 }
 function askGoBuy(o){
-  const f=document.getElementById("buyAmt");
-  f.value=askRaw();          // the raw typed string, already validated by parseAmt
-  SELECTED=o; PINNED=true;   // renderBook keeps a pinned offer that can still fill
-  showTab("buy");
-  renderBook();              // ends in quote(), which prices the pinned offer
-  askScroll(document.getElementById("v-buy"));
-  f.focus();
+  // The desk already knows the amount and the offer. Open the sheet on it
+  // rather than switching tabs and leaving the reader to find the form.
+  document.getElementById("buyAmt").value=askRaw();
+  openFill(o);
 }
 function askGoBid(){
   const f=document.getElementById("bidAmt");
